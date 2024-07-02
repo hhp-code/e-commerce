@@ -66,4 +66,8 @@
 
 ## 11. 관련 문서
 - 시스템 요구사항 명세서
-- 데이터베이스 설계 문서
+- ERD
+
+## 12. 시퀸스 다이어그램
+
+![cart](https://github.com/kdelay/Point-API-TDD/assets/62240333/b0837b41-2168-49c2-92ee-068d3c599f26)

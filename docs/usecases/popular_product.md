@@ -45,5 +45,9 @@
 
 ## 11. 관련 문서
 - 시스템 요구사항 명세서
-- 데이터베이스 설계 문서
-- 통계 처리 알고리즘 문서
+- ERD
+
+
+## 12. 시퀸스 다이어그램
+
+![popular_product](https://github.com/kdelay/Point-API-TDD/assets/62240333/fda6cef6-7c1e-4c2e-9bbd-a30150154ade)
