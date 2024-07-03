@@ -262,3 +262,123 @@ https://api.ecommerce-example.com
     - 401 Unauthorized: 인증 실패
     - 404 Not Found: 상품을 찾을 수 없음
     - 500 Internal Server Error: 서버 오류
+
+
+
+
+### 2.3.5 쿠폰 생성 
+
+- **Endpoint**: POST /coupons
+- **Authorization**: Bearer Token 필요
+- **Description**: 새로운 쿠폰을 생성합니다.
+- **Request Body**:
+
+```json
+{
+  "name": "string",
+  "code": "string",
+  "discountAmount": "number",
+  "quantity": "number",
+  "startDateTime": "datetime",
+  "endDateTime": "datetime"
+}
+```
+
+- **Response**:
+
+```json
+{
+  "id": "long",
+  "name": "string",
+  "code": "string",
+  "discountAmount": "number",
+  "quantity": "number",
+  "remainingQuantity": "number",
+  "startDateTime": "datetime",
+  "endDateTime": "datetime",
+  "createdAt": "datetime"
+}
+```
+
+### 2.3.6 쿠폰 발급 요청
+
+- **Endpoint**: POST /coupons/{couponId}/issue
+- **Authorization**: Bearer Token 필요
+- **Description**: 사용자가 특정 쿠폰의 발급을 요청합니다.
+- **Path Parameters**:
+  - couponId: long
+- **Response**:
+
+```json
+{
+  "success": "boolean",
+  "message": "string",
+  "userCouponId": "long"
+}
+```
+
+### 2.3.7 사용자 쿠폰 조회
+
+- **Endpoint**: GET /users/{userId}/coupons
+- **Authorization**: Bearer Token 필요
+- **Description**: 특정 사용자의 발급받은 쿠폰 목록을 조회합니다.
+- **Path Parameters**:
+  - userId: long
+- **Response**:
+
+```json
+{
+  "coupons": [
+    {
+      "id": "long",
+      "couponId": "long",
+      "couponName": "string",
+      "discountAmount": "number",
+      "issuedAt": "datetime",
+      "expiresAt": "datetime",
+      "isUsed": "boolean"
+    }
+  ]
+}
+```
+
+### 2.3.8 쿠폰 사용
+
+- **Endpoint**: POST /users/{userId}/coupons/{userCouponId}/use
+- **Authorization**: Bearer Token 필요
+- **Description**: 사용자가 발급받은 쿠폰을 사용합니다.
+- **Path Parameters**:
+  - userId: long
+  - userCouponId: long
+- **Response**:
+
+```json
+{
+  "success": "boolean",
+  "message": "string"
+}
+```
+
+### 2.3.9 쿠폰 정보 조회 
+
+- **Endpoint**: GET /coupons/{couponId}
+- **Authorization**: Bearer Token 필요
+- **Description**: 특정 쿠폰의 상세 정보를 조회합니다.
+- **Path Parameters**:
+  - couponId: long
+- **Response**:
+
+```json
+{
+  "id": "long",
+  "name": "string",
+  "code": "string",
+  "discountAmount": "number",
+  "quantity": "number",
+  "remainingQuantity": "number",
+  "startDateTime": "datetime",
+  "endDateTime": "datetime",
+  "createdAt": "datetime",
+  "issuedCount": "number"
+}
+```
