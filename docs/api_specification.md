@@ -15,9 +15,9 @@ https://api.ecommerce-example.com
 ### 1.3 공통 응답 형식
 ```json
 {
-  "success": boolean,
-  "message": string,
-  "data": object
+  "success": "boolean",
+  "message": "string",
+  "data": "object"
 }
 ```
 
@@ -39,8 +39,8 @@ https://api.ecommerce-example.com
 - **Request Body**:
   ```json
   {
-    "userId": long,
-    "amount": bigdecimal
+    "userId": "long",
+    "amount": "bigdecimal"
   }
   ```
 - **Response**:
@@ -51,7 +51,7 @@ https://api.ecommerce-example.com
         "success": true,
         "message": "잔액이 충전되었습니다.",
         "data": {
-          "userId": long,
+          "userId": "long",
           "newBalance": bigdecimal,
           "chargedAmount": bigdecimal,
           "chargeDate": datetime
@@ -84,7 +84,7 @@ https://api.ecommerce-example.com
         "success": true,
         "message": "잔액 조회 성공",
         "data": {
-          "userId": long,
+          "userId": "long",
           "balance": bigdecimal,
           "lastUpdated": datetime
         }
@@ -111,7 +111,7 @@ https://api.ecommerce-example.com
         "data": {
           "popularProducts": [
             {
-              "id": long,
+              "id": "long",
               "name": string,
               "price": bigdecimal,
               "salesCount": int
@@ -134,9 +134,9 @@ https://api.ecommerce-example.com
 - **Request Body**:
   ```json
   {
-    "userId": long,
-    "productId": long,
-    "quantity": int
+    "userId": "long",
+    "productId": "long",
+    "quantity": "int"
   }
   ```
 - **Response**:
@@ -147,7 +147,7 @@ https://api.ecommerce-example.com
         "success": true,
         "message": "상품이 장바구니에 추가되었습니다.",
         "data": {
-          "cartId": long,
+          "cartId": "long",
           "totalItems": int,
           "addedProduct": {
             "productId": long,
@@ -187,8 +187,8 @@ https://api.ecommerce-example.com
         "success": true,
         "message": "상품이 장바구니에서 삭제되었습니다.",
         "data": {
-          "cartId": long,
-          "totalItems": int
+          "cartId": "long",
+          "totalItems": "int"
         }
       }
       ```
@@ -211,10 +211,10 @@ https://api.ecommerce-example.com
         "success": true,
         "message": "장바구니 조회 성공",
         "data": {
-          "cartId": long,
+          "cartId": "long",
           "items": [
             {
-              "productId": long,
+              "productId": "long",
               "name": string,
               "price": bigdecimal,
               "quantity": int
@@ -239,8 +239,8 @@ https://api.ecommerce-example.com
 - **Request Body**:
   ```json
   {
-    "userId": long,
-    "quantity": int
+    "userId": "long",
+    "quantity": "int"
   }
   ```
 - **Response**:
@@ -251,8 +251,8 @@ https://api.ecommerce-example.com
         "success": true,
         "message": "상품 수량이 변경되었습니다.",
         "data": {
-          "productId": long,
-          "newQuantity": int,
+          "productId": "long",
+          "newQuantity": "int",
           "totalAmount": bigdecimal
         }
       }
