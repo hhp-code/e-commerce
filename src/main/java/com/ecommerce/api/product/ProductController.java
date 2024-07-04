@@ -11,32 +11,28 @@ import java.util.*;
 public class ProductController {
 
     @GetMapping
-    public ResponseEntity<List<Product>> listProducts(
+    public List<ProductResponse> listProducts(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        List<Product> products = Arrays.asList(
-                new Product(1L, "Product 1", BigDecimal.valueOf(100), 50),
-                new Product(2L, "Product 2", BigDecimal.valueOf(200), 30)
+        return Arrays.asList(
+                new ProductResponse(1L, "ProductResponse 1", BigDecimal.valueOf(100), 50),
+                new ProductResponse(2L, "ProductResponse 2", BigDecimal.valueOf(200), 30)
         );
-        return ResponseEntity.ok(products);
     }
 
     @GetMapping("/{productId}")
-    public ResponseEntity<Product> getProduct(@PathVariable Long productId) {
-        Product product = new Product(productId, "wow", BigDecimal.valueOf(100), 50);
-        return ResponseEntity.ok(product);
+    public ProductResponse getProduct(@PathVariable Long productId) {
+        return new ProductResponse(productId, "wow", BigDecimal.valueOf(100), 50);
     }
 
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody ProductRequest request) {
-        Product product = new Product(1L, request.name(), request.price(), request.quantity());
-        return ResponseEntity.ok(product);
+    public ProductResponse createProduct(@RequestBody ProductRequest request) {
+        return new ProductResponse(1L, request.name(), request.price(), request.quantity());
     }
 
     @PutMapping("/{productId}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long productId, @RequestBody ProductRequest request) {
-        Product product = new Product(productId, request.name(), request.price(), request.quantity());
-        return ResponseEntity.ok(product);
+    public ProductResponse updateProduct(@PathVariable Long productId, @RequestBody ProductRequest request) {
+        return new ProductResponse(productId, request.name(), request.price(), request.quantity());
     }
 
     @DeleteMapping("/{productId}")
@@ -45,5 +41,5 @@ public class ProductController {
     }
     record ProductRequest(String name, BigDecimal price, int quantity) {}
 
-    record Product(Long id, String name, BigDecimal price, int quantity) {}
+    record ProductResponse(Long id, String name, BigDecimal price, int quantity) {}
 }

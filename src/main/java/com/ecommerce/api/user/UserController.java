@@ -11,25 +11,22 @@ import java.time.LocalDateTime;
 public class UserController {
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserInfo(@PathVariable Long id) {
-        UserResponse user = new UserResponse(id, "testUser", BigDecimal.valueOf(10000), 1, false, LocalDateTime.now());
-        return ResponseEntity.ok(user);
+    public UserResponse getUserInfo(@PathVariable Long id) {
+        return new UserResponse(id, "testUser", BigDecimal.valueOf(10000),  false, LocalDateTime.now());
     }
 
     @PostMapping("/{id}/balance")
-    public ResponseEntity<BalanceResponse> chargeBalance(@PathVariable Long id, @RequestBody BalanceRequest request) {
+    public BalanceResponse chargeBalance(@PathVariable Long id, @RequestBody BalanceRequest request) {
         BigDecimal newBalance = BigDecimal.valueOf(10000).add(request.amount());
-        BalanceResponse response = new BalanceResponse(id, newBalance, 2);
-        return ResponseEntity.ok(response);
+        return new BalanceResponse(id, newBalance);
     }
 
     @GetMapping("/balance/{userId}")
-    public ResponseEntity<BalanceResponse> getBalance(@PathVariable Long userId) {
-        BalanceResponse response = new BalanceResponse(userId, BigDecimal.valueOf(10000),2 );
-        return ResponseEntity.ok(response);
+    public BalanceResponse getBalance(@PathVariable Long userId) {
+        return new BalanceResponse(userId, BigDecimal.valueOf(10000) );
     }
 
-    record UserResponse(Long id, String username, BigDecimal balance, Integer version, Boolean isDeleted, LocalDateTime createdAt) { }
+    record UserResponse(Long id, String username, BigDecimal balance, Boolean isDeleted, LocalDateTime createdAt) { }
     record BalanceRequest(BigDecimal amount) { }
-    record BalanceResponse(Long userId, BigDecimal balance, Integer version) { }
+    record BalanceResponse(Long userId, BigDecimal balance) { }
 }

@@ -41,7 +41,6 @@ https://api.ecommerce-example.com
   "id": "long",
   "username": "string",
   "balance": "bigdecimal",
-  "version": "integer",
   "isDeleted": "boolean",
   "createdAt": "localdatetime"
 }
@@ -60,8 +59,7 @@ https://api.ecommerce-example.com
 ```json
 {
   "id": "long",
-  "balance": "bigdecimal",
-  "version": "integer"
+  "balance": "bigdecimal"
 }
 ```
 - **Error**:
@@ -117,7 +115,6 @@ https://api.ecommerce-example.com
       "price": "bigdecimal",
       "availableStock": "integer",
       "reservedStock": "integer",
-      "version": "integer",
       "lastUpdated": "localdatetime",
       "isDeleted": "boolean",
       "createdAt": "localdatetime"
@@ -164,7 +161,6 @@ https://api.ecommerce-example.com
   "price": "bigdecimal",
   "availableStock": "integer",
   "reservedStock": "integer",
-  "version": "integer",
   "lastUpdated": "localdatetime",
   "isDeleted": "boolean",
   "createdAt": "localdatetime"
