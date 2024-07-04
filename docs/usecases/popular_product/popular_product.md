@@ -49,6 +49,3 @@
 - ERD
 
 
-## 12. 시퀸스 다이어그램
-
-![popular_product](https://github.com/kdelay/Point-API-TDD/assets/62240333/fda6cef6-7c1e-4c2e-9bbd-a30150154ade)

@@ -69,5 +69,3 @@
 - 시스템 요구사항 명세서
 - ERD
 
-## 12. 시퀸스 다이어그램
-![Untitled diagram-2024-07-02-161158](https://github.com/kdelay/Point-API-TDD/assets/62240333/b80d2fd0-0c74-461c-91eb-d2d432a86ad6)

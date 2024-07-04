@@ -72,7 +72,5 @@
 - 시스템 요구사항 명세서
 - ERD
 
-## 12. 시퀀스 다이어그램
 
-![Untitled diagram-2024-07-03-005217](https://github.com/kdelay/Point-API-TDD/assets/62240333/fe064ce1-1015-444b-8779-9f757e13d9e9)
 
