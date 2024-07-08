@@ -24,6 +24,14 @@ public class BalanceService {
     public BigDecimal chargeBalance(BalanceCommand.Create request) {
         User user = balanceRepository.getUserByRequest(request.userId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        return user.getBalance().map(amount -> amount.add(request.amount())).orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        BigDecimal newBalance = user.getBalance()
+                .map(amount -> amount.add(request.amount()))
+                .orElse(request.amount());
+
+        user.setBalance(newBalance);
+        balanceRepository.saveChargeAmount(user);  // 변경된 사용자 정보를 저장
+
+        return newBalance;
     }
 }
