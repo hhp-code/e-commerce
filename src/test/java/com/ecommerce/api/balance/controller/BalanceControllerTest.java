@@ -1,7 +1,7 @@
-package com.ecommerce.api.balance;
+package com.ecommerce.api.balance.controller;
 
-import com.ecommerce.api.balance.controller.BalanceController;
-import com.ecommerce.api.balance.controller.dto.BalanceDto;
+import com.ecommerce.api.balance.service.BalanceCommand;
+import com.ecommerce.api.balance.service.BalanceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,13 +26,13 @@ class BalanceControllerTest {
     @MockBean
     private BalanceService balanceService;
 
-    private BalanceDto.BalanceRequest balanceRequest;
+    private BalanceCommand.Create balanceRequest;
     private Long userId;
 
     @BeforeEach
     void setUp() {
         userId = 1L;
-        balanceRequest = new BalanceDto.BalanceRequest(BigDecimal.valueOf(1000));
+        balanceRequest = new BalanceCommand.Create(1L,BigDecimal.valueOf(1000));
     }
 
     @Test
@@ -55,7 +55,7 @@ class BalanceControllerTest {
     @DisplayName("잔액 충전")
     void chargeBalance() throws Exception {
         //given
-        given(balanceService.chargeBalance(userId, balanceRequest)).willReturn(BigDecimal.valueOf(1000));
+        given(balanceService.chargeBalance(balanceRequest)).willReturn(BigDecimal.valueOf(1000));
 
         //when
         mockMvc.perform(post("/api/balance/{userId}/charge", userId)
@@ -64,8 +64,7 @@ class BalanceControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.data.balance").value(1000));
-
         //then
-        verify(balanceService).chargeBalance(userId, balanceRequest);
+        verify(balanceService).chargeBalance( balanceRequest);
     }
 }
