@@ -1,5 +1,6 @@
 package com.ecommerce.api.cart.controller;
 
+import com.ecommerce.api.cart.controller.dto.Product;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,5 +1,7 @@
 package com.ecommerce.api.product.controller;
 
+import com.ecommerce.api.product.controller.dto.ProductRequest;
+import com.ecommerce.api.product.controller.dto.ProductResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package com.ecommerce.api.order.controller;
+package com.ecommerce.api.order.controller.dto;
 
 import java.math.BigDecimal;
 

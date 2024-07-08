@@ -1,4 +1,4 @@
-package com.ecommerce.api.coupon.controller;
+package com.ecommerce.api.coupon.controller.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

@@ -1,43 +1,32 @@
 package com.ecommerce.api.balance.controller;
 
-import com.ecommerce.api.balance.BalanceRequest;
-import com.ecommerce.api.balance.BalanceResponse;
+import com.ecommerce.api.balance.BalanceService;
+import com.ecommerce.api.balance.controller.dto.BalanceDto;
+import com.ecommerce.api.balance.controller.dto.BalanceMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 @Tag(name = "balance", description = "잔액 관련 API")
 @RestController
 @RequestMapping("/api")
 public class BalanceController {
+    private final BalanceService balanceService;
 
-    private final Map<Long, BigDecimal> userBalances = new HashMap<>();
+    public BalanceController(BalanceService balanceService) {
+        this.balanceService = balanceService;
+    }
+
     @GetMapping("/balance/{userId}")
     @Operation(summary = "잔액 조회", description = "사용자의 잔액을 조회합니다.")
-    public BalanceResponse getBalance(@PathVariable Long userId) {
-        BigDecimal balance = userBalances.getOrDefault(userId, BigDecimal.ZERO);
-        Map<String, Object> data = new HashMap<>();
-        data.put("userId", userId);
-        data.put("balance", balance);
-        data.put("lastUpdated", LocalDateTime.now());
-        return new BalanceResponse(true, "잔액 조회 성공", data);
+    public BalanceDto.BalanceResponse getBalance(@PathVariable Long userId) {
+        return BalanceMapper.toResponse(balanceService.getBalance(userId));
     }
-    @PostMapping("/users/{id}/balance")
+    @PostMapping("/balance/{userId}/charge")
     @Operation(summary = "잔액 충전", description = "사용자의 잔액을 충전합니다.")
-    public BalanceResponse chargeBalance(@PathVariable Long id, @RequestBody BalanceRequest request) {
-        BigDecimal amount = request.amount();
-        BigDecimal currentBalance = userBalances.getOrDefault(id, BigDecimal.ZERO);
-        BigDecimal newBalance = currentBalance.add(amount);
-        userBalances.put(id, newBalance);
+    public BalanceDto.BalanceResponse chargeBalance(@PathVariable Long userId, @RequestBody BalanceDto.BalanceRequest request) {
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("id", id);
-        response.put("balance", newBalance);
-        return new BalanceResponse(true, "충전 성공", new HashMap<>(response));
+        return BalanceMapper.toResponse(balanceService.chargeBalance(userId, request));
     }
 }
 

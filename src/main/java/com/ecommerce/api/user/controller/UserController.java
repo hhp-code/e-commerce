@@ -1,5 +1,8 @@
 package com.ecommerce.api.user.controller;
 
+import com.ecommerce.api.user.controller.dto.BalanceRequest;
+import com.ecommerce.api.user.controller.dto.BalanceResponse;
+import com.ecommerce.api.user.controller.dto.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
