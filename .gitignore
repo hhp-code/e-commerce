@@ -41,4 +41,4 @@ gradle/
 gradlew.bat
 gradlew
 settings.gradle
-application.properties
+application.yml
