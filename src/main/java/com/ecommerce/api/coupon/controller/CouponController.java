@@ -1,14 +1,12 @@
-package com.ecommerce.api.coupon;
+package com.ecommerce.api.coupon.controller;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.http.ResponseEntity;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
-
+@Tag(name = "coupon", description = "쿠폰 관련 API")
 @RestController
 @RequestMapping("/api")
 public class CouponController {
@@ -52,19 +50,7 @@ public class CouponController {
 
 
 
-    public record UserCouponRequest(Long couponId) { }
 
-    public record UserCouponResponse(Long id, Long couponId, String couponName, BigDecimal discountAmount,
-                                     LocalDateTime issuedAt, LocalDateTime expiresAt) {
-    }
-    public record CouponRequest(String code, BigDecimal discountAmount, int remainingQuantity,
-                                LocalDateTime validFrom, LocalDateTime validTo, boolean active) {
-    }
-    public record CouponResponse(Long id, String code, BigDecimal discountAmount, int remainingQuantity,
-                                 LocalDateTime validFrom, LocalDateTime validTo, boolean active) {}
 
-    public record CouponDetailResponse(Long id, String code, BigDecimal discountAmount, int quantity,
-                                       int remainingQuantity, LocalDateTime startDateTime, LocalDateTime endDateTime,
-                                       LocalDateTime createdAt, int issuedCount) {
-    }
 }
+
