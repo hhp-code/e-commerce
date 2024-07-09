@@ -1,10 +1,13 @@
 package com.ecommerce.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Entity
 @Table(name = "commerce_user")
@@ -14,6 +17,8 @@ public class User {
     private Long id;
 
     private String username;
+    @Setter
+    @Getter
     private BigDecimal balance;
 
     private boolean isDeleted;
@@ -25,23 +30,24 @@ public class User {
     @OneToOne(mappedBy = "user")
     private Cart cart;
 
-    @OneToMany(mappedBy = "user")
-    private List<Order> orders;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders = new ArrayList<>();
 
     public boolean isDeleted() {
         return isDeleted;
     }
 
 
-    public BigDecimal getBalance() {
-        return balance;
-    }
-
-    public void setBalance(BigDecimal newBalance) {
-        this.balance = newBalance;
-    }
-
     public void setId(long l) {
         this.id = l;
+    }
+    public void addOrder(Order order) {
+        orders.add(order);
+        order.setUser(this);
+    }
+
+    public void removeOrder(Order order) {
+        orders.remove(order);
+        order.setUser(null);
     }
 }

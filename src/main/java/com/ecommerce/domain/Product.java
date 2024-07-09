@@ -1,6 +1,9 @@
 package com.ecommerce.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -14,10 +17,15 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Getter
+    @Setter
     private String name;
+    @Getter
+    @Setter
     private BigDecimal price;
     private Integer availableStock;
     private Integer reservedStock;
+    @Setter
     private LocalDateTime lastUpdated;
     private boolean isDeleted;
     private LocalDateTime deletedAt;
@@ -28,16 +36,22 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<OrderItem> orderItems;
 
+    public Product() {
+        this.lastUpdated = LocalDateTime.now();
+        this.isDeleted = false;
+    }
+
+    public Product(String name, BigDecimal price, Integer availableStock) {
+        this();
+        this.name = name;
+        this.price = price;
+        this.availableStock = availableStock;
+        this.reservedStock = 0;
+    }
+
+
     public long getId() {
         return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
     }
 
     public boolean isDeleted() {
@@ -56,24 +70,12 @@ public class Product {
         this.id = l;
     }
 
-    public void setName(String sampleProduct) {
-        this.name = sampleProduct;
-    }
-
-    public void setPrice(BigDecimal bigDecimal) {
-        this.price = bigDecimal;
-    }
-
     public void setAvailableStock(int i) {
         this.availableStock = i;
     }
 
     public void setReservedStock(int i) {
         this.reservedStock = i;
-    }
-
-    public void setLastUpdated(LocalDateTime now) {
-        this.lastUpdated = now;
     }
 
     public void setDeleted(boolean b) {
