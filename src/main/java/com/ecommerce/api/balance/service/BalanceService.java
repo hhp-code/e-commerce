@@ -25,9 +25,7 @@ public class BalanceService {
         User user = balanceRepository.getUserByRequest(request.userId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        BigDecimal newBalance = user.getBalance()
-                .map(amount -> amount.add(request.amount()))
-                .orElse(request.amount());
+        BigDecimal newBalance = user.getBalance();
 
         user.setBalance(newBalance);
         balanceRepository.saveChargeAmount(user);  // 변경된 사용자 정보를 저장

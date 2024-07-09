@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "orders")  // "order" is a reserved keyword in SQL
+@Table(name = "orders")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +18,7 @@ public class Order {
     private BigDecimal sellingPrice;
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus status;
+    private OrderItem.OrderStatus status;
 
     private boolean isDeleted;
     private LocalDateTime deletedAt;
@@ -30,9 +30,5 @@ public class Order {
     @OneToMany(mappedBy = "order")
     private List<OrderItem> orderItems;
 
-    // Getters and setters
 }
 
-enum OrderStatus {
-    PENDING, SHIPPED, DELIVERED, CANCELLED
-}

@@ -1,6 +1,6 @@
 package com.ecommerce.api.cart.controller;
 
-import com.ecommerce.api.cart.controller.dto.Product;
+import com.ecommerce.api.cart.controller.dto.ProductRequest;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,11 +10,11 @@ import java.math.BigDecimal;
 public class CartItem {
     @Setter
     private int quantity;
-    private final Product product;
+    private final ProductRequest product;
 
     public CartItem(Long productId, int quantity) {
         this.quantity = quantity;
-        this.product = new Product(productId, "Sample Product", BigDecimal.valueOf(10000));
+        this.product = new ProductRequest(productId, "Sample ProductRequest", BigDecimal.valueOf(10000));
     }
 
 

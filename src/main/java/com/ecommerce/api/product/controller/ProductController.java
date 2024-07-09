@@ -1,53 +1,49 @@
 package com.ecommerce.api.product.controller;
 
-import com.ecommerce.api.product.controller.dto.ProductRequest;
-import com.ecommerce.api.product.controller.dto.ProductResponse;
+import com.ecommerce.api.product.service.ProductService;
+import com.ecommerce.api.product.controller.dto.ProductMapper;
+import com.ecommerce.api.product.controller.dto.ProductDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.*;
+
 @Tag(name = "product", description = "상품 관련 API")
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
 
+    private final ProductService productService;
+
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
     @GetMapping
     @Operation(summary = "상품 목록 조회", description = "상품 목록을 조회합니다.")
-    public List<ProductResponse> listProducts(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return Arrays.asList(
-                new ProductResponse(1L, "ProductResponse 1", BigDecimal.valueOf(100), 50),
-                new ProductResponse(2L, "ProductResponse 2", BigDecimal.valueOf(200), 30)
+    public ProductDto.ProductListResponse getProducts() {
+        return ProductMapper.toProductListResponse(
+                productService.getProducts()
         );
     }
 
+
     @GetMapping("/{productId}")
-    @Operation(summary = "상품 조회", description = "상품을 조회합니다.")
-    public ProductResponse getProduct(@PathVariable Long productId) {
-        return new ProductResponse(productId, "wow", BigDecimal.valueOf(100), 50);
+    @Operation(summary = "상품 상세 조회", description = "상품을 조회합니다.")
+    public ProductDto.ProductResponse getProduct(@PathVariable Long productId) {
+        productService.getProduct(productId);
+        return new ProductDto.ProductResponse(productId, "wow", BigDecimal.valueOf(100), 50);
+    }
+    @GetMapping("/popular")
+    @Operation(summary = "인기 상품 조회", description = "인기 상품을 조회합니다.")
+    public ProductDto.ProductListResponse getPopularProducts() {
+        return ProductMapper.toProductListResponse(
+                productService.getPopularProducts()
+        );
     }
 
-    @PostMapping
-    @Operation(summary = "상품 생성", description = "상품을 생성합니다.")
-    public ProductResponse createProduct(@RequestBody ProductRequest request) {
-        return new ProductResponse(1L, request.name(), request.price(), request.quantity());
-    }
 
-    @PutMapping("/{productId}")
-    @Operation(summary = "상품 수정", description = "상품을 수정합니다.")
-    public ProductResponse updateProduct(@PathVariable Long productId, @RequestBody ProductRequest request) {
-        return new ProductResponse(productId, request.name(), request.price(), request.quantity());
-    }
 
-    @DeleteMapping("/{productId}")
-    @Operation(summary = "상품 삭제", description = "상품을 삭제합니다.")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long productId) {
-        return ResponseEntity.noContent().build();
-    }
 
 }
 

@@ -21,4 +21,8 @@ public class OrderItem {
     private Product product;
 
     // Getters and setters
+    enum OrderStatus {
+        PENDING, SHIPPED, DELIVERED, CANCELLED
+    }
+
 }

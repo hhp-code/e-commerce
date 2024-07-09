@@ -32,39 +32,16 @@ public class User {
         return isDeleted;
     }
 
-    public Optional<Long> getId() {
-        return Optional.of(id);
+
+    public BigDecimal getBalance() {
+        return balance;
     }
 
-    public Optional<String> getUsername() {
-        return Optional.of(username);
+    public void setBalance(BigDecimal newBalance) {
+        this.balance = newBalance;
     }
 
-    public Optional<BigDecimal> getBalance() {
-        return Optional.of(balance);
-    }
-
-    public Optional<LocalDateTime> getDeletedAt() {
-        return Optional.of(deletedAt);
-    }
-
-    public List<UserCoupon> getUserCoupons() {
-        return userCoupons;
-    }
-
-    public Optional<Cart> getCart() {
-        return Optional.of(cart);
-    }
-
-    public List<Order> getOrders() {
-        return orders;
-    }
-
-    public void setBalance(BigDecimal balance) {
-        this.balance = balance;
-    }
-
-    public void setId(long id) {
-        this.id = id;
+    public void setId(long l) {
+        this.id = l;
     }
 }
