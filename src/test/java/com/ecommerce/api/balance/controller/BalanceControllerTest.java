@@ -60,7 +60,19 @@ class BalanceControllerTest {
         verify(balanceService).getBalance(USER_ID);
     }
 
+    @Test
+    @DisplayName("잔액 조회 실패 - 사용자 없음")
+    void getBalance_ShouldReturnNotFound_WhenUserDoesNotExist() throws Exception {
+        given(balanceService.getBalance(USER_ID)).willThrow(new IllegalArgumentException("User not found"));
 
+        mockMvc.perform(get(API_BALANCE + "/{userId}", USER_ID))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.error").exists())
+                .andExpect(jsonPath("$.message").value("User not found"));
+
+        verify(balanceService).getBalance(USER_ID);
+    }
 
     @Test
     @DisplayName("잔액 충전 성공")
