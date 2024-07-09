@@ -125,9 +125,9 @@ class ProductServiceUnitTest {
         @DisplayName("전체 상품 조회")
         void testGetProducts() {
             List<Product> allProducts = Arrays.asList(
-                    createProduct(1L, "ProductRequest 1", "10000", 100),
-                    createProduct(2L, "ProductRequest 2", "15000", 80),
-                    createProduct(3L, "ProductRequest 3", "20000", 60)
+                    createProductRequest(1L, "ProductRequest 1", "10000", 100),
+                    createProductRequest(2L, "ProductRequest 2", "15000", 80),
+                    createProductRequest(3L, "ProductRequest 3", "20000", 60)
             );
 
             when(productRepository.getProducts()).thenReturn(allProducts);
@@ -156,7 +156,7 @@ class ProductServiceUnitTest {
         }
     }
 
-    private Product createProduct(Long id, String name, String price, Integer availableStock) {
+    private Product createProductRequest(Long id, String name, String price, Integer availableStock) {
         return createProduct(id, name, price, availableStock, LocalDateTime.now());
     }
 
