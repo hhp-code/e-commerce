@@ -2,7 +2,6 @@ package com.ecommerce.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,20 +19,16 @@ public class Cart {
     private LocalDateTime expirationDate;
 
 
-    @Setter
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", unique = true)
-    private User user;
 
-    @OneToMany(mappedBy = "cart")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "cart_id")
     private List<CartItem> cartItems;
 
+
+    @OneToOne
+    private User user;
+
     public Cart() {
-
-    }
-
-    public Cart(User user) {
-        this.user = user;
         this.cartItems = new ArrayList<>();
         this.lastUpdated = LocalDateTime.now();
         this.expirationDate = LocalDateTime.now().plusDays(7);
@@ -41,12 +36,12 @@ public class Cart {
 
     public void addCartItem(CartItem item) {
         cartItems.add(item);
-        item.setCart(this);
+        updateLastUpdated();
     }
 
     public void removeCartItem(CartItem item) {
         cartItems.remove(item);
-        item.setCart(null);
+        updateLastUpdated();
     }
 
     public void updateLastUpdated() {

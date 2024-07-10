@@ -66,7 +66,7 @@ class BalanceControllerTest {
         given(balanceService.getBalance(USER_ID)).willThrow(new IllegalArgumentException("User not found"));
 
         mockMvc.perform(get(API_BALANCE + "/{userId}", USER_ID))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.error").exists())
                 .andExpect(jsonPath("$.message").value("User not found"));

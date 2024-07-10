@@ -1,6 +1,7 @@
 package com.ecommerce.api.cart.service.repository;
 
 import com.ecommerce.domain.Cart;
+import com.ecommerce.domain.CartItem;
 
 import java.util.Optional;
 

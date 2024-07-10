@@ -2,6 +2,7 @@ package com.ecommerce.api.cart.controller.dto;
 
 import com.ecommerce.api.cart.service.CartCommand;
 import com.ecommerce.domain.Cart;
+import com.ecommerce.domain.Product;
 
 import java.util.Map;
 
@@ -12,7 +13,7 @@ public class CartMapper {
     }
 
     public static CartDto.CartResponse toCartResponse(Cart cart) {
-        return new CartDto.CartResponse(cart.getId(), cart.getLastUpdated(), cart.getExpirationDate(), cart.getCartItems());
+        return new CartDto.CartResponse( cart.getLastUpdated(), cart.getExpirationDate(), cart.getCartItems());
     }
 
     public static CartDto.CartItemRemoveResponse toCartItemDeleteResponse(Cart cart) {
@@ -24,7 +25,7 @@ public class CartMapper {
     }
 
     public static CartDto.CartItemUpdateResponse toCartItemUpdateResponse(Cart cart) {
-        return new CartDto.CartItemUpdateResponse(true, "상품 수량이 변경되었습니다.", Map.of("id", cart.getId(), "totalAmount", cart.getCartItems().size()));
+        return new CartDto.CartItemUpdateResponse(true, "상품 수량이 변경되었습니다.", Map.of("cart",cart));
     }
 
     public static CartCommand.Update toUpdateItem(Long productId, CartDto.CartItemUpdateRequest request) {

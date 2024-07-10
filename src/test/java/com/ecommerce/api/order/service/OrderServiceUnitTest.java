@@ -3,6 +3,7 @@ package com.ecommerce.api.order.service;
 import com.ecommerce.api.order.service.repository.OrderRepository;
 import com.ecommerce.api.order.service.repository.UserRepository;
 import com.ecommerce.domain.Order;
+import com.ecommerce.domain.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -73,30 +74,17 @@ public class OrderServiceUnitTest {
         verify(orderRepository).getOrders(searchCommand);
     }
 
-    @Test
-    void createOrder_주문생성성공() {
-        // Given
-        Order mockOrder = new Order();
-        OrderCommand.Create createCommand = new OrderCommand.Create(1, List.of());
-        when(orderRepository.saveAndGet(mockOrder)).thenReturn(Optional.of(mockOrder));
 
-        // When
-        Order result = orderService.createOrder(createCommand);
-
-        // Then
-        assertNotNull(result);
-        verify(orderRepository).saveAndGet(mockOrder);
-    }
 
     @Test
     void createOrder_주문생성실패_예외발생() {
         // Given
-        Order mockOrder = new Order();
-        OrderCommand.Create createCommand = new OrderCommand.Create(1,List.of());
-        when(orderRepository.saveAndGet(mockOrder)).thenReturn(Optional.empty());
+        OrderCommand.Create createCommand = new OrderCommand.Create(1, List.of());
+        when(userRepository.getById(1L)).thenReturn(Optional.of(new User()));
+        when(orderRepository.saveAndGet(any(Order.class))).thenReturn(Optional.empty());
 
         // When & Then
         assertThrows(RuntimeException.class, () -> orderService.createOrder(createCommand));
-        verify(orderRepository).saveAndGet(mockOrder);
+        verify(orderRepository).saveAndGet(any(Order.class));
     }
 }

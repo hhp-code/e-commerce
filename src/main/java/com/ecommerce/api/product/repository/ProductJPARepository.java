@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public interface ProductJPARepository extends JpaRepository<Product, Long> {
@@ -14,4 +15,7 @@ public interface ProductJPARepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT p FROM Product p ORDER BY p.id")
     List<Product> getByPopular();
+
+    @Query("SELECT p FROM Product p WHERE p.name = :name")
+    Optional<Product> findByName(String name);
 }

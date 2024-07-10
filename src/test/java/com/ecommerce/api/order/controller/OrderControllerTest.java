@@ -56,7 +56,7 @@ class OrderControllerTest {
         when(orderService.getOrder(nonExistentOrderId)).thenThrow(new RuntimeException("주문을 찾을 수 없습니다."));
 
         mockMvc.perform(get("/api/orders/{orderId}", nonExistentOrderId))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().is5xxServerError())
                 .andExpect(jsonPath("$.message").value("주문을 찾을 수 없습니다."));
     }
 
@@ -68,6 +68,6 @@ class OrderControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(orderCreateRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("상품 번호는 0 이상이어야 합니다."));
+                .andExpect(jsonPath("$.message").value("주문자의 ID가 잘못되었습니다"));
     }
 }

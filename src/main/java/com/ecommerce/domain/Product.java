@@ -9,10 +9,10 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Optional;
 
 @Entity
 public class Product {
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -50,9 +50,6 @@ public class Product {
     }
 
 
-    public long getId() {
-        return id;
-    }
 
     public boolean isDeleted() {
         return isDeleted;
@@ -81,4 +78,5 @@ public class Product {
     public void setDeleted(boolean b) {
         this.isDeleted = b;
     }
+
 }

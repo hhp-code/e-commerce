@@ -1,5 +1,6 @@
 package com.ecommerce.api.cart.service;
 
+import com.ecommerce.api.cart.service.repository.CartItemRepository;
 import com.ecommerce.api.cart.service.repository.CartRepository;
 import com.ecommerce.api.order.service.repository.UserRepository;
 import com.ecommerce.api.product.service.repository.ProductRepository;
@@ -16,11 +17,13 @@ public class CartService {
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final CartItemRepository cartItemRepository;
 
-    public CartService(CartRepository cartRepository, UserRepository userRepository, ProductRepository productRepository) {
+    public CartService(CartRepository cartRepository, UserRepository userRepository, ProductRepository productRepository, CartItemRepository cartItemRepository) {
         this.cartRepository = cartRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
+        this.cartItemRepository = cartItemRepository;
     }
 
     @Transactional(readOnly = true)
@@ -30,18 +33,17 @@ public class CartService {
 
     @Transactional
     public Cart addItemToCart(CartCommand.Add add) {
-        long userId = add.userId();
-        User user = getUser(userId);
+        User user = userRepository.getById(add.userId()).orElseThrow(EntityNotFoundException::new);
         Cart cart = user.getCart();
         if (cart == null) {
             cart = new Cart();
-            user.setCart(cart);
             cart = cartRepository.saveAndGet(cart).orElseThrow(EntityNotFoundException::new);
         }
-        Product product = getProduct(add.productId());
-        CartItem cartItem = new CartItem(cart, product, add.quantity());
+        Product product = productRepository.getProduct(add.productId()).orElseThrow(EntityNotFoundException::new);
+        CartItem cartItem = new CartItem(product, add.quantity());
+        cartItemRepository.save(cartItem);
         cart.addCartItem(cartItem);
-        return cartRepository.saveAndGet(cart).orElseThrow(EntityNotFoundException::new);
+        return cartRepository.saveAndGet(cart).orElseThrow(() -> new EntityNotFoundException("Cart not found"));
     }
 
     @Transactional
@@ -51,7 +53,7 @@ public class CartService {
         Product product = getProduct(productId);
         CartItem cartItem = cart.getCartItem(product).orElseThrow(EntityNotFoundException::new);
         cart.removeCartItem(cartItem);
-        return cartRepository.saveAndGet(cart).orElseThrow(EntityNotFoundException::new);
+        return cart;
     }
 
     @Transactional

@@ -5,6 +5,7 @@ import com.ecommerce.api.order.service.repository.UserRepository;
 import com.ecommerce.domain.Order;
 import com.ecommerce.domain.User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,16 +19,19 @@ public class OrderService {
         this.orderRepository = orderRepository;
     }
 
+    @Transactional(readOnly = true)
     public Order getOrder(Long customerId) {
         return orderRepository.getById(customerId).orElseThrow(
                 () -> new RuntimeException("주문이 존재하지 않습니다.")
         );
     }
 
+    @Transactional(readOnly = true)
     public List<Order> getOrders(OrderCommand.Search search){
         return orderRepository.getOrders(search);
     }
 
+    @Transactional
     public Order createOrder(OrderCommand.Create command) {
         User user = userRepository.getById(command.id()).orElseThrow(
                 ()-> new RuntimeException("사용자가 존재하지 않습니다.")

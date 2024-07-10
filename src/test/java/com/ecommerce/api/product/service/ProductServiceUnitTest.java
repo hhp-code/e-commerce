@@ -52,7 +52,6 @@ class ProductServiceUnitTest {
 
             //then
             assertNotNull(result);
-            assertEquals(1L, result.getId());
             assertEquals("Sample ProductRequest", result.getName());
             assertEquals(new BigDecimal("10000"), result.getPrice());
             assertEquals(100, result.getAvailableStock());

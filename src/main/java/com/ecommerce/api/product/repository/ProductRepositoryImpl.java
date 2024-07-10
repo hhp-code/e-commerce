@@ -33,7 +33,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     @Override
     public Optional<Product> save(Product oldProduct) {
         productJPARepository.save(oldProduct);
-        return productJPARepository.findById(oldProduct.getId());
+        return productJPARepository.findByName(oldProduct.getName());
     }
 
     @Override

@@ -28,6 +28,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<UserCoupon> userCoupons;
 
+    @Setter
     @OneToOne(mappedBy = "user" ,cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Cart cart;
 
@@ -41,6 +42,7 @@ public class User {
         this.isDeleted = false;
         this.userCoupons = new ArrayList<>();
         this.orders = new ArrayList<>();
+        this.cart= new Cart();
     }
 
     public User() {
@@ -69,13 +71,9 @@ public class User {
     }
     public Cart getCart(){
         if (this.cart == null) {
-            this.cart = new Cart(this);
+            this.cart = new Cart();
         }
         return this.cart;
-    }
-    public void setCart(Cart cart) {
-        this.cart = cart;
-        cart.setUser(this);
     }
 
 }

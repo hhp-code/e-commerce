@@ -18,7 +18,7 @@ public class CartDto {
     }
     public record CartItemUpdateResponse(boolean success, String message, Map<String, Object> data) {
     }
-    public record CartResponse(long id, LocalDateTime lastUpdated, LocalDateTime expirationDate, List<CartItem> items) {
+    public record CartResponse( LocalDateTime lastUpdated, LocalDateTime expirationDate, List<CartItem> items) {
     }
 
 

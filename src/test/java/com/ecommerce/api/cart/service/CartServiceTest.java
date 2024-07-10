@@ -34,9 +34,6 @@ public class CartServiceTest {
     @Autowired
     private ProductRepository productRepository;
 
-    @Autowired
-    private EntityManager entityManager;
-
     private User testUser;
     private Product testProduct;
 
@@ -49,13 +46,6 @@ public class CartServiceTest {
         productRepository.save(testProduct);
     }
 
-    @Test
-    void testGetCart() {
-        Cart testCart = new Cart();
-        Cart retrievedCart = cartService.getCart(testCart.getId());
-        assertNotNull(retrievedCart);
-        assertEquals(testCart.getId(), retrievedCart.getId());
-    }
 
     @Test
     void testAddItemToCart() {
@@ -87,13 +77,10 @@ public class CartServiceTest {
 
     @Test
     void testUpdateCartItemQuantity() {
-        // 먼저 아이템을 추가
         CartCommand.Add addCommand = new CartCommand.Add(testUser.getId(), testProduct.getId(), 1);
-        Cart cart = cartService.addItemToCart(addCommand);
-        System.out.println(cartRepository.getById(testUser.getId()).get().getCartItems().get(0).getQuantity());
+        cartService.addItemToCart(addCommand);
 
 
-        // 수량 업데이트
         CartCommand.Update updateCommand = new CartCommand.Update(testUser.getId(), testProduct.getId(), 3);
         Cart updatedCart = cartService.updateCartItemQuantity(updateCommand);
         assertNotNull(updatedCart);

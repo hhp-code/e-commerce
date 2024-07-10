@@ -18,10 +18,7 @@ public class CartItem {
 
     private LocalDateTime addedDate;
 
-    @Setter
-    @ManyToOne
-    @JoinColumn(name = "cart_id")
-    private Cart cart;
+
 
     @Getter
     @ManyToOne
@@ -31,15 +28,12 @@ public class CartItem {
     public CartItem() {
     }
 
-    public CartItem(Cart cart, Product product, int quantity) {
-        this.cart = cart;
+    public CartItem(Product product, int quantity) {
         this.product = product;
         this.quantity = quantity;
         this.addedDate = LocalDateTime.now();
     }
 
 
-    public long getId() {
-        return id;
-    }
+
 }
