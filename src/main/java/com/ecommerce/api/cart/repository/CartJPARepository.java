@@ -1,6 +1,6 @@
 package com.ecommerce.api.cart.repository;
 
-import com.ecommerce.domain.Cart;
+import com.ecommerce.api.domain.Cart;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 

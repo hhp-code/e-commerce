@@ -1,6 +1,6 @@
 package com.ecommerce.api.cart.controller.dto;
 
-import com.ecommerce.domain.CartItem;
+import com.ecommerce.api.domain.CartItem;
 import lombok.experimental.UtilityClass;
 
 import java.time.LocalDateTime;

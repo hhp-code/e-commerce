@@ -1,6 +1,6 @@
 package com.ecommerce.api.product.controller.dto;
 
-import com.ecommerce.domain.Product;
+import com.ecommerce.api.domain.Product;
 
 import java.util.List;
 

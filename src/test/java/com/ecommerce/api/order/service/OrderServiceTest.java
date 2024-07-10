@@ -1,7 +1,7 @@
 package com.ecommerce.api.order.service;
 
 import com.ecommerce.api.order.service.repository.OrderRepository;
-import com.ecommerce.domain.Order;
+import com.ecommerce.api.domain.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

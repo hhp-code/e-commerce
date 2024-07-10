@@ -2,7 +2,7 @@ package com.ecommerce.api.product.service;
 
 
 import com.ecommerce.api.product.service.repository.ProductRepository;
-import com.ecommerce.domain.Product;
+import com.ecommerce.api.domain.Product;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

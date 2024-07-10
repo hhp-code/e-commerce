@@ -1,7 +1,7 @@
 package com.ecommerce.api.balance.service;
 
 import com.ecommerce.api.balance.service.repository.BalanceRepository;
-import com.ecommerce.domain.User;
+import com.ecommerce.api.domain.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

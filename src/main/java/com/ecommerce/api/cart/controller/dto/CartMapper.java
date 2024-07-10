@@ -1,8 +1,7 @@
 package com.ecommerce.api.cart.controller.dto;
 
 import com.ecommerce.api.cart.service.CartCommand;
-import com.ecommerce.domain.Cart;
-import com.ecommerce.domain.Product;
+import com.ecommerce.api.domain.Cart;
 
 import java.util.Map;
 

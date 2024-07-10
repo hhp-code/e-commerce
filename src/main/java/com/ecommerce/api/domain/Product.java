@@ -1,4 +1,4 @@
-package com.ecommerce.domain;
+package com.ecommerce.api.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -49,11 +49,6 @@ public class Product {
         this.reservedStock = 0;
     }
 
-
-
-    public boolean isDeleted() {
-        return isDeleted;
-    }
 
     public int getAvailableStock() {
         return availableStock;

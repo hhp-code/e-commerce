@@ -1,6 +1,6 @@
 package com.ecommerce.api.balance.service.repository;
 
-import com.ecommerce.domain.User;
+import com.ecommerce.api.domain.User;
 
 import java.math.BigDecimal;
 import java.util.Optional;

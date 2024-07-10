@@ -2,7 +2,7 @@ package com.ecommerce.api.order.controller;
 
 import com.ecommerce.api.order.controller.dto.OrderDto;
 import com.ecommerce.api.order.service.OrderService;
-import com.ecommerce.domain.OrderItem;
+import com.ecommerce.api.domain.OrderItem;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -68,6 +68,6 @@ class OrderControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(orderCreateRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("주문자의 ID가 잘못되었습니다"));
+                .andExpect(jsonPath("$.message").value("주문자의 ID가 잘못되었습니다."));
     }
 }

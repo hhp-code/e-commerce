@@ -1,6 +1,6 @@
 package com.ecommerce.api.order.controller.dto;
 
-import com.ecommerce.domain.OrderItem;
+import com.ecommerce.api.domain.OrderItem;
 import lombok.experimental.UtilityClass;
 
 import java.math.BigDecimal;

@@ -1,7 +1,6 @@
 package com.ecommerce.api.order.service;
 
-import com.ecommerce.domain.Order;
-import com.ecommerce.domain.OrderItem;
+import com.ecommerce.api.domain.OrderItem;
 import lombok.experimental.UtilityClass;
 
 import java.util.List;

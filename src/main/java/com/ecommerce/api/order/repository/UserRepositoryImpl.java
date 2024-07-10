@@ -1,7 +1,7 @@
 package com.ecommerce.api.order.repository;
 
 import com.ecommerce.api.order.service.repository.UserRepository;
-import com.ecommerce.domain.User;
+import com.ecommerce.api.domain.User;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;

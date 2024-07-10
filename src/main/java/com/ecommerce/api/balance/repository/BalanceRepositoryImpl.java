@@ -1,7 +1,7 @@
 package com.ecommerce.api.balance.repository;
 
 import com.ecommerce.api.balance.service.repository.BalanceRepository;
-import com.ecommerce.domain.User;
+import com.ecommerce.api.domain.User;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;

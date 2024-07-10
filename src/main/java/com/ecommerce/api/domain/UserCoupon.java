@@ -1,21 +1,27 @@
-package com.ecommerce.domain;
+package com.ecommerce.api.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+
 import java.time.LocalDateTime;
 
 @Entity
 public class UserCoupon {
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private boolean isUsed;
+    @Getter
     private LocalDateTime usedAt;
 
+    @Getter
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Getter
     @ManyToOne
     @JoinColumn(name = "coupon_id")
     private Coupon coupon;
@@ -36,10 +42,8 @@ public class UserCoupon {
         }
     }
 
-    public void cancelUse() {
-        if (isUsed) {
-            this.isUsed = false;
-            this.usedAt = null;
-        }
+    public boolean isUsed() {
+        return isUsed;
     }
+
 }

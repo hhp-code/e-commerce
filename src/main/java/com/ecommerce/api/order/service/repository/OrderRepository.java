@@ -1,8 +1,7 @@
 package com.ecommerce.api.order.service.repository;
 
 import com.ecommerce.api.order.service.OrderCommand;
-import com.ecommerce.domain.Order;
-import org.springframework.stereotype.Component;
+import com.ecommerce.api.domain.Order;
 
 import java.util.List;
 import java.util.Optional;

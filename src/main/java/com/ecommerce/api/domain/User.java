@@ -1,4 +1,4 @@
-package com.ecommerce.domain;
+package com.ecommerce.api.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -12,12 +12,13 @@ import java.util.List;
 @Entity
 @Table(name = "commerce_user")
 public class User {
-    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Getter
     private String username;
+
     @Setter
     @Getter
     private BigDecimal balance;
@@ -36,6 +37,10 @@ public class User {
     private List<Order> orders = new ArrayList<>();
 
 
+    public User() {
+
+    }
+
     public User(String username, BigDecimal initialBalance) {
         this.username = username;
         this.balance = initialBalance;
@@ -45,30 +50,10 @@ public class User {
         this.cart= new Cart();
     }
 
-    public User() {
-
-    }
-
-
     public boolean isDeleted() {
         return isDeleted;
     }
 
-
-
-
-    public void setId(long l) {
-        this.id = l;
-    }
-    public void addOrder(Order order) {
-        orders.add(order);
-        order.setUser(this);
-    }
-
-    public void removeOrder(Order order) {
-        orders.remove(order);
-        order.setUser(null);
-    }
     public Cart getCart(){
         if (this.cart == null) {
             this.cart = new Cart();
@@ -76,4 +61,8 @@ public class User {
         return this.cart;
     }
 
+    public void addCoupon(Coupon coupon) {
+        UserCoupon userCoupon = new UserCoupon(this, coupon);
+        userCoupons.add(userCoupon);
+    }
 }

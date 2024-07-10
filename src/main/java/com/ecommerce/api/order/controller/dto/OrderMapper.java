@@ -2,8 +2,7 @@ package com.ecommerce.api.order.controller.dto;
 
 
 import com.ecommerce.api.order.service.OrderCommand;
-import com.ecommerce.domain.Order;
-import com.ecommerce.domain.OrderItem;
+import com.ecommerce.api.domain.Order;
 
 import java.util.List;
 import java.util.stream.Collectors;

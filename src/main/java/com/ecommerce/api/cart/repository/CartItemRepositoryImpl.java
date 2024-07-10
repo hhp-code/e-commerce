@@ -1,7 +1,7 @@
 package com.ecommerce.api.cart.repository;
 
 import com.ecommerce.api.cart.service.repository.CartItemRepository;
-import com.ecommerce.domain.CartItem;
+import com.ecommerce.api.domain.CartItem;
 import org.springframework.stereotype.Repository;
 
 @Repository

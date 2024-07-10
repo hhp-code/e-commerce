@@ -1,8 +1,7 @@
 package com.ecommerce.api.cart.repository;
 
 import com.ecommerce.api.cart.service.repository.CartRepository;
-import com.ecommerce.domain.Cart;
-import com.ecommerce.domain.CartItem;
+import com.ecommerce.api.domain.Cart;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;

@@ -1,12 +1,8 @@
 package com.ecommerce.api.cart.service;
 
-import com.ecommerce.api.cart.controller.dto.CartDto;
 import com.ecommerce.api.cart.service.repository.CartRepository;
 import com.ecommerce.api.product.service.repository.ProductRepository;
-import com.ecommerce.domain.Cart;
-import com.ecommerce.domain.User;
-import com.ecommerce.domain.CartItem;
-import com.ecommerce.domain.Product;
+import com.ecommerce.api.domain.Cart;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,8 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;

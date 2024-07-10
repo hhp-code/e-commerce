@@ -2,8 +2,8 @@ package com.ecommerce.api.order.service;
 
 import com.ecommerce.api.order.service.repository.OrderRepository;
 import com.ecommerce.api.order.service.repository.UserRepository;
-import com.ecommerce.domain.Order;
-import com.ecommerce.domain.User;
+import com.ecommerce.api.domain.Order;
+import com.ecommerce.api.domain.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

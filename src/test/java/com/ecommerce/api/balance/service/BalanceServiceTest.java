@@ -1,7 +1,7 @@
 package com.ecommerce.api.balance.service;
 
 import com.ecommerce.api.balance.service.repository.BalanceRepository;
-import com.ecommerce.domain.User;
+import com.ecommerce.api.domain.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,9 +28,7 @@ class BalanceServiceTest {
 
     @BeforeEach
     void setUp() {
-        testUser = new User();
-        testUser.setId(1L);
-        testUser.setBalance(BigDecimal.ZERO);
+        testUser = new User("testUser", BigDecimal.ZERO);
     }
 
     @Test

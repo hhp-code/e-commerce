@@ -1,4 +1,4 @@
-package com.ecommerce.domain;
+package com.ecommerce.api.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -49,6 +49,14 @@ public class Order {
 
     public Order() {
     }
+    public Order(User user, List<OrderItem> orderItems) {
+        this.orderDate = LocalDateTime.now();
+        this.user = user;
+        this.orderItems = orderItems;
+        this.status = OrderItem.OrderStatus.PENDING;
+        this.isDeleted = false;
+        calculatePrices();
+    }
 
     public void applyCoupon(Coupon coupon) {
         if (coupon != null && coupon.isValid()) {
@@ -93,19 +101,6 @@ public class Order {
 
 
     }
-
-    public void addOrderItem(OrderItem item) {
-        orderItems.add(item);
-        item.setOrder(this);
-        calculatePrices();
-    }
-
-    public void removeOrderItem(OrderItem item) {
-        orderItems.remove(item);
-        item.setOrder(null);
-        calculatePrices();
-    }
-
 
     public String getStatus() {
         return status.name();

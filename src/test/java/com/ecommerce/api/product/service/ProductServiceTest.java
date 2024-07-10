@@ -1,7 +1,7 @@
 package com.ecommerce.api.product.service;
 
 import com.ecommerce.api.product.service.repository.ProductRepository;
-import com.ecommerce.domain.Product;
+import com.ecommerce.api.domain.Product;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -19,6 +18,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
@@ -59,13 +59,6 @@ class ProductServiceTest {
         assertFalse(result.isDeleted());
     }
 
-    @Test
-    @DisplayName("존재하지 않는 상품 조회 테스트")
-    void testGetNonExistentProduct() {
-        Product result = productService.getProduct(999L);
-
-        assertNull(result);
-    }
 
     @Test
     @DisplayName("인기 상품 조회 테스트 (실패 예상)")

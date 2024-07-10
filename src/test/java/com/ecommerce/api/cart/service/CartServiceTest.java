@@ -3,21 +3,18 @@ package com.ecommerce.api.cart.service;
 import com.ecommerce.api.cart.service.repository.CartRepository;
 import com.ecommerce.api.order.service.repository.UserRepository;
 import com.ecommerce.api.product.service.repository.ProductRepository;
-import com.ecommerce.domain.Cart;
-import com.ecommerce.domain.CartItem;
-import com.ecommerce.domain.Product;
-import com.ecommerce.domain.User;
-import jakarta.persistence.EntityManager;
+import com.ecommerce.api.domain.Cart;
+import com.ecommerce.api.domain.CartItem;
+import com.ecommerce.api.domain.Product;
+import com.ecommerce.api.domain.User;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 

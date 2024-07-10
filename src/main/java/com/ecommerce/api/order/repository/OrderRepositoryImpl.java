@@ -2,7 +2,7 @@ package com.ecommerce.api.order.repository;
 
 import com.ecommerce.api.order.service.OrderCommand;
 import com.ecommerce.api.order.service.repository.OrderRepository;
-import com.ecommerce.domain.Order;
+import com.ecommerce.api.domain.Order;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

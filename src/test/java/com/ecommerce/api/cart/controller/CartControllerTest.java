@@ -2,10 +2,10 @@ package com.ecommerce.api.cart.controller;
 
 import com.ecommerce.api.cart.service.CartCommand;
 import com.ecommerce.api.cart.service.CartService;
-import com.ecommerce.domain.Cart;
-import com.ecommerce.domain.CartItem;
-import com.ecommerce.domain.Product;
-import com.ecommerce.domain.User;
+import com.ecommerce.api.domain.Cart;
+import com.ecommerce.api.domain.CartItem;
+import com.ecommerce.api.domain.Product;
+import com.ecommerce.api.domain.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
