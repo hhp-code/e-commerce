@@ -5,6 +5,7 @@ import com.ecommerce.domain.Product;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class ProductRepositoryImpl implements ProductRepository {
@@ -25,18 +26,19 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public Product getProduct(Long productId) {
-        return productJPARepository.findById(productId).orElseThrow(()->new RuntimeException("ProductRequest not found"));
+    public Optional<Product> getProduct(Long productId) {
+        return productJPARepository.findById(productId);
     }
 
     @Override
-    public Product save(Product oldProduct) {
+    public Optional<Product> save(Product oldProduct) {
         productJPARepository.save(oldProduct);
-        return productJPARepository.findById(oldProduct.getId()).orElseThrow(()->new RuntimeException("ProductRequest not found"));
+        return productJPARepository.findById(oldProduct.getId());
     }
 
     @Override
     public void deleteAll() {
         productJPARepository.deleteAll();
     }
+
 }

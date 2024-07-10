@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -44,7 +45,7 @@ class ProductServiceUnitTest {
         @DisplayName("존재하는 상품 ID로 조회 시 상품 반환")
         void testGetExistingProduct() {
             //given
-            when(productRepository.getProduct(1L)).thenReturn(sampleProduct);
+            when(productRepository.getProduct(1L)).thenReturn(Optional.of(sampleProduct));
 
             //when
             Product result = productService.getProduct(1L);

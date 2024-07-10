@@ -17,7 +17,9 @@ public class ProductService {
     }
 
     public Product getProduct(Long productId) {
-        return productRepository.getProduct(productId);
+        return productRepository.getProduct(productId).orElseThrow(
+                () -> new RuntimeException("Product not found")
+        );
     }
 
 

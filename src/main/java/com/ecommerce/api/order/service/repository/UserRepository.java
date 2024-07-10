@@ -6,4 +6,7 @@ import java.util.Optional;
 
 public interface UserRepository {
     Optional<User> getById(Long id);
+
+    Optional<User> save(User testUser);
+
 }

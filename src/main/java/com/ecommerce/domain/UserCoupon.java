@@ -20,5 +20,26 @@ public class UserCoupon {
     @JoinColumn(name = "coupon_id")
     private Coupon coupon;
 
-    // Getters and setters
+    public UserCoupon() {
+    }
+
+    public UserCoupon(User user, Coupon coupon) {
+        this.user = user;
+        this.coupon = coupon;
+        this.isUsed = false;
+    }
+
+    public void use() {
+        if (!isUsed) {
+            this.isUsed = true;
+            this.usedAt = LocalDateTime.now();
+        }
+    }
+
+    public void cancelUse() {
+        if (isUsed) {
+            this.isUsed = false;
+            this.usedAt = null;
+        }
+    }
 }

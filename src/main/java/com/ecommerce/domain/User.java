@@ -12,6 +12,7 @@ import java.util.List;
 @Entity
 @Table(name = "commerce_user")
 public class User {
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,15 +28,31 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<UserCoupon> userCoupons;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user" ,cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Cart cart;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
 
+
+    public User(String username, BigDecimal initialBalance) {
+        this.username = username;
+        this.balance = initialBalance;
+        this.isDeleted = false;
+        this.userCoupons = new ArrayList<>();
+        this.orders = new ArrayList<>();
+    }
+
+    public User() {
+
+    }
+
+
     public boolean isDeleted() {
         return isDeleted;
     }
+
+
 
 
     public void setId(long l) {
@@ -50,4 +67,15 @@ public class User {
         orders.remove(order);
         order.setUser(null);
     }
+    public Cart getCart(){
+        if (this.cart == null) {
+            this.cart = new Cart(this);
+        }
+        return this.cart;
+    }
+    public void setCart(Cart cart) {
+        this.cart = cart;
+        cart.setUser(this);
+    }
+
 }
