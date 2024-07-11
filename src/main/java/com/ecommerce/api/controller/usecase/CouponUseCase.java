@@ -8,7 +8,8 @@ import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.usercoupon.UserCoupon;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.user.service.UserService;
-
+import org.springframework.stereotype.Component;
+@Component
 public class CouponUseCase {
     private final UserCouponService userCouponService;
     private final UserService userService;

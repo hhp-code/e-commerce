@@ -8,6 +8,7 @@ import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
+import com.ecommerce.external.DummyPlatform;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,8 @@ class PaymentUseCaseTest {
     private OrderService orderService;
     @Mock
     private ProductService productService;
+    @Mock
+    private DummyPlatform dummyPlatform;
     @InjectMocks
     private PaymentUseCase paymentUseCase;
 
@@ -45,6 +48,7 @@ class PaymentUseCaseTest {
             OrderCommand.Payment paymentCommand = new OrderCommand.Payment(ORDER_ID, mockOrder.getTotalAmount());
 
             when(orderService.getOrder(ORDER_ID)).thenReturn(mockOrder);
+            when(dummyPlatform.send(mockOrder)).thenReturn(true);
 
             Order result = paymentUseCase.payOrder(paymentCommand);
 

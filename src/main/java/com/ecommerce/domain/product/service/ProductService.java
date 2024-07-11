@@ -24,10 +24,12 @@ public class ProductService {
     }
 
 
+    @Transactional
     public List<Product> getPopularProducts() {
         return productRepository.getPopularProducts();
     }
 
+    @Transactional(readOnly = true)
     public List<Product> getProducts() {
         return productRepository.getProducts();
     }
@@ -39,4 +41,6 @@ public class ProductService {
             throw new RuntimeException("상품의 재고가 부족합니다. 상품 ID: " + productId);
         }
     }
+
+
 }

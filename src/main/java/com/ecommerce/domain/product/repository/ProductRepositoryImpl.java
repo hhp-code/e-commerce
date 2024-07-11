@@ -19,13 +19,13 @@ import java.util.stream.Collectors;
 @Repository
 public class ProductRepositoryImpl implements ProductRepository {
 
+    private final ProductJPARepository productJPARepository;
     private final JPAQueryFactory queryFactory;
-    private final EntityManager entityManager;
     private final QProduct product = QProduct.product;
     private final QOrder order = QOrder.order;
 
-    public ProductRepositoryImpl(EntityManager entityManager) {
-        this.entityManager = entityManager;
+    public ProductRepositoryImpl(ProductJPARepository productJPARepository, EntityManager entityManager) {
+        this.productJPARepository = productJPARepository;
         this.queryFactory = new JPAQueryFactory(entityManager);
     }
 
@@ -80,8 +80,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     @Override
     @Transactional
     public Optional<Product> save(Product product) {
-        entityManager.persist(product);
-        return Optional.of(product);
+        return Optional.of(productJPARepository.save(product));
     }
 
     @Override
@@ -102,4 +101,6 @@ public class ProductRepositoryImpl implements ProductRepository {
                 .execute();
         return (int) updatedCount;
     }
+
+
 }

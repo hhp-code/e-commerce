@@ -60,7 +60,7 @@ public class Order {
     public Order(User user, List<OrderItem> orderItems) {
         this.orderDate = LocalDateTime.now();
         this.user = user;
-        this.orderItems = orderItems;
+        this.orderItems = new ArrayList<>(orderItems);
         this.isDeleted = false;
         calculatePrices();
     }

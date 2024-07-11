@@ -6,9 +6,10 @@ import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.external.DummyPlatform;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
-
+@Component
 public class PaymentUseCase {
     private final OrderService orderService;
     private final ProductService productService;
