@@ -1,13 +1,12 @@
 package com.ecommerce.api.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 
 @Entity
@@ -18,14 +17,12 @@ public class Product {
     private Long id;
 
     @Getter
-    @Setter
     private String name;
     @Getter
-    @Setter
     private BigDecimal price;
     private Integer availableStock;
     private Integer reservedStock;
-    @Setter
+    @Getter
     private LocalDateTime lastUpdated;
     private boolean isDeleted;
     private LocalDateTime deletedAt;
@@ -33,8 +30,6 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<CartItem> cartItems;
 
-    @OneToMany(mappedBy = "product")
-    private List<OrderItem> orderItems;
 
     public Product() {
         this.lastUpdated = LocalDateTime.now();
@@ -48,30 +43,21 @@ public class Product {
         this.availableStock = availableStock;
         this.reservedStock = 0;
     }
+    public Product(long id, String name, BigDecimal price, Integer availableStock) {
+        this();
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.availableStock = availableStock;
+        this.reservedStock = 0;
+    }
 
 
     public int getAvailableStock() {
         return availableStock;
     }
 
-    public Instant getLastUpdated() {
-        return lastUpdated.toInstant(ZoneOffset.UTC);
+    public boolean isDeleted() {
+        return isDeleted;
     }
-
-    public void setId(long l) {
-        this.id = l;
-    }
-
-    public void setAvailableStock(int i) {
-        this.availableStock = i;
-    }
-
-    public void setReservedStock(int i) {
-        this.reservedStock = i;
-    }
-
-    public void setDeleted(boolean b) {
-        this.isDeleted = b;
-    }
-
 }

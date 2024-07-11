@@ -2,10 +2,10 @@ package com.ecommerce.api.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -25,15 +25,13 @@ public class Order {
     @Getter
     private BigDecimal sellingPrice;
 
-    @Enumerated(EnumType.STRING)
-    private OrderItem.OrderStatus status;
 
     private boolean isDeleted;
-    @Getter
-    private LocalDateTime deletedAt;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
 
 
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -44,16 +42,26 @@ public class Order {
 
     @Getter
     @OneToMany(mappedBy = "order")
-    private List<OrderItem> orderItems;
+    private List<CartItem> cartItems;
 
+    @Getter
+    private LocalDateTime deletedAt;
 
     public Order() {
     }
-    public Order(User user, List<OrderItem> orderItems) {
+
+    public Order(User user, List<CartItem> cartItems) {
         this.orderDate = LocalDateTime.now();
         this.user = user;
-        this.orderItems = orderItems;
-        this.status = OrderItem.OrderStatus.PENDING;
+        this.cartItems = cartItems;
+        this.isDeleted = false;
+        calculatePrices();
+    }
+    public Order(long orderId, User user, List<CartItem> cartItems) {
+        this.id = orderId;
+        this.orderDate = LocalDateTime.now();
+        this.user = user;
+        this.cartItems = new ArrayList<>(cartItems);
         this.isDeleted = false;
         calculatePrices();
     }
@@ -78,7 +86,7 @@ public class Order {
         BigDecimal regularPrice = BigDecimal.ZERO;
         BigDecimal sellingPrice = BigDecimal.ZERO;
 
-        for (OrderItem item : orderItems) {
+        for (CartItem item : cartItems) {
             BigDecimal itemPrice = item.getProduct().getPrice();
             int quantity = item.getQuantity();
 
@@ -102,17 +110,34 @@ public class Order {
 
     }
 
-    public String getStatus() {
-        return status.name();
-    }
 
     public Boolean getIsDeleted() {
         return isDeleted;
     }
 
-    public void setOrderItems(List<OrderItem> orderItems) {
-        this.orderItems = orderItems;
-        calculatePrices();
+
+    public void addCartItem(CartItem cartItem) {
+        if (this.cartItems == null) {
+            this.cartItems = new ArrayList<>();
+        }
+        this.cartItems.add(cartItem);
+    }
+
+
+    public void finish() {
+        this.status = OrderStatus.ORDERED;
+    }
+
+    public void start() {
+        this.status = OrderStatus.PREPARED;
+    }
+
+    public String getStatus() {
+        return status.name();
+    }
+
+    public BigDecimal getTotalAmount() {
+        return sellingPrice;
     }
 }
 

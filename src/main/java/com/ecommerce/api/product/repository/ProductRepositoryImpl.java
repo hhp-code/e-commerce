@@ -41,4 +41,9 @@ public class ProductRepositoryImpl implements ProductRepository {
         productJPARepository.deleteAll();
     }
 
+    @Override
+    public int decreaseStock(Long id, int orderedQuantity) {
+        return productJPARepository.decreaseStock(id, orderedQuantity);
+    }
+
 }

@@ -46,4 +46,5 @@ public class UserCoupon {
         return isUsed;
     }
 
+
 }

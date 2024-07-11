@@ -37,6 +37,14 @@ public class OrderController {
         );
 
     }
+    @PatchMapping("/orders/{orderId}/items")
+    @Operation(summary = "주문 상품 추가", description = "주문에 상품을 추가합니다.")
+    public OrderDto.OrderResponse addCartItemToOrder(@PathVariable Long orderId, @RequestBody OrderDto.OrderAddItemRequest request) {
+        request.validate();
+        return OrderMapper.toOrderResponse(
+                orderService.addCartItemToOrder(OrderMapper.toOrderAddItem(orderId, request))
+        );
+    }
 
     @GetMapping("/orders")
     @Operation(summary = "주문 목록 조회", description = "주문 목록을 조회합니다.")
@@ -46,6 +54,16 @@ public class OrderController {
                 orderService.getOrders(OrderMapper.toSearch(request))
         );
     }
+
+    @PostMapping("/orders/payments")
+    @Operation(summary = "주문 결제", description = "주문을 결제합니다.")
+    public OrderDto.OrderResponse payOrder(@RequestBody OrderDto.OrderPayRequest request){
+        request.validate();
+        return OrderMapper.toOrderResponse(
+                orderService.payOrder(OrderMapper.toOrderPay(request))
+        );
+    }
+
 }
 
 

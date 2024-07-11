@@ -4,18 +4,28 @@ import com.ecommerce.api.order.service.repository.OrderRepository;
 import com.ecommerce.api.order.service.repository.UserRepository;
 import com.ecommerce.api.domain.Order;
 import com.ecommerce.api.domain.User;
+import com.ecommerce.api.product.service.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class OrderServiceUnitTest {
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+@ExtendWith(MockitoExtension.class)
+class OrderServiceUnitTest {
+
+    private static final Long VALID_USER_ID = 1L;
+    private static final Long INVALID_USER_ID = 999L;
 
     @Mock
     private OrderRepository orderRepository;
@@ -23,68 +33,74 @@ public class OrderServiceUnitTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private ProductRepository productRepository;
+
+    @InjectMocks
     private OrderService orderService;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        orderService = new OrderService(userRepository, orderRepository);
+    @Nested
+    @DisplayName("getOrder 메소드 테스트")
+    class GetOrderTests {
+
+        @Test
+        @DisplayName("존재하는 주문 조회 시 성공")
+        void getOrder_ExistingOrder_ShouldSucceed() {
+            Order mockOrder = createMockOrder();
+            when(orderRepository.getById(VALID_USER_ID)).thenReturn(Optional.of(mockOrder));
+
+            Order result = orderService.getOrder(VALID_USER_ID);
+
+            assertNotNull(result);
+            verify(orderRepository).getById(VALID_USER_ID);
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 주문 조회 시 예외 발생")
+        void getOrder_NonExistentOrder_ShouldThrowException() {
+            when(orderRepository.getById(INVALID_USER_ID)).thenReturn(Optional.empty());
+
+            assertThrows(RuntimeException.class, () -> orderService.getOrder(INVALID_USER_ID));
+            verify(orderRepository).getById(INVALID_USER_ID);
+        }
     }
 
-    @Test
-    void getOrder_존재하는주문_성공() {
-        // Given
-        Long customerId = 1L;
-        Order mockOrder = new Order(); // Order 객체 생성 필요
-        when(orderRepository.getById(customerId)).thenReturn(Optional.of(mockOrder));
+    @Nested
+    @DisplayName("getOrders 메소드 테스트")
+    class GetOrdersTests {
 
-        // When
-        Order result = orderService.getOrder(customerId);
+        @Test
+        @DisplayName("검색 조건에 맞는 주문 목록 반환")
+        void getOrders_WithSearchCondition_ShouldReturnOrderList() {
+            OrderCommand.Search searchCommand = new OrderCommand.Search(VALID_USER_ID);
+            List<Order> mockOrders = Arrays.asList(createMockOrder(), createMockOrder());
+            when(orderRepository.getOrders(searchCommand)).thenReturn(mockOrders);
 
-        // Then
-        assertNotNull(result);
-        verify(orderRepository).getById(customerId);
+            List<Order> result = orderService.getOrders(searchCommand);
+
+            assertNotNull(result);
+            assertEquals(2, result.size());
+            verify(orderRepository).getOrders(searchCommand);
+        }
     }
 
-    @Test
-    void getOrder_존재하지않는주문_예외발생() {
-        // Given
-        Long customerId = 1L;
-        when(orderRepository.getById(customerId)).thenReturn(Optional.empty());
+    @Nested
+    @DisplayName("createOrder 메소드 테스트")
+    class CreateOrderTests {
 
-        // When & Then
-        assertThrows(RuntimeException.class, () -> orderService.getOrder(customerId));
-        verify(orderRepository).getById(customerId);
+        @Test
+        @DisplayName("주문 생성 실패 시 예외 발생")
+        void createOrder_Failure_ShouldThrowException() {
+            OrderCommand.Create createCommand = new OrderCommand.Create(VALID_USER_ID.intValue(), List.of());
+            when(userRepository.getById(VALID_USER_ID)).thenReturn(Optional.of(new User()));
+            when(orderRepository.saveAndGet(any(Order.class))).thenReturn(Optional.empty());
+
+            assertThrows(RuntimeException.class, () -> orderService.createOrder(createCommand));
+            verify(orderRepository).saveAndGet(any(Order.class));
+        }
     }
 
-    @Test
-    void getOrders_검색조건에맞는주문목록반환() {
-        // Given
-        long userId = 1L;
-        OrderCommand.Search searchCommand = new OrderCommand.Search(userId);
-        List<Order> mockOrders = Arrays.asList(new Order(), new Order());
-        when(orderRepository.getOrders(searchCommand)).thenReturn(mockOrders);
-
-        // When
-        List<Order> result = orderService.getOrders(searchCommand);
-
-        // Then
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        verify(orderRepository).getOrders(searchCommand);
-    }
-
-
-
-    @Test
-    void createOrder_주문생성실패_예외발생() {
-        // Given
-        OrderCommand.Create createCommand = new OrderCommand.Create(1, List.of());
-        when(userRepository.getById(1L)).thenReturn(Optional.of(new User()));
-        when(orderRepository.saveAndGet(any(Order.class))).thenReturn(Optional.empty());
-
-        // When & Then
-        assertThrows(RuntimeException.class, () -> orderService.createOrder(createCommand));
-        verify(orderRepository).saveAndGet(any(Order.class));
+    private Order createMockOrder() {
+        return new Order(); // 필요한 경우 Order 객체에 더 많은 정보를 설정할 수 있습니다.
     }
 }

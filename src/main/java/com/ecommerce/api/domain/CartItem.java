@@ -2,7 +2,6 @@ package com.ecommerce.api.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -13,11 +12,14 @@ public class CartItem {
     private Long id;
 
     @Getter
-    @Setter
     private Integer quantity;
 
     private LocalDateTime addedDate;
 
+    @Getter
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private Order order;
 
 
     @Getter

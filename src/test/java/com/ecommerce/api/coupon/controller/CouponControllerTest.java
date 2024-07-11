@@ -19,7 +19,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -38,18 +41,18 @@ class CouponControllerTest {
     @MockBean
     private CouponService couponService;
 
-
-
     @Test
     void testCreateCoupon() throws Exception {
-        CouponCommand.CouponCreate command = new CouponCommand.CouponCreate("SUMMER2024", BigDecimal.valueOf(5000), 100, DiscountType.FIXED_AMOUNT,LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
-        Coupon coupon = new Coupon( "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.FIXED_AMOUNT, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
-        when(couponService.createCoupon(command)).thenReturn(coupon);
+        CouponDto.CouponRequest request = new CouponDto.CouponRequest("SUMMER2024", BigDecimal.valueOf(5000), 100, DiscountType.FIXED_AMOUNT, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
+        Coupon coupon = new Coupon(1L, "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.FIXED_AMOUNT, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
+
+        when(couponService.createCoupon(any(CouponCommand.CouponCreate.class))).thenReturn(coupon);
 
         mockMvc.perform(post("/api/coupons")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(command)))
-                .andExpect(status().isOk())
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.code").value("SUMMER2024"))
                 .andExpect(jsonPath("$.discountAmount").value(5000))
                 .andExpect(jsonPath("$.remainingQuantity").value(100))
@@ -58,50 +61,59 @@ class CouponControllerTest {
 
     @Test
     void testIssueCouponToUser() throws Exception {
-        CouponDto.UserCouponRequest request = new CouponDto.UserCouponRequest(1L);
-        User user = new User("test", BigDecimal.ZERO);
-        Coupon coupon = new Coupon( "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
-        CouponCommand.UserCouponCreate command = new CouponCommand.UserCouponCreate(1L, request);
-        UserCoupon userCoupon = new UserCoupon(user,coupon);
-        when(couponService.issueCouponToUser(command)).thenReturn(userCoupon);
+        Long userId = 1L;
+        Long couponId = 1L;
+        CouponDto.UserCouponRequest request = new CouponDto.UserCouponRequest(couponId);
+        UserCoupon userCoupon = new UserCoupon(new User(userId, "test", BigDecimal.ZERO),
+                new Coupon(couponId, "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true));
 
-        mockMvc.perform(post("/api/users/1/coupons")
+        when(couponService.issueCouponToUser(any(CouponCommand.UserCouponCreate.class))).thenReturn(userCoupon);
+
+        mockMvc.perform(post("/api/users/{userId}/coupons", userId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"couponId\":1}"))
-                .andExpect(status().isOk())
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.coupon.id").value(couponId))
                 .andExpect(jsonPath("$.coupon.code").value("SUMMER2024"))
                 .andExpect(jsonPath("$.coupon.discountAmount").value(5000));
     }
 
     @Test
     void testGetUserCoupons() throws Exception {
-        User user = new User("test", BigDecimal.ZERO);
-        Coupon coupon = new Coupon( "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
-        Coupon coupon2 = new Coupon( "WELCOME", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
-        when(couponService.getUserCoupons(any(Long.class))).thenReturn(java.util.Arrays.asList(
-                new UserCoupon(user,coupon),
-                new UserCoupon(user,coupon2)
-        ));
+        long userId = 1L;
+        List<UserCoupon> userCoupons = Arrays.asList(
+                new UserCoupon(new User(userId, "test", BigDecimal.ZERO),
+                        new Coupon(1L, "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true)),
+                new UserCoupon(new User(userId, "test", BigDecimal.ZERO),
+                        new Coupon(2L, "WELCOME", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true))
+        );
 
-        mockMvc.perform(get("/api/users/1/coupons"))
+        when(couponService.getUserCoupons(userId)).thenReturn(userCoupons);
+
+        mockMvc.perform(get("/api/users/{userId}/coupons", userId))
                 .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$[0].coupon.code").value("SUMMER2024"))
-                .andExpect(jsonPath("$[1].coupon.code").value("WELCOME"));
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].code").value("SUMMER2024"))
+                .andExpect(jsonPath("$[1].code").value("WELCOME"));
     }
 
     @Test
     void testUseCoupon() throws Exception {
-        User user = new User();
-        Coupon coupon = new Coupon("SUMMER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
-        UserCoupon userCoupon = new UserCoupon(user,coupon);
-        when(couponService.useCoupon(any(Long.class), any(Long.class))).thenReturn(userCoupon);
+        Long userId = 1L;
+        Long userCouponId = 1L;
+        UserCoupon usedCoupon = new UserCoupon(
+                new User(userId, "test", BigDecimal.ZERO),
+                new Coupon(1L, "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true)
+        );
 
-        mockMvc.perform(post("/api/users/1/coupons/1/use"))
+        when(couponService.useCoupon(userId, userCouponId)).thenReturn(usedCoupon);
+
+        mockMvc.perform(post("/api/users/{userId}/coupons/{userCouponId}/use", userId, userCouponId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.code").value("SUMMER2024"))
                 .andExpect(jsonPath("$.remainingQuantity").value(100))
                 .andExpect(jsonPath("$.active").value(true));
     }
+
 }

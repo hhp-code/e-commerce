@@ -27,7 +27,6 @@ public class ProductController {
         );
     }
 
-
     @GetMapping("/{productId}")
     @Operation(summary = "상품 상세 조회", description = "상품을 조회합니다.")
     public ProductDto.ProductResponse getProduct(@PathVariable Long productId) {

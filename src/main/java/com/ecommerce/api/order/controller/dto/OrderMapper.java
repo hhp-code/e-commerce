@@ -21,7 +21,7 @@ public class OrderMapper {
                 order.getStatus(),
                 order.getIsDeleted(),
                 order.getDeletedAt(),
-                order.getOrderItems());
+                order.getCartItems());
     }
 
     public static OrderCommand.Create toOrder(OrderDto.OrderCreateRequest request) {
@@ -30,6 +30,7 @@ public class OrderMapper {
 
 
     public static OrderDto.OrderResponse toOrderResponse(Order order) {
+
         return new OrderDto.OrderResponse(order.getId(),
                 order.getOrderDate(),
                 order.getRegularPrice(),
@@ -38,11 +39,20 @@ public class OrderMapper {
                 order.getStatus(),
                 order.getIsDeleted(),
                 order.getDeletedAt(),
-                order.getOrderItems());
+                order.getCartItems());
 
     }
 
     public static OrderCommand.Search toSearch(OrderDto.OrderListRequest request) {
         return new OrderCommand.Search(request.customerId());
+    }
+
+    public static OrderCommand.Add toOrderAddItem(Long orderId, OrderDto.OrderAddItemRequest request) {
+        return new OrderCommand.Add(orderId,request.productId(),request.quantity());
+    }
+
+    public static OrderCommand.Payment toOrderPay(OrderDto.OrderPayRequest request) {
+        return new OrderCommand.Payment(request.orderId(),request.amount());
+
     }
 }

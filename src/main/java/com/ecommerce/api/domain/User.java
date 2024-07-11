@@ -12,6 +12,7 @@ import java.util.List;
 @Entity
 @Table(name = "commerce_user")
 public class User {
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,10 +30,6 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<UserCoupon> userCoupons;
 
-    @Setter
-    @OneToOne(mappedBy = "user" ,cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Cart cart;
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
 
@@ -47,22 +44,33 @@ public class User {
         this.isDeleted = false;
         this.userCoupons = new ArrayList<>();
         this.orders = new ArrayList<>();
-        this.cart= new Cart();
+    }
+    public User(long userId, String username, BigDecimal initialBalance) {
+        this.id = userId;
+        this.username = username;
+        this.balance = initialBalance;
+        this.isDeleted = false;
+        this.userCoupons = new ArrayList<>();
+        this.orders = new ArrayList<>();
     }
 
     public boolean isDeleted() {
         return isDeleted;
     }
 
-    public Cart getCart(){
-        if (this.cart == null) {
-            this.cart = new Cart();
-        }
-        return this.cart;
-    }
 
     public void addCoupon(Coupon coupon) {
         UserCoupon userCoupon = new UserCoupon(this, coupon);
         userCoupons.add(userCoupon);
+    }
+
+    public UserCoupon getCoupon(long couponId) {
+        return userCoupons.stream().filter(UserCoupon::isUsed).findFirst().orElseThrow(
+                () -> new RuntimeException("사용 가능한 쿠폰이 없습니다.")
+        );
+    }
+
+    public void addOrder(Order order) {
+        orders.add(order);
     }
 }

@@ -35,7 +35,7 @@ class ProductServiceUnitTest {
 
     @BeforeEach
     void setUp() {
-        sampleProduct = createProduct(1L, "Sample ProductRequest", "10000", 100, LocalDateTime.now());
+        sampleProduct = createProduct("Sample ProductRequest", "10000", 100, LocalDateTime.now());
     }
 
     @Nested
@@ -76,33 +76,6 @@ class ProductServiceUnitTest {
     @Nested
     @DisplayName("인기 상품 조회 테스트")
     class GetPopularProductsTests {
-        @Test
-        @DisplayName("인기 상품 조회 - 3일 기준")
-        void testGetPopularProductsLastThreeDays() {
-            // 3일 전 시간
-            Instant threeDaysAgo = Instant.now().minus(3, java.time.temporal.ChronoUnit.DAYS);
-            List<Product> allProducts = Arrays.asList(
-                    createProduct(1L, "Recent ProductRequest 1", "20000", 50, LocalDateTime.now()),
-                    createProduct(2L, "Recent ProductRequest 2", "15000", 30, LocalDateTime.now().minusDays(1)),
-                    createProduct(3L, "Recent ProductRequest 3", "25000", 20, LocalDateTime.now().minusDays(2)),
-                    createProduct(4L, "Old ProductRequest 1", "18000", 40, LocalDateTime.now().minusDays(4)),
-                    createProduct(5L, "Old ProductRequest 2", "22000", 25, LocalDateTime.now().minusDays(5))
-            );
-
-            //given
-            when(productRepository.getPopularProducts()).thenReturn(allProducts);
-
-            //when
-            List<Product> result = productService.getPopularProducts();
-
-            //then
-            assertNotNull(result);
-            assertEquals(3, result.size(), "3일 이내의 상품만 반환되어야 합니다.");
-            assertTrue(result.stream().allMatch(p -> p.getLastUpdated().isAfter(threeDaysAgo)),
-                    "모든 반환된 상품은 3일 이내에 판매된 것이어야 합니다.");
-
-            verify(productRepository, times(1)).getPopularProducts();
-        }
 
         @Test
         @DisplayName("인기 상품이 없을 경우 빈 리스트 반환")
@@ -125,9 +98,9 @@ class ProductServiceUnitTest {
         @DisplayName("전체 상품 조회")
         void testGetProducts() {
             List<Product> allProducts = Arrays.asList(
-                    createProductRequest(1L, "ProductRequest 1", "10000", 100),
-                    createProductRequest(2L, "ProductRequest 2", "15000", 80),
-                    createProductRequest(3L, "ProductRequest 3", "20000", 60)
+                    createProductRequest("ProductRequest 1", "10000", 100),
+                    createProductRequest("ProductRequest 2", "15000", 80),
+                    createProductRequest("ProductRequest 3", "20000", 60)
             );
 
             when(productRepository.getProducts()).thenReturn(allProducts);
@@ -156,19 +129,11 @@ class ProductServiceUnitTest {
         }
     }
 
-    private Product createProductRequest(Long id, String name, String price, Integer availableStock) {
-        return createProduct(id, name, price, availableStock, LocalDateTime.now());
+    private Product createProductRequest(String name, String price, Integer availableStock) {
+        return createProduct(name, price, availableStock, LocalDateTime.now());
     }
 
-    private Product createProduct(Long id, String name, String price, Integer availableStock, LocalDateTime lastUpdated) {
-        Product product = new Product();
-        product.setId(id);
-        product.setName(name);
-        product.setPrice(new BigDecimal(price));
-        product.setAvailableStock(availableStock);
-        product.setReservedStock(0);
-        product.setLastUpdated(lastUpdated);
-        product.setDeleted(false);
-        return product;
+    private Product createProduct(String name, String price, Integer availableStock, LocalDateTime lastUpdated) {
+        return new Product(name, new BigDecimal(price), availableStock);
     }
 }

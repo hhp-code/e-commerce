@@ -1,6 +1,6 @@
 package com.ecommerce.api.order.controller.dto;
 
-import com.ecommerce.api.domain.OrderItem;
+import com.ecommerce.api.domain.CartItem;
 import lombok.experimental.UtilityClass;
 
 import java.math.BigDecimal;
@@ -10,7 +10,7 @@ import java.util.List;
 @UtilityClass
 public class OrderDto {
 
-    public record OrderCreateRequest(long customerId, List<OrderItem> items) {
+    public record OrderCreateRequest(long customerId, List<CartItem> items) {
         public void validate() {
             if (items.size() > 10) {
                 throw new IllegalArgumentException("주문 수량은 최대 10개까지 가능합니다.");
@@ -33,12 +33,21 @@ public class OrderDto {
                                 String status,
                                 Boolean isDeleted,
                                 LocalDateTime deletedAt,
-                                List<OrderItem> items) {
+                                List<CartItem> items) {
     }
 
     public record OrderListResponse(List<OrderResponse> orders) {
     }
 
 
+    public record OrderAddItemRequest(long productId, int quantity) {
+        public void validate() {
+        }
+    }
 
+    public record OrderPayRequest (long orderId,  BigDecimal amount) {
+        public void validate() {
+
+        }
+    }
 }

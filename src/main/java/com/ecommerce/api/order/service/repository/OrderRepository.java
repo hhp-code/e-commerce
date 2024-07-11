@@ -1,5 +1,6 @@
 package com.ecommerce.api.order.service.repository;
 
+import com.ecommerce.api.domain.OrderStatus;
 import com.ecommerce.api.order.service.OrderCommand;
 import com.ecommerce.api.domain.Order;
 
@@ -12,4 +13,6 @@ public interface OrderRepository {
     List<Order> getOrders(OrderCommand.Search search);
 
     Optional<Order> saveAndGet(Order order);
+
+    Optional<Order> findByUserIdAndStatus(Long id, OrderStatus orderStatus);
 }

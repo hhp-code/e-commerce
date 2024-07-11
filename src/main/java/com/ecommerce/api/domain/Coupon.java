@@ -41,6 +41,18 @@ public class Coupon {
         this.validTo = validTo;
         this.isActive = isActive;
     }
+    public Coupon(long couponId, String code, BigDecimal discountAmount, DiscountType discountType,
+                  Integer quantity, LocalDateTime validFrom, LocalDateTime validTo,
+                  boolean isActive) {
+        this.id = couponId;
+        this.code = code;
+        this.discountAmount = discountAmount;
+        this.discountType = discountType;
+        this.quantity = quantity;
+        this.validFrom = validFrom;
+        this.validTo = validTo;
+        this.isActive = isActive;
+    }
 
     public boolean isValid() {
         LocalDateTime now = LocalDateTime.now();

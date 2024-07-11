@@ -1,5 +1,6 @@
 package com.ecommerce.api.order.repository;
 
+import com.ecommerce.api.domain.OrderStatus;
 import com.ecommerce.api.order.service.OrderCommand;
 import com.ecommerce.api.order.service.repository.OrderRepository;
 import com.ecommerce.api.domain.Order;
@@ -29,5 +30,10 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Override
     public Optional<Order> saveAndGet(Order order) {
         return Optional.of(orderJPARepository.save(order));
+    }
+
+    @Override
+    public Optional<Order> findByUserIdAndStatus(Long id, OrderStatus orderStatus) {
+        return orderJPARepository.findByUserIdAndStatus(id, orderStatus);
     }
 }

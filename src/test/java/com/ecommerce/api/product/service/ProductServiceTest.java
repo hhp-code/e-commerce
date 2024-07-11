@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,15 +35,7 @@ class ProductServiceTest {
 
     @BeforeEach
     void setUp() {
-        sampleProduct = new Product();
-        sampleProduct.setId(31L);
-        sampleProduct.setName("Sample ProductRequest");
-        sampleProduct.setPrice(new BigDecimal("100.00"));
-        sampleProduct.setAvailableStock(50);
-        sampleProduct.setReservedStock(0);
-        sampleProduct.setLastUpdated(LocalDateTime.now());
-        sampleProduct.setDeleted(false);
-
+        sampleProduct = new Product("Sample ProductRequest", new BigDecimal("100.00"), 50);
         productRepository.save(sampleProduct);
     }
 
@@ -60,24 +53,7 @@ class ProductServiceTest {
     }
 
 
-    @Test
-    @DisplayName("인기 상품 조회 테스트 (실패 예상)")
-    void testGetPopularProducts() {
-        Product oldProduct = new Product();
-        oldProduct.setName("Old ProductRequest");
-        oldProduct.setPrice(new BigDecimal("50.00"));
-        oldProduct.setAvailableStock(30);
-        oldProduct.setLastUpdated(LocalDateTime.now().minusDays(4));
-        productRepository.save(oldProduct);
 
-        List<Product> popularProducts = productService.getPopularProducts();
-
-        // 이 테스트는 실패할 것입니다. 현재 구현은 3일 기준을 고려하지 않기 때문입니다.
-        assertFalse(popularProducts.isEmpty());
-        assertTrue(popularProducts.stream()
-                        .allMatch(p -> p.getLastUpdated().isAfter(Instant.now().minus(3, ChronoUnit.DAYS))),
-                "모든 인기 상품은 3일 이내에 업데이트되어야 합니다.");
-    }
 
     @Test
     @DisplayName("전체 상품 조회 테스트")

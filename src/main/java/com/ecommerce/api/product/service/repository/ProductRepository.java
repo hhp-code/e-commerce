@@ -16,4 +16,5 @@ public interface ProductRepository {
 
     void deleteAll();
 
+    int decreaseStock(Long id, int orderedQuantity);
 }
