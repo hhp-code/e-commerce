@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @UtilityClass
 public class CouponDto {
     public record CouponDetailResponse(Long id, String code, BigDecimal discountAmount, int quantity,
-                                       int remainingQuantity, LocalDateTime startDateTime, LocalDateTime endDateTime,
-                                       LocalDateTime createdAt, int issuedCount) {
+                                     LocalDateTime startDateTime, LocalDateTime endDateTime,
+                                        boolean active) {
     }
     public record CouponRequest(String code, BigDecimal discountAmount, int remainingQuantity, DiscountType type,
                                 LocalDateTime validFrom, LocalDateTime validTo, boolean active) {

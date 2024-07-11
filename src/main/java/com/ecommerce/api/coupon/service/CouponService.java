@@ -89,4 +89,10 @@ public class CouponService {
                 () -> new RuntimeException("Coupon could not be used")
         );
     }
+
+    public Coupon getCouponDetail(Long couponId) {
+        return couponRepository.getById(couponId).orElseThrow(
+                () -> new RuntimeException("Coupon not found")
+        );
+    }
 }

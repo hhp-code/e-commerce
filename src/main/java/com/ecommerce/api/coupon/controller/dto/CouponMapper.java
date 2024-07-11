@@ -22,6 +22,10 @@ public class CouponMapper {
     public static CouponDto.UserCouponResponse toUserCouponResponse(UserCoupon userCoupon){
         return new CouponDto.UserCouponResponse(userCoupon.getId(), userCoupon.isUsed(), userCoupon.getUsedAt(), userCoupon.getUser(), userCoupon.getCoupon());
     }
+    public static CouponDto.CouponDetailResponse toCouponDetailResponse(Coupon coupon) {
+        return new CouponDto.CouponDetailResponse(coupon.getId(), coupon.getCode(), coupon.getDiscountAmount(), coupon.getQuantity(),
+                coupon.getValidFrom(), coupon.getValidTo(), coupon.getActive());
+    }
 
     public static CouponCommand.UserCouponCreate toUserCouponCommand(Long userId, CouponDto.UserCouponRequest request) {
         return new CouponCommand.UserCouponCreate(userId, request);
