@@ -9,7 +9,6 @@ import java.util.List;
 @UtilityClass
 public class OrderCommand {
     public record Create(long id, List<CartItem> items) {
-
     }
     public record Search(long id) {
     }

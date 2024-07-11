@@ -31,7 +31,8 @@ public class BalanceController {
     })
     public BalanceDto.BalanceResponse getBalance(
             @Parameter(description = "사용자 ID") @PathVariable Long userId) {
-        return BalanceDtoMapper.toResponse(balanceService.getBalance(userId));
+        return BalanceDtoMapper.toResponse(
+                balanceService.getBalance(userId));
     }
 
     @PostMapping("/balance/{userId}/charge")

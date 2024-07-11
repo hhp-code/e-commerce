@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface BalanceRepository {
     Optional<BigDecimal> getAmountByUserId(Long userId);
 
-    Optional<User> saveChargeAmount(User user);
+    Optional<User> saveChargeAmount(Long userId, BigDecimal amount);
 
     Optional<User> getUserByRequest(Long userId);
 }

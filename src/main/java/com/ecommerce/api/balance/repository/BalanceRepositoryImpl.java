@@ -22,8 +22,12 @@ public class BalanceRepositoryImpl implements BalanceRepository {
     }
 
     @Override
-    public Optional<User> saveChargeAmount(User user) {
-        return balanceJPARepository.saveChargeAmount(user);
+    public Optional<User> saveChargeAmount(Long userId, BigDecimal amount) {
+        int resultRow = balanceJPARepository.saveChargeAmount(amount, userId);
+        if(resultRow == 0){
+            return Optional.empty();
+        }
+        return balanceJPARepository.findById(userId);
     }
 
     @Override

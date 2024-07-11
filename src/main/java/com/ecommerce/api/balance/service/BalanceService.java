@@ -22,11 +22,10 @@ public class BalanceService {
 
     @Transactional
     public BigDecimal chargeBalance(BalanceCommand.Create request) {
-        User user = balanceRepository.getUserByRequest(request.userId())
+        BigDecimal currentBalance = balanceRepository.getAmountByUserId(request.userId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        BigDecimal newBalance = user.getBalance();
-        newBalance = newBalance.add(request.amount());
-        user.setBalance(newBalance);
+        BigDecimal newBalance = currentBalance.add(request.amount());
+        balanceRepository.saveChargeAmount(request.userId(), newBalance);
         return newBalance;
     }
 }

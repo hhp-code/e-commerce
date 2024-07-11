@@ -24,7 +24,6 @@ public class ProductService {
 
 
     public List<Product> getPopularProducts() {
-        //TODO: 3일동안의 인기를 구가하는 상품을 반환하는 로직을 구현해야 합니다.
         return productRepository.getPopularProducts();
     }
 
