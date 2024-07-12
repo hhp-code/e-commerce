@@ -46,6 +46,7 @@ public class UserController {
     public UserDto.UserBalanceResponse chargeBalance(
             @Parameter(description = "사용자 ID") @PathVariable Long userId,
             @Parameter(description = "충전 요청 정보") @RequestBody UserDto.UserBalanceRequest request) {
+        request.validate();
         return UserBalanceMapper.toResponse(
                 userBalanceService.chargeBalance(UserBalanceMapper.toCommand(userId, request)));
     }

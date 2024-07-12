@@ -29,6 +29,7 @@ public class CouponController {
                     @ApiResponse(responseCode = "400", description = "잘못된 요청")
             })
     public CouponDto.CouponResponse createCoupon(@RequestBody CouponDto.CouponRequest request) {
+        request.validate();
         return CouponMapper.toCouponResponse(
                 couponService.createCoupon(CouponMapper.toCoupon(request))
         );

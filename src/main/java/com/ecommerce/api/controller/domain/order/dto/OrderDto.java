@@ -42,12 +42,17 @@ public class OrderDto {
 
     public record OrderAddItemRequest(long productId, int quantity) {
         public void validate() {
+            if (quantity <= 0) {
+                throw new IllegalArgumentException("상품 수량은 0보다 커야 합니다.");
+            }
         }
     }
 
     public record OrderPayRequest (long orderId,  BigDecimal amount) {
         public void validate() {
-
+            if (amount.compareTo(BigDecimal.ZERO) < 0) {
+                throw new IllegalArgumentException("결제 금액은 0 과같거나 커야 합니다.");
+            }
         }
     }
 }
