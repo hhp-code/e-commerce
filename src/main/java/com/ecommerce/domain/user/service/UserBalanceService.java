@@ -33,6 +33,9 @@ public class UserBalanceService {
         BigDecimal currentBalance = userBalanceRepository.getAmountByUserId(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         BigDecimal newBalance = currentBalance.subtract(totalAmount);
+        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("잔액이 부족합니다.");
+        }
         userBalanceRepository.saveChargeAmount(id, newBalance);
     }
 }

@@ -1,10 +1,12 @@
 package com.ecommerce.domain.coupon;
 
+import com.ecommerce.domain.coupon.service.AtomicIntegerConverter;
 import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Entity
 public class Coupon {
@@ -20,7 +22,8 @@ public class Coupon {
     @Getter
     private DiscountType discountType;
 
-    private Integer quantity;
+    @Convert(converter = AtomicIntegerConverter.class)
+    private AtomicInteger quantity;
     @Getter
     private LocalDateTime validFrom;
     @Getter
@@ -36,7 +39,7 @@ public class Coupon {
         this.code = code;
         this.discountAmount = discountAmount;
         this.discountType = discountType;
-        this.quantity = quantity;
+        this.quantity = new AtomicInteger(quantity);
         this.validFrom = validFrom;
         this.validTo = validTo;
         this.isActive = isActive;
@@ -48,7 +51,7 @@ public class Coupon {
         this.code = code;
         this.discountAmount = discountAmount;
         this.discountType = discountType;
-        this.quantity = quantity;
+        this.quantity = new AtomicInteger(quantity);
         this.validFrom = validFrom;
         this.validTo = validTo;
         this.isActive = isActive;
@@ -56,7 +59,14 @@ public class Coupon {
 
     public boolean isValid() {
         LocalDateTime now = LocalDateTime.now();
-        return isActive && quantity > 0 && now.isAfter(validFrom) && now.isBefore(validTo);
+        return isActive && quantity.get() > 0 && now.isAfter(validFrom) && now.isBefore(validTo);
+    }
+    public boolean decrementQuantity() {
+        while (true) {
+            int current = quantity.get();
+            if (current <= 0) return false;
+            if (quantity.compareAndSet(current, current - 1)) return true;
+        }
     }
 
     public boolean getActive() {
@@ -64,10 +74,14 @@ public class Coupon {
     }
 
     public int getQuantity() {
-        return quantity;
+        return quantity.get();
     }
 
     public void setQuantity(int i) {
-        this.quantity = i;
+        this.quantity.set(i);
+    }
+
+    public int use() {
+        return this.quantity.decrementAndGet();
     }
 }

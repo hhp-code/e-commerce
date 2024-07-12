@@ -31,4 +31,10 @@ public class CouponService {
                 () -> new RuntimeException("쿠폰을 찾을 수 없습니다.")
         );
     }
+
+    public void updateCoupon(Coupon coupon) {
+        couponRepository.save(coupon).orElseThrow(
+                () -> new RuntimeException("쿠폰을 업데이트할 수 없습니다.")
+        );
+    }
 }

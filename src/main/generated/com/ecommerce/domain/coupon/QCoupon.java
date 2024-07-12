@@ -29,7 +29,7 @@ public class QCoupon extends EntityPathBase<Coupon> {
 
     public final BooleanPath isActive = createBoolean("isActive");
 
-    public final NumberPath<Integer> quantity = createNumber("quantity", Integer.class);
+    public final SimplePath<java.util.concurrent.atomic.AtomicInteger> quantity = createSimple("quantity", java.util.concurrent.atomic.AtomicInteger.class);
 
     public final DateTimePath<java.time.LocalDateTime> validFrom = createDateTime("validFrom", java.time.LocalDateTime.class);
 

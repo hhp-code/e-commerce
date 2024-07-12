@@ -6,6 +6,8 @@ import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
+import com.ecommerce.domain.user.User;
+import com.ecommerce.domain.user.service.UserBalanceService;
 import com.ecommerce.external.DummyPlatform;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +35,8 @@ class PaymentUseCaseConcurrencyTest {
     private ProductService productService;
     @Mock
     private DummyPlatform dummyPlatform;
+    @Mock
+    private UserBalanceService userBalanceService;
 
     @InjectMocks
     private PaymentUseCase paymentUseCase;
@@ -44,13 +48,16 @@ class PaymentUseCaseConcurrencyTest {
     private OrderItem mockOrderItem;
 
     @Mock
+    private User mockUser;
+
+    @Mock
     private Product mockProduct;
 
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        paymentUseCase = new PaymentUseCase(orderService, productService, dummyPlatform);
+        paymentUseCase = new PaymentUseCase(orderService, productService, dummyPlatform, userBalanceService);
     }
 
     @Test
@@ -65,6 +72,7 @@ class PaymentUseCaseConcurrencyTest {
         when(orderService.getOrder(orderId)).thenReturn(mockOrder);
         when(mockOrder.getOrderItems()).thenReturn(List.of(mockOrderItem));
         when(mockOrderItem.getProduct()).thenReturn(mockProduct);
+        when(mockOrder.getUser()).thenReturn(mockUser);
         when(mockProduct.getId()).thenReturn(productId);
         when(mockOrderItem.getQuantity()).thenReturn(1);
 
