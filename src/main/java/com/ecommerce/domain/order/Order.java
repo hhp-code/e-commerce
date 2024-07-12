@@ -39,6 +39,7 @@ public class Order {
     private OrderStatus status;
 
 
+    @Getter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -161,5 +162,6 @@ public class Order {
     public boolean isFinished() {
         return status == OrderStatus.ORDERED;
     }
+
 }
 

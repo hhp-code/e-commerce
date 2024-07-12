@@ -27,4 +27,12 @@ public class UserBalanceService {
         userBalanceRepository.saveChargeAmount(request.userId(), newBalance);
         return newBalance;
     }
+
+    @Transactional
+    public void decreaseBalance(Long id, BigDecimal totalAmount) {
+        BigDecimal currentBalance = userBalanceRepository.getAmountByUserId(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        BigDecimal newBalance = currentBalance.subtract(totalAmount);
+        userBalanceRepository.saveChargeAmount(id, newBalance);
+    }
 }
