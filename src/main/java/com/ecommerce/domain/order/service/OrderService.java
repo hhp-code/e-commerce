@@ -35,7 +35,6 @@ public class OrderService {
     public Order createOrder(OrderCommand.Create command) {
         User user = userService.getUser(command.id());
         Order order = new Order(user, command.items());
-        order.start();
         return orderRepository.saveAndGet(order)
                 .orElseThrow(() -> new RuntimeException("주문 생성에 실패하였습니다."));
     }

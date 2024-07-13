@@ -105,8 +105,6 @@ class OrderServiceTest {
     }
 
     private Order createMockOrder() {
-        Order order = new Order(ORDER_ID, createMockUser(), List.of(createMockCartItem()));
-        order.start();
-        return order;
+        return new Order(ORDER_ID, createMockUser(), List.of(createMockCartItem()));
     }
 }

@@ -2,6 +2,7 @@ package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.domain.order.OrderItem;
 import com.ecommerce.domain.order.Order;
+import com.ecommerce.domain.order.OrderStatus;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.service.ProductService;
@@ -31,6 +32,7 @@ public class PaymentUseCase {
             productService.decreaseStock(item.getProduct().getId(), item.getQuantity());
         }
         userBalanceService.decreaseBalance(order.getUser().getId(), order.getTotalAmount());
+        orderService.saveAndGet(order);
         order.finish();
         dummyPlatform.send(order);
         return order;

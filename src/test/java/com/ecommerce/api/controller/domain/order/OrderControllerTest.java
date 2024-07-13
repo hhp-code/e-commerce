@@ -143,7 +143,6 @@ class OrderControllerTest {
         User user = new User(VALID_USER_ID, "test", PRODUCT_PRICE);
         List<OrderItem> items = List.of(new OrderItem(new Product("test", PRODUCT_PRICE, PRODUCT_STOCK), 1));
         Order order = new Order(VALID_USER_ID, user, items);
-        order.start();
         user.addOrder(order);
         return order;
     }

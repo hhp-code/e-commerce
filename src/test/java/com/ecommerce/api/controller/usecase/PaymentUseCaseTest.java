@@ -43,7 +43,6 @@ class PaymentUseCaseTest {
         @DisplayName("주문을 결제 처리한다")
         void payOrder_ShouldProcessPayment_WhenValidCommandProvided() {
             Order mockOrder = createMockOrder();
-            mockOrder.start();
             OrderCommand.Payment paymentCommand = new OrderCommand.Payment(ORDER_ID, mockOrder.getTotalAmount());
 
             when(orderService.getOrder(ORDER_ID)).thenReturn(mockOrder);
@@ -52,7 +51,7 @@ class PaymentUseCaseTest {
             Order result = paymentUseCase.payOrder(paymentCommand);
 
             assertNotNull(result);
-            assertEquals(OrderStatus.ORDERED.name(), result.getStatus());
+            assertEquals(OrderStatus.ORDERED.name(), result.getOrderStatus());
         }
     }
     private User createMockUser() {
@@ -68,8 +67,6 @@ class PaymentUseCaseTest {
     }
 
     private Order createMockOrder() {
-        Order order = new Order(ORDER_ID, createMockUser(), List.of(createMockCartItem()));
-        order.start();
-        return order;
+        return new Order(ORDER_ID, createMockUser(), List.of(createMockCartItem()));
     }
 }

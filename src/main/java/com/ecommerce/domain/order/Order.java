@@ -37,7 +37,7 @@ public class Order {
     private boolean isDeleted;
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus status;
+    private OrderStatus orderStatus;
 
 
     @Getter
@@ -64,6 +64,7 @@ public class Order {
         this.user = user;
         this.orderItems = new ArrayList<>(orderItems);
         this.isDeleted = false;
+        this.orderStatus = OrderStatus.PREPARED;
         calculatePrices();
     }
     public Order(long orderId, User user, List<OrderItem> orderItems) {
@@ -72,6 +73,7 @@ public class Order {
         this.user = user;
         this.orderItems = new ArrayList<>(orderItems);
         this.isDeleted = false;
+        this.orderStatus = OrderStatus.PREPARED;
         calculatePrices();
     }
 
@@ -141,15 +143,11 @@ public class Order {
 
 
     public void finish() {
-        this.status = OrderStatus.ORDERED;
+        this.orderStatus = OrderStatus.ORDERED;
     }
 
-    public void start() {
-        this.status = OrderStatus.PREPARED;
-    }
-
-    public String getStatus() {
-        return status.name();
+    public String getOrderStatus() {
+        return orderStatus.name();
     }
 
     public BigDecimal getTotalAmount() {
@@ -157,7 +155,7 @@ public class Order {
     }
 
     public boolean isFinished() {
-        return status == OrderStatus.ORDERED;
+        return orderStatus == OrderStatus.ORDERED;
     }
 
 }
