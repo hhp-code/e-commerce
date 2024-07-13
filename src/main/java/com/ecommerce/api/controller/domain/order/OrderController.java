@@ -110,4 +110,19 @@ public class OrderController {
         request.validate();
         return OrderMapper.toOrderResponse(paymentUseCase.payOrder(OrderMapper.toOrderPay(request)));
     }
+    @PatchMapping("/orders/cancel")
+    @Operation(
+            summary = "주문 취소",
+            description = "주문을 취소합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "취소 성공",
+                            content = @Content(schema = @Schema(implementation = OrderDto.OrderResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "잘못된 요청"),
+                    @ApiResponse(responseCode = "404", description = "주문을 찾을 수 없음")
+            }
+    )
+    public OrderDto.OrderResponse cancelOrder(@RequestBody OrderDto.OrderCancelRequest request){
+        request.validate();
+        return OrderMapper.toOrderResponse(paymentUseCase.cancelOrder(OrderMapper.toOrderCancel(request)));
+    }
 }

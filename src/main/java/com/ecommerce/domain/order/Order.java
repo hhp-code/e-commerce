@@ -158,5 +158,8 @@ public class Order {
         return orderStatus == OrderStatus.ORDERED;
     }
 
+    public void cancel() {
+        this.orderStatus = OrderStatus.CANCELLED;
+    }
 }
 

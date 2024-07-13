@@ -38,4 +38,12 @@ public class UserBalanceService {
         }
         userBalanceRepository.saveChargeAmount(id, newBalance);
     }
+
+    @Transactional
+    public void increaseBalance(Long id, BigDecimal totalAmount) {
+        BigDecimal currentBalance = userBalanceRepository.getAmountByUserId(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        BigDecimal newBalance = currentBalance.add(totalAmount);
+        userBalanceRepository.saveChargeAmount(id, newBalance);
+    }
 }

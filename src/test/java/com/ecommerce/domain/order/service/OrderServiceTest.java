@@ -2,8 +2,6 @@ package com.ecommerce.domain.order.service;
 
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.OrderItem;
-import com.ecommerce.domain.order.service.OrderCommand;
-import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.order.service.repository.OrderRepository;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.user.User;

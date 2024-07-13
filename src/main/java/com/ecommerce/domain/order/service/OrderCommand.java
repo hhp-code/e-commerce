@@ -16,4 +16,6 @@ public class OrderCommand {
     }
     public record Payment(long orderId, BigDecimal amount) {
     }
+    public record Cancel(long orderId) {
+    }
 }

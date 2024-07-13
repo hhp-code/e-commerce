@@ -55,4 +55,11 @@ public class OrderDto {
             }
         }
     }
+    public record OrderCancelRequest(long orderId) {
+        public void validate() {
+            if (orderId <= 0) {
+                throw new IllegalArgumentException("주문 ID가 잘못되었습니다.");
+            }
+        }
+    }
 }

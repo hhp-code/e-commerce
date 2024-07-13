@@ -93,11 +93,41 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     @Transactional
-    public int decreaseStock(Long id, int orderedQuantity) {
+    public int decreaseAvailableStock(Long id, int orderedQuantity) {
         long updatedCount = queryFactory
                 .update(product)
                 .set(product.availableStock, product.availableStock.subtract(orderedQuantity))
                 .where(product.id.eq(id).and(product.availableStock.goe(orderedQuantity)))
+                .execute();
+        return (int) updatedCount;
+    }
+
+    @Override
+    public int increaseReservedStock(Long productId, int quantity) {
+        long updatedCount = queryFactory
+                .update(product)
+                .set(product.reservedStock, product.reservedStock.add(quantity))
+                .where(product.id.eq(productId).and(product.availableStock.goe(quantity)))
+                .execute();
+        return (int) updatedCount;
+    }
+
+    @Override
+    public int decreaseReservedStock(Long id, Integer quantity) {
+        long updatedCount = queryFactory
+                .update(product)
+                .set(product.reservedStock, product.reservedStock.subtract(quantity))
+                .where(product.id.eq(id).and(product.reservedStock.goe(quantity)))
+                .execute();
+        return (int) updatedCount;
+    }
+
+    @Override
+    public int increaseAvailableStock(Long id, Integer quantity) {
+        long updatedCount = queryFactory
+                .update(product)
+                .set(product.availableStock, product.availableStock.add(quantity))
+                .where(product.id.eq(id))
                 .execute();
         return (int) updatedCount;
     }

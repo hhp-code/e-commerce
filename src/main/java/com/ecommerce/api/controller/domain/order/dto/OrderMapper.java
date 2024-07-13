@@ -52,6 +52,8 @@ public class OrderMapper {
 
     public static OrderCommand.Payment toOrderPay(OrderDto.OrderPayRequest request) {
         return new OrderCommand.Payment(request.orderId(),request.amount());
-
+    }
+    public static OrderCommand.Cancel toOrderCancel(OrderDto.OrderCancelRequest request) {
+        return new OrderCommand.Cancel(request.orderId());
     }
 }

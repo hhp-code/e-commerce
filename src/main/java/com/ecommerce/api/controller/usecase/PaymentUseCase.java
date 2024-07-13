@@ -2,7 +2,6 @@ package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.domain.order.OrderItem;
 import com.ecommerce.domain.order.Order;
-import com.ecommerce.domain.order.OrderStatus;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.service.ProductService;
@@ -11,6 +10,7 @@ import com.ecommerce.external.DummyPlatform;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+
 @Component
 public class PaymentUseCase {
     private final OrderService orderService;
@@ -28,12 +28,34 @@ public class PaymentUseCase {
     public Order payOrder(OrderCommand.Payment orderPay) {
         Order order = orderService.getOrder(orderPay.orderId());
         List<OrderItem> orderItems = order.getOrderItems();
-        for (OrderItem item : orderItems) {
-            productService.decreaseStock(item.getProduct().getId(), item.getQuantity());
+        try {
+            for (OrderItem item : orderItems) {
+                productService.decreaseStock(item.getProduct().getId(), item.getQuantity());
+            }
+            userBalanceService.decreaseBalance(order.getUser().getId(), order.getTotalAmount());
+            orderService.saveAndGet(order).finish();
+            boolean externalSystemSuccess = dummyPlatform.send(order);
+            if (!externalSystemSuccess) {
+                throw new RuntimeException("Failed to send order to external system");
+            }
+
+            return order;
+        } catch (Exception e) {
+            cancelOrder(new OrderCommand.Cancel(order.getId()));
+            throw new RuntimeException("Payment processing failed", e);
         }
-        userBalanceService.decreaseBalance(order.getUser().getId(), order.getTotalAmount());
-        orderService.saveAndGet(order);
-        order.finish();
+    }
+
+
+
+    public Order cancelOrder(OrderCommand.Cancel orderCancel) {
+        Order order = orderService.getOrder(orderCancel.orderId());
+        List<OrderItem> orderItems = order.getOrderItems();
+        for (OrderItem item : orderItems) {
+            productService.increaseStock(item.getProduct().getId(), item.getQuantity());
+        }
+        userBalanceService.increaseBalance(order.getUser().getId(), order.getTotalAmount());
+        orderService.saveAndGet(order).cancel();
         dummyPlatform.send(order);
         return order;
     }
