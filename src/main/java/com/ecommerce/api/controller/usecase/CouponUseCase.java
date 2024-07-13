@@ -33,7 +33,7 @@ public class CouponUseCase {
             throw new RuntimeException("유효하지 않은 쿠폰입니다.");
         }
         if(!coupon.decrementQuantity()) {
-            throw new RuntimeException("쿠폰을 수량이 부족합니다");
+            throw new RuntimeException("쿠폰이 수량이 부족합니다");
         }
         UserCoupon userCoupon = userCouponService.getUserCoupon(user,coupon);
         if (userCoupon.isUsed()) {

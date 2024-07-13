@@ -1,7 +1,7 @@
 package com.ecommerce.api.controller.domain.user;
 
 import com.ecommerce.domain.user.service.UserBalanceCommand;
-import com.ecommerce.domain.user.service.UserBalanceService;
+import com.ecommerce.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,7 +36,7 @@ class UserControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private UserBalanceService userBalanceService;
+    private UserService userService;
 
     private UserBalanceCommand.Create balanceRequest;
 
@@ -48,7 +48,7 @@ class UserControllerTest {
     @Test
     @DisplayName("잔액 조회 성공")
     void getBalance_ShouldReturnBalance_WhenUserExists() throws Exception {
-        given(userBalanceService.getBalance(USER_ID)).willReturn(INITIAL_BALANCE);
+        given(userService.getBalance(USER_ID)).willReturn(INITIAL_BALANCE);
 
         mockMvc.perform(get(API_BALANCE + "/{userId}", USER_ID))
                 .andExpect(status().isOk())
@@ -57,13 +57,13 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.error").doesNotExist());
 
-        verify(userBalanceService).getBalance(USER_ID);
+        verify(userService).getBalance(USER_ID);
     }
 
     @Test
     @DisplayName("잔액 조회 실패 - 사용자 없음")
     void getBalance_ShouldReturnNotFound_WhenUserDoesNotExist() throws Exception {
-        given(userBalanceService.getBalance(USER_ID)).willThrow(new IllegalArgumentException("User not found"));
+        given(userService.getBalance(USER_ID)).willThrow(new IllegalArgumentException("User not found"));
 
         mockMvc.perform(get(API_BALANCE + "/{userId}", USER_ID))
                 .andExpect(status().isBadRequest())
@@ -71,13 +71,13 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.error").exists())
                 .andExpect(jsonPath("$.message").value("User not found"));
 
-        verify(userBalanceService).getBalance(USER_ID);
+        verify(userService).getBalance(USER_ID);
     }
 
     @Test
     @DisplayName("잔액 충전 성공")
     void chargeBalance_ShouldReturnUpdatedBalance_WhenRequestIsValid() throws Exception {
-        given(userBalanceService.chargeBalance(any(UserBalanceCommand.Create.class))).willReturn(INITIAL_BALANCE);
+        given(userService.chargeBalance(any(UserBalanceCommand.Create.class))).willReturn(INITIAL_BALANCE);
 
         mockMvc.perform(post(API_BALANCE_CHARGE, USER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -88,7 +88,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.error").doesNotExist());
 
-        verify(userBalanceService).chargeBalance(any(UserBalanceCommand.Create.class));
+        verify(userService).chargeBalance(any(UserBalanceCommand.Create.class));
     }
 
     @Test

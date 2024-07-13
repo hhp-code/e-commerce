@@ -12,6 +12,10 @@ public class DummyPlatform {
             log.info("주문이 완료되었습니다. 주문번호: {}", order.getId());
             return true;
         }
+        if(order.isCanceled()){
+            log.info("주문이 취소되었습니다. 주문번호: {}", order.getId());
+            return true;
+        }
         return false;
     }
 }

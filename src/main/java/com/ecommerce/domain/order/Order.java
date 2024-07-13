@@ -161,5 +161,9 @@ public class Order {
     public void cancel() {
         this.orderStatus = OrderStatus.CANCELLED;
     }
+
+    public boolean isCanceled() {
+        return orderStatus == OrderStatus.CANCELLED;
+    }
 }
 
