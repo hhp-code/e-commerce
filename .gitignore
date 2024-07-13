@@ -42,9 +42,5 @@ gradlew.bat
 gradlew
 settings.gradle
 application.yml
-src/main/generated/com/ecommerce/domain/coupon/QCoupon.java
-src/main/generated/com/ecommerce/domain/order/QOrder.java
-src/main/generated/com/ecommerce/domain/product/QProduct.java
-src/main/generated/com/ecommerce/domain/order/QOrderItem.java
-src/main/generated/com/ecommerce/domain/usercoupon/QUserCoupon.java
-src/main/generated/com/ecommerce/domain/user/QUser.java
+
+src/main/generated/*
