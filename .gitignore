@@ -42,3 +42,5 @@ gradlew.bat
 gradlew
 settings.gradle
 application.yml
+
+src/main/generated/*

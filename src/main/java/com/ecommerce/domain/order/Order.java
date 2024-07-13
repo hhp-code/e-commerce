@@ -130,7 +130,7 @@ public class Order {
         return regularPrice.subtract(sellingPrice);
     }
 
-    
+
 
     public void addCartItem(OrderItem orderItem) {
         if (this.orderItems == null) {
