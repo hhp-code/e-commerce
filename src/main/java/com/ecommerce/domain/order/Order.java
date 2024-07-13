@@ -33,6 +33,7 @@ public class Order {
     private BigDecimal sellingPrice;
 
 
+    @Getter
     private boolean isDeleted;
 
     @Enumerated(EnumType.STRING)
@@ -129,11 +130,7 @@ public class Order {
         return regularPrice.subtract(sellingPrice);
     }
 
-
-    public Boolean getIsDeleted() {
-        return isDeleted;
-    }
-
+    
 
     public void addCartItem(OrderItem orderItem) {
         if (this.orderItems == null) {

@@ -19,7 +19,7 @@ public class OrderMapper {
                 order.getSalePrice(),
                 order.getSellingPrice(),
                 order.getStatus(),
-                order.getIsDeleted(),
+                order.isDeleted(),
                 order.getDeletedAt(),
                 order.getOrderItems());
     }
@@ -36,7 +36,7 @@ public class OrderMapper {
                 order.getSalePrice(),
                 order.getSellingPrice(),
                 order.getStatus(),
-                order.getIsDeleted(),
+                order.isDeleted(),
                 order.getDeletedAt(),
                 order.getOrderItems());
 
