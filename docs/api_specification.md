@@ -47,7 +47,7 @@ https://api.ecommerce-example.com
 ```
 #### 2.1.2 사용자 잔액 충전
 
-- **Endpoint**: POST /users/{id}/balance
+- **Endpoint**: POST /balance/{id}/charge
 - **Authorization**: Bearer Token 필요
 - **Request Body**:
 ```json
