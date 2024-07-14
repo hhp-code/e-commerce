@@ -8,7 +8,7 @@ import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
-import com.ecommerce.domain.user.service.UserBalanceService;
+import com.ecommerce.domain.user.service.UserService;
 import com.ecommerce.external.DummyPlatform;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -35,7 +35,7 @@ class PaymentUseCaseTest {
     @Mock
     private ProductService productService;
     @Mock
-    private UserBalanceService userBalanceService;
+    private UserService userService;
     @Mock
     private DummyPlatform dummyPlatform;
     @InjectMocks
@@ -71,7 +71,7 @@ class PaymentUseCaseTest {
             // When & Then
             assertThrows(RuntimeException.class, () -> paymentUseCase.payOrder(paymentCommand));
             verify(productService).increaseStock(anyLong(), anyInt());
-            verify(userBalanceService).increaseBalance(anyLong(), any(BigDecimal.class));
+            verify(userService).increaseBalance(anyLong(), any(BigDecimal.class));
             verify(orderService).saveAndGet(any(Order.class));
         }
         @Test
@@ -81,7 +81,7 @@ class PaymentUseCaseTest {
             Order mockOrder = createMockOrder();
             OrderCommand.Payment paymentCommand = new OrderCommand.Payment(ORDER_ID, mockOrder.getTotalAmount());
             when(orderService.getOrder(ORDER_ID)).thenReturn(mockOrder);
-            doThrow(new RuntimeException("잔액 부족")).when(userBalanceService).decreaseBalance(anyLong(), any(BigDecimal.class));
+            doThrow(new RuntimeException("잔액 부족")).when(userService).decreaseBalance(anyLong(), any(BigDecimal.class));
 
             // When & Then
             assertThrows(RuntimeException.class, () -> paymentUseCase.payOrder(paymentCommand));

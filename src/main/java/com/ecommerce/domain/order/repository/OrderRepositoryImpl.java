@@ -53,7 +53,7 @@ public class OrderRepositoryImpl implements OrderRepository {
                 .selectFrom(order)
                 .leftJoin(order.user).fetchJoin()
                 .where(order.user.id.eq(id)
-                        .and(order.status.eq(orderStatus)))
+                        .and(order.orderStatus.eq(orderStatus)))
                 .fetchOne());
     }
 

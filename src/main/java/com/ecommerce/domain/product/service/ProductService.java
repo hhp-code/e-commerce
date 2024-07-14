@@ -60,4 +60,10 @@ public class ProductService {
         }
 
     }
+
+    public Product saveAndGet(Product testProduct) {
+        return productRepository.save(testProduct).orElseThrow(
+                () -> new RuntimeException("Product not found")
+        );
+    }
 }

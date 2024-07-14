@@ -7,7 +7,7 @@ import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
-import com.ecommerce.domain.user.service.UserBalanceService;
+import com.ecommerce.domain.user.service.UserService;
 import com.ecommerce.external.DummyPlatform;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ class PaymentUseCaseConcurrencyTest {
     @Mock
     private DummyPlatform dummyPlatform;
     @Mock
-    private UserBalanceService userBalanceService;
+    private UserService userService;
 
     @InjectMocks
     private PaymentUseCase paymentUseCase;
@@ -57,7 +57,7 @@ class PaymentUseCaseConcurrencyTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        paymentUseCase = new PaymentUseCase(orderService, productService, dummyPlatform, userBalanceService);
+        paymentUseCase = new PaymentUseCase(orderService, productService, dummyPlatform, userService);
     }
 
     @Test

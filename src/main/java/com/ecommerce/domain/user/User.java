@@ -3,7 +3,6 @@ package com.ecommerce.domain.user;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.usercoupon.UserCoupon;
-import com.ecommerce.domain.order.Order;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

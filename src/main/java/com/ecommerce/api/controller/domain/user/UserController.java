@@ -1,8 +1,8 @@
 package com.ecommerce.api.controller.domain.user;
 
 import com.ecommerce.api.controller.domain.user.dto.UserDto;
-import com.ecommerce.domain.user.service.UserBalanceService;
 import com.ecommerce.api.controller.domain.user.dto.UserBalanceMapper;
+import com.ecommerce.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api")
 public class UserController {
-    private final UserBalanceService userBalanceService;
 
-    public UserController(UserBalanceService userBalanceService) {
-        this.userBalanceService = userBalanceService;
+    private final UserService userService;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     @GetMapping("/balance/{userId}")
@@ -32,7 +32,7 @@ public class UserController {
     public UserDto.UserBalanceResponse getBalance(
             @Parameter(description = "사용자 ID") @PathVariable Long userId) {
         return UserBalanceMapper.toResponse(
-                userBalanceService.getBalance(userId));
+                userService.getBalance(userId));
     }
 
     @PostMapping("/balance/{userId}/charge")
@@ -48,6 +48,6 @@ public class UserController {
             @Parameter(description = "충전 요청 정보") @RequestBody UserDto.UserBalanceRequest request) {
         request.validate();
         return UserBalanceMapper.toResponse(
-                userBalanceService.chargeBalance(UserBalanceMapper.toCommand(userId, request)));
+                userService.chargeBalance(UserBalanceMapper.toCommand(userId, request)));
     }
 }

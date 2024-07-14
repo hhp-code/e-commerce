@@ -1,7 +1,7 @@
 package com.ecommerce.domain.balance.service;
 
 import com.ecommerce.domain.user.service.UserBalanceCommand;
-import com.ecommerce.domain.user.service.UserBalanceService;
+import com.ecommerce.domain.user.service.UserService;
 import com.ecommerce.domain.user.service.repository.UserBalanceRepository;
 import com.ecommerce.domain.user.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,10 +18,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-class UserBalanceServiceTest {
+class UserServiceTest {
 
     @Autowired
-    private UserBalanceService userBalanceService;
+    private UserService userService;
 
     @MockBean
     private UserBalanceRepository userBalanceRepository;
@@ -40,7 +40,7 @@ class UserBalanceServiceTest {
         when(userBalanceRepository.getAmountByUserId(1L)).thenReturn(Optional.of(BigDecimal.valueOf(1000)));
 
         // when
-        BigDecimal balance = userBalanceService.getBalance(1L);
+        BigDecimal balance = userService.getBalance(1L);
 
         // then
         assertEquals(BigDecimal.valueOf(1000), balance);
@@ -54,7 +54,7 @@ class UserBalanceServiceTest {
         when(userBalanceRepository.getAmountByUserId(anyLong())).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> userBalanceService.getBalance(1L));
+        assertThrows(IllegalArgumentException.class, () -> userService.getBalance(1L));
     }
 
     @Test
@@ -72,7 +72,7 @@ class UserBalanceServiceTest {
         UserBalanceCommand.Create request = new UserBalanceCommand.Create(userId, chargeAmount);
 
         // when
-        BigDecimal newBalance = userBalanceService.chargeBalance(request);
+        BigDecimal newBalance = userService.chargeBalance(request);
 
         // then
         assertEquals(expectedBalance, newBalance);
@@ -91,7 +91,7 @@ class UserBalanceServiceTest {
         UserBalanceCommand.Create request = new UserBalanceCommand.Create(userId, chargeAmount);
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> userBalanceService.chargeBalance(request));
+        assertThrows(IllegalArgumentException.class, () -> userService.chargeBalance(request));
         verify(userBalanceRepository).getAmountByUserId(userId);
         verify(userBalanceRepository, never()).saveChargeAmount(anyLong(), any());
     }
@@ -114,8 +114,8 @@ class UserBalanceServiceTest {
                 .thenReturn(Optional.of(testUser));
 
         // when
-        BigDecimal balanceAfterFirstCharge = userBalanceService.chargeBalance(new UserBalanceCommand.Create(userId, firstCharge));
-        BigDecimal finalBalance = userBalanceService.chargeBalance(new UserBalanceCommand.Create(userId, secondCharge));
+        BigDecimal balanceAfterFirstCharge = userService.chargeBalance(new UserBalanceCommand.Create(userId, firstCharge));
+        BigDecimal finalBalance = userService.chargeBalance(new UserBalanceCommand.Create(userId, secondCharge));
 
         // then
         assertEquals(BigDecimal.valueOf(2000), balanceAfterFirstCharge);
