@@ -8,8 +8,10 @@ import java.time.LocalDateTime;
 
 @UtilityClass
 public class CouponCommand {
-    public record CouponCreate(String code, BigDecimal discountAmount, int remainingQuantity, DiscountType type,
-                               LocalDateTime validFrom, LocalDateTime validTo, boolean active) {
+    public record Create(String code, BigDecimal discountAmount, int remainingQuantity, DiscountType type,
+                         LocalDateTime validFrom, LocalDateTime validTo, boolean active) {
+    }
+    public record Issue(Long couponId, Long userId) {
     }
 
 }

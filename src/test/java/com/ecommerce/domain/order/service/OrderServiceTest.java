@@ -32,7 +32,7 @@ class OrderServiceTest {
     private OrderRepository orderRepository;
 
     @Mock
-    private UserService userRepository;
+    private UserService userService;
 
     @InjectMocks
     private OrderService orderServiceOriginal;
@@ -79,7 +79,7 @@ class OrderServiceTest {
             OrderCommand.Create createCommand = new OrderCommand.Create(USER_ID, List.of(createMockCartItem()));
             Order mockOrder = new Order(mockUser, createCommand.items());
 
-            when(userRepository.getUser(USER_ID)).thenReturn(mockUser);
+            when(userService.getUser(USER_ID)).thenReturn(mockUser);
             when(orderRepository.saveAndGet(any(Order.class))).thenReturn(Optional.of(mockOrder));
 
             Order result = orderServiceOriginal.createOrder(createCommand);

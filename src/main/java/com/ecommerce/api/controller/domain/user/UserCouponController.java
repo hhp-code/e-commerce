@@ -1,10 +1,11 @@
-package com.ecommerce.api.controller.domain.usercoupon;
+package com.ecommerce.api.controller.domain.user;
 
 import com.ecommerce.api.controller.domain.coupon.dto.CouponDto;
+import com.ecommerce.api.controller.domain.coupon.dto.CouponMapper;
+import com.ecommerce.api.controller.domain.user.dto.UserDto;
+import com.ecommerce.api.controller.domain.user.dto.UserMapper;
 import com.ecommerce.api.controller.usecase.CouponUseCase;
-import com.ecommerce.api.controller.domain.usercoupon.dto.UserCouponDto;
-import com.ecommerce.api.controller.domain.usercoupon.dto.UserCouponMapper;
-import com.ecommerce.domain.usercoupon.service.UserCouponService;
+import com.ecommerce.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,36 +20,36 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class UserCouponController {
-    private final UserCouponService userCouponService;
     private final CouponUseCase couponUseCase;
+    private final UserService userService;
 
-    public UserCouponController(UserCouponService userCouponService, CouponUseCase couponUseCase) {
-        this.userCouponService = userCouponService;
+    public UserCouponController(CouponUseCase couponUseCase, UserService userService) {
         this.couponUseCase = couponUseCase;
+        this.userService = userService;
     }
     @PostMapping("/users/{userId}/coupons")
     @Operation(summary = "사용자에게 쿠폰 발급", description = "특정 사용자에게 쿠폰을 발급합니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "쿠폰 발급 성공",
-                            content = @Content(schema = @Schema(implementation = UserCouponDto.UserCouponResponse.class))),
+                            content = @Content(schema = @Schema(implementation = UserDto.UserResponse.class))),
                     @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
             })
-    public UserCouponDto.UserCouponResponse issueCouponToUser(
+    public UserDto.UserResponse issueCouponToUser(
             @Parameter(description = "사용자 ID") @PathVariable Long userId,
-            @RequestBody UserCouponDto.UserCouponRequest request) {
-        return UserCouponMapper.toUserCouponResponse(
-                userCouponService.issueCouponToUser(UserCouponMapper.toUserCouponCommand(userId, request))
+            @RequestBody Long couponId) {
+        return UserMapper.toUserResponse(
+                couponUseCase.issueCouponToUser(CouponMapper.toUserCouponCommand(userId, couponId))
         );
     }
     @GetMapping("/users/{userId}/coupons")
     @Operation(summary = "사용자의 쿠폰 목록 조회", description = "특정 사용자의 모든 쿠폰을 조회합니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "쿠폰 목록 조회 성공",
-                            content = @Content(schema = @Schema(implementation = UserCouponDto.UserCouponResponse.class))),
+                            content = @Content(schema = @Schema(implementation = UserDto.UserResponse.class))),
                     @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
             })
-    public List<UserCouponDto.UserCouponResponse> getUserCoupons(@Parameter(description = "사용자 ID") @PathVariable Long userId) {
-        return UserCouponMapper.toUserCouponResponseList(userCouponService.getUserCoupons(userId));
+    public List<UserDto.CouponResponse> getUserCoupons(@Parameter(description = "사용자 ID") @PathVariable Long userId) {
+        return UserMapper.toUserCouponResponseList(userService.getUserCoupons(userId));
     }
 
 
@@ -59,10 +60,10 @@ public class UserCouponController {
                             content = @Content(schema = @Schema(implementation = CouponDto.CouponResponse.class))),
                     @ApiResponse(responseCode = "404", description = "사용자 또는 쿠폰을 찾을 수 없음")
             })
-    public UserCouponDto.UserCouponResponse useCoupon(
+    public UserDto.UserResponse useCoupon(
             @Parameter(description = "사용자 ID") @PathVariable Long userId,
             @Parameter(description = "사용자 쿠폰 ID") @PathVariable Long userCouponId) {
-        return UserCouponMapper.toUserCouponResponse(couponUseCase.useCoupon(userId, userCouponId));
+        return UserMapper.toUserResponse(couponUseCase.useCoupon(userId, userCouponId));
     }
 
 

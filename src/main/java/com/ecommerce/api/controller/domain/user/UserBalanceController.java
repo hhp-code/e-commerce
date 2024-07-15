@@ -2,7 +2,7 @@ package com.ecommerce.api.controller.domain.user;
 
 import com.ecommerce.api.controller.domain.user.dto.UserDto;
 import com.ecommerce.api.controller.domain.user.dto.UserBalanceMapper;
-import com.ecommerce.domain.user.service.UserService;
+import com.ecommerce.domain.user.service.UserBalanceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,14 +12,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "balance", description = "잔액 관련 API")
+import java.math.BigDecimal;
+
+@Tag(name = "user_balance", description = "잔액 관련 API")
 @RestController
 @RequestMapping("/api")
-public class UserController {
+public class UserBalanceController {
 
-    private final UserService userService;
-    public UserController(UserService userService) {
-        this.userService = userService;
+    private final UserBalanceService userBalanceService;
+
+    public UserBalanceController(UserBalanceService userBalanceService) {
+        this.userBalanceService = userBalanceService;
     }
 
     @GetMapping("/balance/{userId}")
@@ -32,7 +35,7 @@ public class UserController {
     public UserDto.UserBalanceResponse getBalance(
             @Parameter(description = "사용자 ID") @PathVariable Long userId) {
         return UserBalanceMapper.toResponse(
-                userService.getBalance(userId));
+                userBalanceService.getBalance(userId));
     }
 
     @PostMapping("/balance/{userId}/charge")
@@ -45,9 +48,8 @@ public class UserController {
     })
     public UserDto.UserBalanceResponse chargeBalance(
             @Parameter(description = "사용자 ID") @PathVariable Long userId,
-            @Parameter(description = "충전 요청 정보") @RequestBody UserDto.UserBalanceRequest request) {
-        request.validate();
+            @Parameter(description = "충전 요청 정보") @RequestBody BigDecimal request) {
         return UserBalanceMapper.toResponse(
-                userService.chargeBalance(UserBalanceMapper.toCommand(userId, request)));
+                userBalanceService.chargeBalance(UserBalanceMapper.toCommand(userId, request)));
     }
 }

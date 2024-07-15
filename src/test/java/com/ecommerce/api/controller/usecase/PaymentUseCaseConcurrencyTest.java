@@ -7,7 +7,7 @@ import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
-import com.ecommerce.domain.user.service.UserService;
+import com.ecommerce.domain.user.service.UserBalanceService;
 import com.ecommerce.external.DummyPlatform;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ class PaymentUseCaseConcurrencyTest {
     @Mock
     private DummyPlatform dummyPlatform;
     @Mock
-    private UserService userService;
+    private UserBalanceService userBalanceService;
 
     @InjectMocks
     private PaymentUseCase paymentUseCase;
@@ -57,7 +57,7 @@ class PaymentUseCaseConcurrencyTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        paymentUseCase = new PaymentUseCase(orderService, productService, dummyPlatform, userService);
+        paymentUseCase = new PaymentUseCase(orderService, productService, dummyPlatform, userBalanceService);
     }
 
     @Test
@@ -84,7 +84,7 @@ class PaymentUseCaseConcurrencyTest {
                 return stockCounter.addAndGet(-quantity);
             }
             return 0;
-        }).when(productService).decreaseStock(eq(productId), anyInt());
+        }).when(productService).decreaseStock(eq(mockProduct), anyInt());
 
         // 동시 요청 시뮬레이션
         ExecutorService executor = Executors.newFixedThreadPool(concurrentRequests);
@@ -103,7 +103,7 @@ class PaymentUseCaseConcurrencyTest {
 
         // 결과 검증
         verify(orderService, times(concurrentRequests)).getOrder(orderId);
-        verify(productService, times(concurrentRequests)).decreaseStock(eq(productId), eq(1));
+        verify(productService, times(concurrentRequests)).decreaseStock(eq(mockProduct), eq(1));
         verify(mockOrder, times(concurrentRequests)).finish();
         verify(dummyPlatform, times(concurrentRequests)).send(mockOrder);
 

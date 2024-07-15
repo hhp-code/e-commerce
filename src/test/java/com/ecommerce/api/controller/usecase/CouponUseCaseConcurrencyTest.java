@@ -6,8 +6,6 @@ import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
-import com.ecommerce.domain.usercoupon.UserCoupon;
-import com.ecommerce.domain.usercoupon.service.UserCouponService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -26,13 +24,11 @@ import java.util.stream.IntStream;
 public class CouponUseCaseConcurrencyTest {
 
     @Mock
-    private UserService userService;
-    @Mock
     private OrderService orderService;
     @Mock
-    private UserCouponService userCouponService;
-    @Mock
     private CouponService couponService;
+    @Mock
+    private UserService userService;
 
     @InjectMocks
     private CouponUseCase couponUseCase;
@@ -46,13 +42,11 @@ public class CouponUseCaseConcurrencyTest {
     @Mock
     private Coupon mockCoupon;
 
-    @Mock
-    private UserCoupon mockUserCoupon;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        couponUseCase = new CouponUseCase(userService, orderService, userCouponService, couponService);
+        couponUseCase = new CouponUseCase(orderService, couponService,userService);
     }
 
     @Test
@@ -68,14 +62,14 @@ public class CouponUseCaseConcurrencyTest {
         when(userService.getUser(anyLong())).thenReturn(mockUser);
         when(orderService.getOrder(anyLong())).thenReturn(mockOrder);
         when(couponService.getCoupon(couponId)).thenReturn(mockCoupon);
-        when(userCouponService.getUserCoupon(any(), any())).thenReturn(mockUserCoupon);
-        when(userCouponService.updateUserCoupon(any())).thenReturn(mockUserCoupon);
+        when(userService.getUserCoupon(any(), any())).thenReturn(mockCoupon);
+        when(userService.updateUserCoupon(any())).thenReturn(mockUser);
 
         // ExecutorService 생성
         ExecutorService executor = Executors.newFixedThreadPool(10);
 
         // CompletableFuture 리스트 생성
-        List<CompletableFuture<UserCoupon>> futures = IntStream.range(0, numberOfUsers)
+        List<CompletableFuture<User>> futures = IntStream.range(0, numberOfUsers)
                 .mapToObj(i -> CompletableFuture.supplyAsync(() -> {
                     try {
                         return couponUseCase.useCoupon((long) i, couponId);
@@ -96,7 +90,7 @@ public class CouponUseCaseConcurrencyTest {
 
         assertEquals(couponQuantity, successfulUses, "성공적인 쿠폰 사용 횟수가 쿠폰 수량과 일치해야 합니다.");
         verify(couponService, times(numberOfUsers)).getCoupon(couponId);
-        verify(userCouponService, times((int) successfulUses)).updateUserCoupon(any());
+        verify(userService, times((int) successfulUses)).updateUserCoupon(any());
 
         executor.shutdown();
     }

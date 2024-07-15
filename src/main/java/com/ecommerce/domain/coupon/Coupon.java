@@ -1,6 +1,7 @@
 package com.ecommerce.domain.coupon;
 
 import com.ecommerce.domain.coupon.service.AtomicIntegerConverter;
+import com.ecommerce.domain.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -22,6 +23,11 @@ public class Coupon {
     @Getter
     private DiscountType discountType;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+
     @Convert(converter = AtomicIntegerConverter.class)
     private AtomicInteger quantity;
     @Getter
@@ -31,6 +37,17 @@ public class Coupon {
     private boolean isActive;
 
     public Coupon() {
+    }
+
+    public Coupon(String code, BigDecimal discountAmount, DiscountType discountType,
+                  Integer quantity) {
+        this.code = code;
+        this.discountAmount = discountAmount;
+        this.discountType = discountType;
+        this.quantity = new AtomicInteger(quantity);
+        this.validFrom = LocalDateTime.now();
+        this.validTo = LocalDateTime.now().plusDays(7);
+        this.isActive = true;
     }
 
     public Coupon(String code, BigDecimal discountAmount, DiscountType discountType,
@@ -64,8 +81,8 @@ public class Coupon {
     public boolean decrementQuantity() {
         while (true) {
             int current = quantity.get();
-            if (current <= 0) return false;
-            if (quantity.compareAndSet(current, current - 1)) return true;
+            if (current <= 0) return true;
+            if (quantity.compareAndSet(current, current - 1)) return false;
         }
     }
 

@@ -32,7 +32,7 @@ public class CouponDto {
             }
         }
     }
-    public record CouponResponse(Long id, String code, BigDecimal discountAmount, int remainingQuantity,
+    public record CouponResponse(String code, BigDecimal discountAmount,
                                  LocalDateTime validFrom, LocalDateTime validTo, boolean active) {}
 
 

@@ -1,32 +1,30 @@
 package com.ecommerce.domain.balance.service;
 
 import com.ecommerce.domain.user.service.UserBalanceCommand;
-import com.ecommerce.domain.user.service.UserService;
+import com.ecommerce.domain.user.service.UserBalanceService;
 import com.ecommerce.domain.user.service.repository.UserBalanceRepository;
 import com.ecommerce.domain.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class UserServiceUnitTest {
+@SpringBootTest
+class UserBalanceServiceTest {
 
-    @Mock
+    @Autowired
+    private UserBalanceService userBalanceService;
+
+    @MockBean
     private UserBalanceRepository userBalanceRepository;
-
-    @InjectMocks
-    private UserService userService;
 
     private User testUser;
 
@@ -36,34 +34,31 @@ class UserServiceUnitTest {
     }
 
     @Test
-    @DisplayName("잔액 조회 - 사용자가 존재하는 경우")
-    void getBalanceWhenUserExists() {
+    @DisplayName("잔액 조회 성공 시나리오")
+    void getBalanceSuccess() {
         // given
-        long userId = 1L;
-        when(userBalanceRepository.getAmountByUserId(userId)).thenReturn(Optional.of(BigDecimal.valueOf(1000)));
+        when(userBalanceRepository.getAmountByUserId(1L)).thenReturn(Optional.of(BigDecimal.valueOf(1000)));
 
         // when
-        BigDecimal balance = userService.getBalance(userId);
+        BigDecimal balance = userBalanceService.getBalance(1L);
 
         // then
         assertEquals(BigDecimal.valueOf(1000), balance);
-        verify(userBalanceRepository).getAmountByUserId(userId);
+        verify(userBalanceRepository).getAmountByUserId(1L);
     }
 
     @Test
-    @DisplayName("잔액 조회 - 사용자가 존재하지 않는 경우")
-    void getBalanceWhenUserNotExists() {
+    @DisplayName("잔액 조회 실패 시나리오 - 사용자 없음")
+    void getBalanceUserNotFound() {
         // given
-        long userId = 1L;
-        when(userBalanceRepository.getAmountByUserId(userId)).thenReturn(Optional.empty());
+        when(userBalanceRepository.getAmountByUserId(anyLong())).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> userService.getBalance(userId));
-        verify(userBalanceRepository).getAmountByUserId(userId);
+        assertThrows(IllegalArgumentException.class, () -> userBalanceService.getBalance(1L));
     }
 
     @Test
-    @DisplayName("잔액 충전 - 성공 케이스")
+    @DisplayName("잔액 충전 성공 시나리오")
     void chargeBalanceSuccess() {
         // given
         long userId = 1L;
@@ -74,8 +69,10 @@ class UserServiceUnitTest {
         when(userBalanceRepository.getAmountByUserId(userId)).thenReturn(Optional.of(initialBalance));
         when(userBalanceRepository.saveChargeAmount(userId, expectedBalance)).thenReturn(Optional.of(testUser));
 
+        UserBalanceCommand.Create request = new UserBalanceCommand.Create(userId, chargeAmount);
+
         // when
-        BigDecimal newBalance = userService.chargeBalance(new UserBalanceCommand.Create(userId, chargeAmount));
+        BigDecimal newBalance = userBalanceService.chargeBalance(request);
 
         // then
         assertEquals(expectedBalance, newBalance);
@@ -84,18 +81,19 @@ class UserServiceUnitTest {
     }
 
     @Test
-    @DisplayName("잔액 충전 - 사용자가 존재하지 않는 경우")
+    @DisplayName("잔액 충전 실패 시나리오 - 사용자 없음")
     void chargeBalanceUserNotFound() {
         // given
         long userId = 1L;
         BigDecimal chargeAmount = BigDecimal.valueOf(1000);
         when(userBalanceRepository.getAmountByUserId(userId)).thenReturn(Optional.empty());
 
+        UserBalanceCommand.Create request = new UserBalanceCommand.Create(userId, chargeAmount);
+
         // when & then
-        assertThrows(IllegalArgumentException.class,
-                () -> userService.chargeBalance(new UserBalanceCommand.Create(userId, chargeAmount)));
+        assertThrows(IllegalArgumentException.class, () -> userBalanceService.chargeBalance(request));
         verify(userBalanceRepository).getAmountByUserId(userId);
-        verify(userBalanceRepository, never()).saveChargeAmount(any(), any());
+        verify(userBalanceRepository, never()).saveChargeAmount(anyLong(), any());
     }
 
     @Test
@@ -116,8 +114,8 @@ class UserServiceUnitTest {
                 .thenReturn(Optional.of(testUser));
 
         // when
-        BigDecimal balanceAfterFirstCharge = userService.chargeBalance(new UserBalanceCommand.Create(userId, firstCharge));
-        BigDecimal finalBalance = userService.chargeBalance(new UserBalanceCommand.Create(userId, secondCharge));
+        BigDecimal balanceAfterFirstCharge = userBalanceService.chargeBalance(new UserBalanceCommand.Create(userId, firstCharge));
+        BigDecimal finalBalance = userBalanceService.chargeBalance(new UserBalanceCommand.Create(userId, secondCharge));
 
         // then
         assertEquals(BigDecimal.valueOf(2000), balanceAfterFirstCharge);

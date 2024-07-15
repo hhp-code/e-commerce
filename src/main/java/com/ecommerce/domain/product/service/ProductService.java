@@ -35,30 +35,27 @@ public class ProductService {
     }
 
     @Transactional
-    public void decreaseStock(Long productId, int quantity) {
-        int updatedAvailableRows = productRepository.decreaseAvailableStock(productId, quantity);
-        if (updatedAvailableRows == 0) {
-            throw new RuntimeException("상품의 재고가 부족합니다. 상품 ID: " + productId);
-        }
-        int updatedReservedRows = productRepository.increaseReservedStock(productId, quantity);
-        if (updatedReservedRows == 0) {
-            throw new RuntimeException("상품의 예약 재고가 전환되지 않았습니다. 상품 ID: " + productId);
-        }
+    public void decreaseStock(Product product, int quantity) {
+        productUpdate(productRepository.decreaseAvailableStock(product.getId(), quantity),
+                "상품의 재고가 부족합니다. 상품 ID: ", product.getId());
+        productUpdate(productRepository.increaseReservedStock(product.getId(), quantity),
+                "상품의 예약 재고가 전환되지 않았습니다. 상품 ID: ", product.getId());
 
     }
 
 
     @Transactional
-    public void increaseStock(Long id, Integer quantity) {
-        int updatedReservedRows = productRepository.decreaseReservedStock(id, quantity);
-        if (updatedReservedRows == 0) {
-            throw new RuntimeException("상품의 예약 재고가 부족합니다. 상품 ID: " + id);
-        }
-        int updatedAvailableRows = productRepository.increaseAvailableStock(id, quantity);
-        if (updatedAvailableRows == 0) {
-            throw new RuntimeException("상품의 재고가 전환되지 않았습니다. 상품 ID: " + id);
-        }
+    public void increaseStock(Product product, Integer quantity) {
+        long id = product.getId();
+        productUpdate(productRepository.decreaseReservedStock(id, quantity), "상품의 예약 재고가 부족합니다. 상품 ID: ", id);
+        productUpdate(productRepository.increaseAvailableStock(id, quantity), "상품의 재고가 전환되지 않았습니다. 상품 ID: ", id);
 
+    }
+
+    private void productUpdate(int productRepository, String x, long id) {
+        if (productRepository == 0) {
+            throw new RuntimeException(x + id);
+        }
     }
 
     public Product saveAndGet(Product testProduct) {

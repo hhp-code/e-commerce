@@ -2,7 +2,6 @@ package com.ecommerce.domain.user;
 
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.order.Order;
-import com.ecommerce.domain.usercoupon.UserCoupon;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,8 +29,9 @@ public class User {
     private boolean isDeleted;
     private LocalDateTime deletedAt;
 
+    @Getter
     @OneToMany(mappedBy = "user")
-    private List<UserCoupon> userCoupons;
+    public List<Coupon> coupons;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
@@ -45,7 +45,7 @@ public class User {
         this.username = username;
         this.balance = initialBalance;
         this.isDeleted = false;
-        this.userCoupons = new ArrayList<>();
+        this.coupons = new ArrayList<>();
         this.orders = new ArrayList<>();
     }
     public User(long userId, String username, BigDecimal initialBalance) {
@@ -53,7 +53,15 @@ public class User {
         this.username = username;
         this.balance = initialBalance;
         this.isDeleted = false;
-        this.userCoupons = new ArrayList<>();
+        this.coupons = new ArrayList<>();
+        this.orders = new ArrayList<>();
+    }
+    public User(long userId, String username, BigDecimal initialBalance, List<Coupon> coupons) {
+        this.id = userId;
+        this.username = username;
+        this.balance = initialBalance;
+        this.isDeleted = false;
+        this.coupons = coupons;
         this.orders = new ArrayList<>();
     }
 
@@ -63,17 +71,19 @@ public class User {
 
 
     public void addCoupon(Coupon coupon) {
-        UserCoupon userCoupon = new UserCoupon(this, coupon);
-        userCoupons.add(userCoupon);
+        coupons.add(coupon);
     }
 
-    public UserCoupon getCoupon(long couponId) {
-        return userCoupons.stream().filter(UserCoupon::isUsed).findFirst().orElseThrow(
-                () -> new RuntimeException("사용 가능한 쿠폰이 없습니다.")
-        );
+    public Coupon getCoupon(long couponId) {
+        System.out.println(couponId + "wow");
+        return coupons.stream()
+                .filter(coupon -> coupon.getId().equals(couponId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("사용자에게 발급된 쿠폰을 찾을 수 없습니다."));
     }
 
     public void addOrder(Order order) {
         orders.add(order);
     }
+
 }

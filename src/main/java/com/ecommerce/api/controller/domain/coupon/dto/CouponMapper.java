@@ -4,13 +4,13 @@ import com.ecommerce.domain.coupon.service.CouponCommand;
 import com.ecommerce.domain.coupon.Coupon;
 
 public class CouponMapper {
-    public static CouponCommand.CouponCreate toCoupon(CouponDto.CouponRequest request) {
-        return new CouponCommand.CouponCreate(request.code(), request.discountAmount(), request.remainingQuantity(),request.type(),
+    public static CouponCommand.Create toCoupon(CouponDto.CouponRequest request) {
+        return new CouponCommand.Create(request.code(), request.discountAmount(), request.remainingQuantity(),request.type(),
                 request.validFrom(), request.validTo(), request.active());
     }
 
     public static CouponDto.CouponResponse toCouponResponse(Coupon coupon) {
-        return new CouponDto.CouponResponse(coupon.getId(), coupon.getCode(), coupon.getDiscountAmount(), coupon.getQuantity(),
+        return new CouponDto.CouponResponse( coupon.getCode(), coupon.getDiscountAmount(),
                 coupon.getValidFrom(), coupon.getValidTo(), coupon.getActive());
 
     }
@@ -20,6 +20,11 @@ public class CouponMapper {
         return new CouponDto.CouponDetailResponse(coupon.getId(), coupon.getCode(), coupon.getDiscountAmount(), coupon.getQuantity(),
                 coupon.getValidFrom(), coupon.getValidTo(), coupon.getActive());
     }
+
+    public static CouponCommand.Issue toUserCouponCommand(Long userId, Long couponId) {
+        return new CouponCommand.Issue(userId, couponId);
+    }
+
 
 
 }

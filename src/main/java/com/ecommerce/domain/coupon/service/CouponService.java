@@ -14,7 +14,7 @@ public class CouponService {
     }
 
     @Transactional
-    public Coupon createCoupon(CouponCommand.CouponCreate create) {
+    public Coupon createCoupon(CouponCommand.Create create) {
         Coupon coupon = new Coupon(create.code(),
                 create.discountAmount(),
                 create.type(),
@@ -36,5 +36,13 @@ public class CouponService {
         couponRepository.save(coupon).orElseThrow(
                 () -> new RuntimeException("쿠폰을 업데이트할 수 없습니다.")
         );
+    }
+
+    public Coupon decrementCouponQuantity(Long couponId) {
+        Coupon coupon = getCoupon(couponId);
+        if (coupon.decrementQuantity()) {
+            throw new IllegalStateException("쿠폰 수량이 부족합니다.");
+        }
+        return coupon;
     }
 }

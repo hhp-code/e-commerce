@@ -35,7 +35,7 @@ class CouponServiceTest {
         @DisplayName("쿠폰 생성 성공")
         void createCouponSuccess() {
             // Given
-            CouponCommand.CouponCreate command = new CouponCommand.CouponCreate(
+            CouponCommand.Create command = new CouponCommand.Create(
                     "CODE123", BigDecimal.TEN,  100,DiscountType.FIXED_AMOUNT,
                     LocalDateTime.now(), LocalDateTime.now().plusDays(30), true
             );
@@ -58,7 +58,7 @@ class CouponServiceTest {
         @DisplayName("쿠폰 생성 실패")
         void createCouponFailure() {
             // Given
-            CouponCommand.CouponCreate command = new CouponCommand.CouponCreate(
+            CouponCommand.Create command = new CouponCommand.Create(
                     "CODE123", BigDecimal.TEN, 100, DiscountType.FIXED_AMOUNT,
                     LocalDateTime.now(), LocalDateTime.now().plusDays(30), true
             );

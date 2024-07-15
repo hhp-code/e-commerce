@@ -32,7 +32,9 @@ public class ProductRepositoryImpl implements ProductRepository {
     @Override
     public List<Product> getPopularProducts() {
         LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
-        List<Tuple> popularProductIds = queryFactory
+
+        // 1. 커버링 인덱스를 사용하여 인기 상품 ID와 판매량 조회
+        List<Tuple> popularProductInfo = queryFactory
                 .select(order.orderItems.any().product.id, order.orderItems.any().quantity.sum())
                 .from(order)
                 .where(order.orderDate.after(threeDaysAgo))
@@ -41,16 +43,18 @@ public class ProductRepositoryImpl implements ProductRepository {
                 .limit(5)
                 .fetch();
 
-        List<Long> productIds = popularProductIds.stream()
+        List<Long> productIds = popularProductInfo.stream()
                 .map(tuple -> tuple.get(0, Long.class))
                 .collect(Collectors.toList());
 
+        // 2. 조회된 ID를 사용하여 실제 상품 정보 조회
         List<Product> products = queryFactory
                 .selectFrom(product)
                 .where(product.id.in(productIds))
                 .fetch();
 
-        Map<Long, Long> quantityMap = popularProductIds.stream()
+        // 3. 판매량에 따라 정렬
+        Map<Long, Long> quantityMap = popularProductInfo.stream()
                 .collect(Collectors.toMap(
                         tuple -> tuple.get(0, Long.class),
                         tuple -> tuple.get(1, Long.class)

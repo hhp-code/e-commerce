@@ -49,4 +49,10 @@ public class OrderService {
         return orderRepository.findByUserIdAndStatus(command.userId(), OrderStatus.PREPARED )
                 .orElseGet(() -> createOrder(new OrderCommand.Create(command.userId(), List.of())));
     }
+
+    @Transactional
+    public Order getOrderByUserId(Long userId) {
+        return orderRepository.findByUserIdAndStatus(userId, OrderStatus.PREPARED)
+                .orElseThrow(() -> new RuntimeException("주문이 존재하지 않습니다."));
+    }
 }

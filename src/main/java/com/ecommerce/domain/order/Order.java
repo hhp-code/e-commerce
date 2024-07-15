@@ -14,8 +14,10 @@ import java.util.List;
 
 @Entity
 @Table(name = "orders", indexes = {
-        @Index(name = "idx_order_date_product_quantity",
-                columnList = "orderDate, product_id, quantity")
+        @Index(name = "idx_order_date_items",
+                columnList = "orderDate, id"),
+        @Index(name = "idx_order_items",
+                columnList = "id, orderDate, regularPrice, salePrice, sellingPrice")
 })
 public class Order {
     @Getter
@@ -78,7 +80,7 @@ public class Order {
     }
 
     public void applyCoupon(Coupon coupon) {
-        if (coupon != null && coupon.isValid()) {
+        if (coupon != null && coupon.isValid() && coupon.getQuantity() >= 0) {
             this.coupon = coupon;
             calculateDiscount();
         } else {

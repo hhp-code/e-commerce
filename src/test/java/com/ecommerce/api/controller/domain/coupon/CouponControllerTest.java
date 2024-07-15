@@ -43,16 +43,14 @@ class CouponControllerTest {
         CouponDto.CouponRequest request = new CouponDto.CouponRequest("SUMMER2024", BigDecimal.valueOf(5000), 100, DiscountType.FIXED_AMOUNT, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
         Coupon coupon = new Coupon(1L, "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.FIXED_AMOUNT, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
 
-        when(couponService.createCoupon(any(CouponCommand.CouponCreate.class))).thenReturn(coupon);
+        when(couponService.createCoupon(any(CouponCommand.Create.class))).thenReturn(coupon);
 
         mockMvc.perform(post("/api/coupons")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.code").value("SUMMER2024"))
                 .andExpect(jsonPath("$.discountAmount").value(5000))
-                .andExpect(jsonPath("$.remainingQuantity").value(100))
                 .andExpect(jsonPath("$.active").value(true));
     }
 

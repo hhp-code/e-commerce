@@ -13,8 +13,11 @@ public class UserBalanceMapper {
         }
         return new UserDto.UserBalanceResponse(false,"balance is not found", Map.of());
     }
-    public static UserBalanceCommand.Create toCommand(Long userId, UserDto.UserBalanceRequest request) {
-        return new UserBalanceCommand.Create(userId, request.amount());
+    public static UserBalanceCommand.Create toCommand(Long userId, BigDecimal amount) {
+        if(amount == null || amount.compareTo(BigDecimal.ZERO) < 0){
+            throw new IllegalArgumentException("금액은 0하고 같거나 커야 합니다.");
+        }
+        return new UserBalanceCommand.Create(userId, amount);
     }
 
 }
