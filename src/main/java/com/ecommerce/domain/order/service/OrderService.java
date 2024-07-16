@@ -28,7 +28,8 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<Order> getOrders(OrderCommand.Search search) {
-        return orderRepository.getOrders(search);
+        long id = search.id();
+        return orderRepository.getOrders(id);
     }
 
     @Transactional
@@ -55,4 +56,5 @@ public class OrderService {
         return orderRepository.findByUserIdAndStatus(userId, OrderStatus.PREPARED)
                 .orElseThrow(() -> new RuntimeException("주문이 존재하지 않습니다."));
     }
+
 }

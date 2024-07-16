@@ -17,7 +17,8 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    @Transactional(readOnly = true)
+
+    @Transactional
     public User getUser(Long userId) {
         return userRepository.getById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + userId));

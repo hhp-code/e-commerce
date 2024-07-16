@@ -20,6 +20,7 @@ public class Product {
     @Getter
     private BigDecimal price;
     private Integer availableStock;
+    @Getter
     private Integer reservedStock;
     @Getter
     private LocalDateTime lastUpdated;
@@ -58,5 +59,13 @@ public class Product {
 
     public boolean isDeleted() {
         return isDeleted;
+    }
+
+    public void decreaseReservedStock(Integer quantity) {
+        this.reservedStock -= quantity;
+    }
+
+    public void decreaseAvailableStock(int orderedQuantity) {
+        this.availableStock -= orderedQuantity;
     }
 }

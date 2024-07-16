@@ -6,6 +6,8 @@ import com.ecommerce.domain.product.service.repository.ProductRepository;
 import com.ecommerce.domain.product.Product;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,7 +84,6 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    @Transactional
     public Optional<Product> save(Product product) {
         return Optional.of(productJPARepository.save(product));
     }
@@ -96,14 +97,19 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    @Transactional
     public int decreaseAvailableStock(Long id, int orderedQuantity) {
-        long updatedCount = queryFactory
-                .update(product)
-                .set(product.availableStock, product.availableStock.subtract(orderedQuantity))
-                .where(product.id.eq(id).and(product.availableStock.goe(orderedQuantity)))
-                .execute();
-        return (int) updatedCount;
+        System.out.println("product22: " + product);
+        Product lockedAvailableStock = queryFactory
+                .selectFrom(this.product)
+                .where(this.product.id.eq(id))
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                .fetchOne();
+        System.out.println("product33: " + lockedAvailableStock);
+        if(lockedAvailableStock == null || lockedAvailableStock.getAvailableStock() < orderedQuantity) {
+            throw new IllegalArgumentException("Not enough available stock");
+        }
+        lockedAvailableStock.decreaseAvailableStock(orderedQuantity);
+        return 1;
     }
 
     @Override
@@ -118,12 +124,19 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     public int decreaseReservedStock(Long id, Integer quantity) {
-        long updatedCount = queryFactory
-                .update(product)
-                .set(product.reservedStock, product.reservedStock.subtract(quantity))
-                .where(product.id.eq(id).and(product.reservedStock.goe(quantity)))
-                .execute();
-        return (int) updatedCount;
+        Product lockedReservedStock = queryFactory
+                .selectFrom(product)
+                .where(product.id.eq(id))
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                .fetchOne();
+
+        if (lockedReservedStock == null || lockedReservedStock.getReservedStock() < quantity) {
+            throw new IllegalArgumentException("Not enough reserved stock");
+        }
+
+        lockedReservedStock.decreaseReservedStock(quantity);
+
+        return 1;
     }
 
     @Override

@@ -47,15 +47,22 @@ public class OrderDto {
             }
         }
     }
-
-    public record OrderPayRequest (long orderId,  BigDecimal amount) {
+    public record OrderDeleteItemRequest(long productId) {
         public void validate() {
-            if (amount.compareTo(BigDecimal.ZERO) < 0) {
-                throw new IllegalArgumentException("결제 금액은 0 과같거나 커야 합니다.");
+            if (productId <= 0) {
+                throw new IllegalArgumentException("상품 ID가 잘못되었습니다.");
             }
         }
     }
-    public record OrderCancelRequest(long orderId) {
+
+    public record OrderPayRequest (long userId, long orderId) {
+        public void validate() {
+            if (orderId <= 0) {
+                throw new IllegalArgumentException("주문 ID가 잘못되었습니다.");
+            }
+        }
+    }
+    public record OrderCancelRequest(long userId, long orderId) {
         public void validate() {
             if (orderId <= 0) {
                 throw new IllegalArgumentException("주문 ID가 잘못되었습니다.");

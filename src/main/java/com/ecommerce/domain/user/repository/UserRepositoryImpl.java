@@ -6,7 +6,9 @@ import com.ecommerce.domain.user.QUser;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.repository.UserRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.LockModeType;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +21,7 @@ public class UserRepositoryImpl implements UserRepository {
     private final QUser user = QUser.user;
     private final QCoupon coupon = QCoupon.coupon;
 
+
     public UserRepositoryImpl(UserJPARepository userJPARepository, JPAQueryFactory queryFactory) {
         this.userJPARepository = userJPARepository;
         this.queryFactory = queryFactory;
@@ -26,10 +29,8 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> getById(Long id) {
-        return Optional.ofNullable(queryFactory
-                .selectFrom(user)
-                .where(user.id.eq(id))
-                .fetchOne());
+        User user1 = queryFactory.select(user).from(user).where(user.id.eq(id)).fetchOne();
+        return Optional.ofNullable(user1);
     }
 
     @Override
@@ -64,5 +65,11 @@ public class UserRepositoryImpl implements UserRepository {
                 .join(user.coupons, coupon)
                 .where(coupon.eq(userCoupon))
                 .fetchOne());
+    }
+
+    @Override
+    @Transactional
+    public void deleteAll() {
+        userJPARepository.deleteAll();
     }
 }

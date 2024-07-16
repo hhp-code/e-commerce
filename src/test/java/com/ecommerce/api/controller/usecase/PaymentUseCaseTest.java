@@ -10,7 +10,7 @@ import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserBalanceCommand;
 import com.ecommerce.domain.user.service.UserBalanceService;
-import com.ecommerce.external.DummyPlatform;
+import com.ecommerce.domain.order.service.external.DummyPlatform;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +23,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,11 +44,11 @@ class PaymentUseCaseTest {
     @DisplayName("주문을 결제 처리한다")
     void payOrder_ShouldProcessPayment_WhenValidCommandProvided() {
         Order mockOrder = createMockOrder();
-        OrderCommand.Payment paymentCommand = new OrderCommand.Payment(ORDER_ID, mockOrder.getTotalAmount());
+        OrderCommand.Payment paymentCommand = new OrderCommand.Payment(USER_ID,ORDER_ID);
 
         when(orderService.getOrder(ORDER_ID)).thenReturn(mockOrder);
         when(dummyPlatform.send(mockOrder)).thenReturn(true);
-        when(orderService.saveAndGet(any(Order.class))).thenReturn(mockOrder); 
+        when(orderService.saveAndGet(any(Order.class))).thenReturn(mockOrder);
 
         Order result = paymentUseCase.payOrder(paymentCommand);
 
@@ -63,7 +62,7 @@ class PaymentUseCaseTest {
     void payOrder_ShouldCompensate_WhenStockIsInsufficient() {
         // Given
         Order mockOrder = createMockOrder();
-        OrderCommand.Payment paymentCommand = new OrderCommand.Payment(ORDER_ID, mockOrder.getTotalAmount());
+        OrderCommand.Payment paymentCommand = new OrderCommand.Payment(USER_ID,ORDER_ID);
         when(orderService.getOrder(ORDER_ID)).thenReturn(mockOrder);
         doThrow(new RuntimeException("재고 부족")).when(productService).decreaseStock(any(Product.class), anyInt());
         // When & Then
@@ -79,7 +78,7 @@ class PaymentUseCaseTest {
     void payOrder_ShouldCompensate_WhenUserBalanceIsInsufficient() {
         // Given
         Order mockOrder = createMockOrder();
-        OrderCommand.Payment paymentCommand = new OrderCommand.Payment(ORDER_ID, mockOrder.getTotalAmount());
+        OrderCommand.Payment paymentCommand = new OrderCommand.Payment(USER_ID,ORDER_ID);
         when(orderService.getOrder(ORDER_ID)).thenReturn(mockOrder);
         doThrow(new RuntimeException("잔액 부족")).when(userBalanceService).decreaseBalance(any(User.class), any(BigDecimal.class));
 

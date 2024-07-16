@@ -52,13 +52,20 @@ public class Order {
     private Coupon coupon;
 
     @Getter
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order" ,cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems;
 
     @Getter
     private LocalDateTime deletedAt;
 
     public Order() {
+    }
+    public Order(User user) {
+        this.orderDate = LocalDateTime.now();
+        this.user = user;
+        this.orderItems = new ArrayList<>();
+        this.isDeleted = false;
+        this.orderStatus = OrderStatus.PREPARED;
     }
 
     public Order(User user, List<OrderItem> orderItems) {
@@ -136,7 +143,7 @@ public class Order {
 
 
 
-    public void addCartItem(OrderItem orderItem) {
+    public void addOrderItem(OrderItem orderItem) {
         if (this.orderItems == null) {
             this.orderItems = new ArrayList<>();
         }
@@ -166,6 +173,14 @@ public class Order {
 
     public boolean isCanceled() {
         return orderStatus == OrderStatus.CANCELLED;
+    }
+
+    public void deleteOrderItem(long orderItemId) {
+        OrderItem orderItem = orderItems.stream()
+                .filter(item -> item.getProduct().getId().equals(orderItemId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Order item not found"));
+        orderItems.remove(orderItem);
     }
 }
 

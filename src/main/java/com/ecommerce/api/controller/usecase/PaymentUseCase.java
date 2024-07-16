@@ -5,9 +5,11 @@ import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.service.ProductService;
+import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserBalanceCommand;
 import com.ecommerce.domain.user.service.UserBalanceService;
-import com.ecommerce.external.DummyPlatform;
+import com.ecommerce.domain.user.service.UserService;
+import com.ecommerce.domain.order.service.external.DummyPlatform;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,19 +20,25 @@ public class PaymentUseCase {
     private final ProductService productService;
     private final DummyPlatform dummyPlatform;
     private final UserBalanceService userBalanceService;
+    private final UserService userService;
 
-    public PaymentUseCase(OrderService orderService, ProductService productService, DummyPlatform dummyPlatformUseCase, UserBalanceService userBalanceService) {
+    public PaymentUseCase(OrderService orderService, ProductService productService, DummyPlatform dummyPlatformUseCase, UserBalanceService userBalanceService, UserService userService) {
         this.orderService = orderService;
         this.productService = productService;
         this.dummyPlatform = dummyPlatformUseCase;
         this.userBalanceService = userBalanceService;
+        this.userService = userService;
     }
 
     public Order payOrder(OrderCommand.Payment orderPay) {
+        User user = userService.getUser(orderPay.userId());
+        System.out.println("orderId"+orderPay.orderId());
         Order order = orderService.getOrder(orderPay.orderId());
+        System.out.println(order.getOrderItems().getFirst().getProduct().getAvailableStock()+"stock");
         List<OrderItem> orderItems = order.getOrderItems();
         try {
             for (OrderItem item : orderItems) {
+                System.out.println("product00: " + item.getProduct());
                 productService.decreaseStock(item.getProduct(), item.getQuantity());
             }
             userBalanceService.decreaseBalance(order.getUser(), order.getTotalAmount());
@@ -42,7 +50,7 @@ public class PaymentUseCase {
 
             return order;
         } catch (Exception e) {
-            cancelOrder(new OrderCommand.Cancel(order.getId()));
+            cancelOrder(new OrderCommand.Cancel(user.getId(), order.getId()));
             throw new RuntimeException("Payment processing failed", e);
         }
     }

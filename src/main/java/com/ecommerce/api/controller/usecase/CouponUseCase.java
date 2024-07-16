@@ -41,12 +41,4 @@ public class CouponUseCase {
         return userService.updateUserCoupon(coupon);
     }
 
-    private void updateCouponUsage(Coupon coupon) {
-        int expectedUsedAmount = coupon.getQuantity() - 1;
-        int afterUseAmount = coupon.use();
-        if (expectedUsedAmount != afterUseAmount) {
-            throw new IllegalStateException("쿠폰 사용에 실패했습니다.");
-        }
-        couponService.updateCoupon(coupon);
-    }
 }

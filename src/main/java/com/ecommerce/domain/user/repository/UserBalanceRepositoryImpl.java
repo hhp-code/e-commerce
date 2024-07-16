@@ -4,10 +4,12 @@ import com.ecommerce.domain.user.QUser;
 import com.ecommerce.domain.user.service.repository.UserBalanceRepository;
 import com.ecommerce.domain.user.User;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.LockModeType;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
+
 import java.math.BigDecimal;
 import java.util.Optional;
 
@@ -51,6 +53,16 @@ public class UserBalanceRepositoryImpl implements UserBalanceRepository {
         return Optional.ofNullable(queryFactory
                 .selectFrom(user)
                 .where(user.id.eq(userId))
+                .fetchOne());
+    }
+
+    @Override
+    public Optional<BigDecimal> getAmountByUserIdWithLock(long userId) {
+        return Optional.ofNullable(queryFactory
+                .select(user.balance)
+                .from(user)
+                .where(user.id.eq(userId))
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
                 .fetchOne());
     }
 }

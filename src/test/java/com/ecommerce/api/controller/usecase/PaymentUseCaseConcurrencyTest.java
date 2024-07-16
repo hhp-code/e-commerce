@@ -4,109 +4,126 @@ import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.OrderItem;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
+import com.ecommerce.domain.order.service.repository.OrderRepository;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
+import com.ecommerce.domain.product.service.repository.ProductRepository;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserBalanceService;
-import com.ecommerce.external.DummyPlatform;
+import com.ecommerce.domain.user.service.UserService;
+import com.ecommerce.domain.user.service.repository.UserRepository;
+import com.ecommerce.domain.order.service.external.DummyPlatform;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Objects;
+import java.util.concurrent.*;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
+@SpringBootTest
 class PaymentUseCaseConcurrencyTest {
-
-    @Mock
+    @Autowired
+    private UserService userService;
+    @Autowired
     private OrderService orderService;
-    @Mock
+    @Autowired
     private ProductService productService;
     @Mock
     private DummyPlatform dummyPlatform;
-    @Mock
+    @Autowired
     private UserBalanceService userBalanceService;
 
-    @InjectMocks
+    @Autowired
     private PaymentUseCase paymentUseCase;
 
-    @Mock
-    private Order mockOrder;
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
-    @Mock
-    private OrderItem mockOrderItem;
+    private User testUser;
+    private Order testOrder;
+    private Product testProduct;
 
-    @Mock
-    private User mockUser;
 
-    @Mock
-    private Product mockProduct;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private OrderRepository orderRepository;
 
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        paymentUseCase = new PaymentUseCase(orderService, productService, dummyPlatform, userBalanceService);
+        userRepository.deleteAll();
+        productRepository.deleteAll();
+        orderRepository.deleteAll();
+        testUser = new User(1L, "test", BigDecimal.valueOf(1000));
+        userService.saveUser(testUser);
+        testProduct = new Product(1L, "test", BigDecimal.TEN, 10);
+        productService.saveAndGet(testProduct);
+        OrderItem testOrderItem = new OrderItem(testProduct, 1);
+        testOrder = new Order(testUser, List.of(testOrderItem));
+        Order order = orderService.saveAndGet(testOrder);
+        System.out.println(order.getOrderItems().getFirst().getProduct().getAvailableStock()+"stock");
+
+
+        when(dummyPlatform.send(any(Order.class))).thenReturn(true);
+
+        paymentUseCase = new PaymentUseCase(orderService, productService, dummyPlatform, userBalanceService, userService);
     }
 
     @Test
-    void testConcurrentPayments() {
-        // 테스트 데이터 준비
-        Long orderId = 1L;
-        Long productId = 1L;
-        int initialStock = 10;
-        int concurrentRequests = 5;
-
-
-        when(orderService.getOrder(orderId)).thenReturn(mockOrder);
-        when(mockOrder.getOrderItems()).thenReturn(List.of(mockOrderItem));
-        when(mockOrderItem.getProduct()).thenReturn(mockProduct);
-        when(mockOrder.getUser()).thenReturn(mockUser);
-        when(mockProduct.getId()).thenReturn(productId);
-        when(mockOrderItem.getQuantity()).thenReturn(1);
-
-        AtomicInteger stockCounter = new AtomicInteger(initialStock);
-        doAnswer(invocation -> {
-            Long pId = invocation.getArgument(0);
-            int quantity = invocation.getArgument(1);
-            if (pId.equals(productId)) {
-                return stockCounter.addAndGet(-quantity);
-            }
-            return 0;
-        }).when(productService).decreaseStock(eq(mockProduct), anyInt());
-
-        // 동시 요청 시뮬레이션
+    void testConcurrentPayments() throws Exception {
+        int concurrentRequests = 10;
         ExecutorService executor = Executors.newFixedThreadPool(concurrentRequests);
-        List<CompletableFuture<Order>> futures = new ArrayList<>();
+        CountDownLatch latch = new CountDownLatch(concurrentRequests);
+        List<Future<Order>> futures = new ArrayList<>();
 
         for (int i = 0; i < concurrentRequests; i++) {
-            CompletableFuture<Order> future = CompletableFuture.supplyAsync(() -> {
-                OrderCommand.Payment orderPay = new OrderCommand.Payment(orderId, BigDecimal.ONE);
-                return paymentUseCase.payOrder(orderPay);
-            }, executor);
-            futures.add(future);
+            futures.add(executor.submit(() -> {
+                try {
+                    OrderCommand.Payment orderPay = new OrderCommand.Payment(testUser.getId(), testOrder.getId());
+                    return paymentUseCase.payOrder(orderPay);
+                } finally {
+                    latch.countDown();
+                }
+            }));
         }
 
-        // 모든 요청이 완료될 때까지 대기
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        latch.await(10, TimeUnit.SECONDS); // 모든 요청이 완료될 때까지 대기 (최대 10초)
 
-        // 결과 검증
-        verify(orderService, times(concurrentRequests)).getOrder(orderId);
-        verify(productService, times(concurrentRequests)).decreaseStock(eq(mockProduct), eq(1));
-        verify(mockOrder, times(concurrentRequests)).finish();
-        verify(dummyPlatform, times(concurrentRequests)).send(mockOrder);
+        long successfulOrders = futures.stream()
+                .map(future -> {
+                    try {
+                        return future.get();
+                    } catch (Exception e) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .count();
 
-        assertEquals(initialStock - concurrentRequests, stockCounter.get());
+        Product updatedProduct = productService.getProduct(testProduct.getId());
+        int expectedStock = Math.max(0, 10 - (int)successfulOrders);
+
+        System.out.println("Successful orders = " + successfulOrders);
+        System.out.println("Remaining stock = " + updatedProduct.getAvailableStock());
+
+        assertEquals(expectedStock, updatedProduct.getAvailableStock(),
+                "Stock should be decreased by " + successfulOrders);
+
+        executor.shutdown();
     }
 }

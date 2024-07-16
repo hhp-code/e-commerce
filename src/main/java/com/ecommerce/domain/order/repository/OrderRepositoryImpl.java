@@ -4,10 +4,11 @@ import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.OrderStatus;
 import com.ecommerce.domain.order.QOrder;
 import com.ecommerce.domain.order.service.repository.OrderRepository;
-import com.ecommerce.domain.order.service.OrderCommand;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -34,11 +35,11 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public List<Order> getOrders(OrderCommand.Search search) {
+    public List<Order> getOrders(Long customerId) {
         return queryFactory
                 .selectFrom(order)
                 .leftJoin(order.user).fetchJoin()
-                .where(userIdEq(search.id()))
+                .where(userIdEq(customerId))
                 .fetch();
     }
 
@@ -55,6 +56,12 @@ public class OrderRepositoryImpl implements OrderRepository {
                 .where(order.user.id.eq(id)
                         .and(order.orderStatus.eq(orderStatus)))
                 .fetchOne());
+    }
+
+    @Override
+    @Transactional
+    public void deleteAll() {
+        orderJPARepository.deleteAll();
     }
 
     private BooleanExpression userIdEq(Long userId) {

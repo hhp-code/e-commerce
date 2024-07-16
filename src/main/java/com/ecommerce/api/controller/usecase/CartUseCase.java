@@ -26,8 +26,14 @@ public class CartUseCase {
         }
 
         OrderItem orderItem = new OrderItem(product, command.quantity());
-        order.addCartItem(orderItem);
+        order.addOrderItem(orderItem);
 
+        return orderService.saveAndGet(order);
+    }
+
+    public Order deleteCartItemToOrder(OrderCommand.Delete orderDeleteItem) {
+        Order order = orderService.getOrder(orderDeleteItem.orderId());
+        order.deleteOrderItem(orderDeleteItem.productId());
         return orderService.saveAndGet(order);
     }
 }

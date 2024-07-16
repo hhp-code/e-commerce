@@ -60,7 +60,7 @@ class OrderServiceTest {
         void getOrders_ShouldReturnOrderList_WhenSearchConditionProvided() {
             OrderCommand.Search searchCommand = new OrderCommand.Search(USER_ID);
             List<Order> mockOrders = List.of(createMockOrder(), createMockOrder());
-            when(orderRepository.getOrders(searchCommand)).thenReturn(mockOrders);
+            when(orderRepository.getOrders(searchCommand.id())).thenReturn(mockOrders);
 
             List<Order> result = orderServiceOriginal.getOrders(searchCommand);
 

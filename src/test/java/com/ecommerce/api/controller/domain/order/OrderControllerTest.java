@@ -43,6 +43,7 @@ class OrderControllerTest {
     private static final int MAX_ORDER_QUANTITY = 10;
     private static final BigDecimal PRODUCT_PRICE = BigDecimal.valueOf(1000);
     private static final int PRODUCT_STOCK = 100;
+    private static final long ORDER_ID = 1L;
 
     @Autowired
     private MockMvc mockMvc;
@@ -117,7 +118,7 @@ class OrderControllerTest {
         @Test
         @DisplayName("결제 요청 - 결제 성공")
         void payOrder_Success() throws Exception {
-            OrderDto.OrderPayRequest request = new OrderDto.OrderPayRequest(VALID_USER_ID, PRODUCT_PRICE);
+            OrderDto.OrderPayRequest request = new OrderDto.OrderPayRequest(VALID_USER_ID, ORDER_ID);
             Order order = createSampleOrder();
 
             when(paymentUseCase.payOrder(OrderMapper.toOrderPay(request))).thenReturn(order);

@@ -36,6 +36,7 @@ public class ProductService {
 
     @Transactional
     public void decreaseStock(Product product, int quantity) {
+        System.out.println("product11: " + product);
         productUpdate(productRepository.decreaseAvailableStock(product.getId(), quantity),
                 "상품의 재고가 부족합니다. 상품 ID: ", product.getId());
         productUpdate(productRepository.increaseReservedStock(product.getId(), quantity),

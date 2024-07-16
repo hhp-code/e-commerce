@@ -11,4 +11,6 @@ public interface UserBalanceRepository {
     Optional<User> saveChargeAmount(Long userId, BigDecimal amount);
 
     Optional<User> getUserByRequest(Long userId);
+
+    Optional<BigDecimal> getAmountByUserIdWithLock(long userId);
 }

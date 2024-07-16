@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Component
 public class UserBalanceService {
@@ -22,22 +23,29 @@ public class UserBalanceService {
 
     @Transactional
     public BigDecimal chargeBalance(UserBalanceCommand.Create request) {
-        BigDecimal currentBalance = userBalanceRepository.getAmountByUserId(request.userId())
+        return userBalanceRepository.getAmountByUserIdWithLock(request.userId())
+                .map(currentBalance -> {
+                    BigDecimal amountToAdd = Optional.ofNullable(request.amount()).orElse(BigDecimal.ZERO);
+                    BigDecimal newBalance = currentBalance.add(amountToAdd);
+                    userBalanceRepository.saveChargeAmount(request.userId(), newBalance);
+                    return newBalance;
+                })
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        BigDecimal newBalance = currentBalance.add(request.amount());
-        userBalanceRepository.saveChargeAmount(request.userId(), newBalance);
-        return newBalance;
     }
 
     @Transactional
     public void decreaseBalance(User user, BigDecimal totalAmount) {
-        BigDecimal currentBalance = userBalanceRepository.getAmountByUserId(user.getId())
+        userBalanceRepository.getAmountByUserIdWithLock(user.getId())
+                .map(currentBalance -> {
+                    BigDecimal amountToSubtract = Optional.ofNullable(totalAmount).orElse(BigDecimal.ZERO);
+                    BigDecimal newBalance = currentBalance.subtract(amountToSubtract);
+                    if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+                        throw new IllegalArgumentException("잔액이 부족합니다.");
+                    }
+                    userBalanceRepository.saveChargeAmount(user.getId(), newBalance);
+                    return newBalance;
+                })
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        BigDecimal newBalance = currentBalance.subtract(totalAmount);
-        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("잔액이 부족합니다.");
-        }
-        userBalanceRepository.saveChargeAmount(user.getId(), newBalance);
     }
 
 }
