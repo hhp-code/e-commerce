@@ -1,9 +1,9 @@
 package com.ecommerce.domain.balance.service;
 
+import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserBalanceCommand;
 import com.ecommerce.domain.user.service.UserBalanceService;
 import com.ecommerce.domain.user.service.repository.UserBalanceRepository;
-import com.ecommerce.domain.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +17,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,14 +39,11 @@ class UserBalanceServiceUnitTest {
     @Test
     @DisplayName("잔액 조회 - 사용자가 존재하는 경우")
     void getBalanceWhenUserExists() {
-        // given
         long userId = 1L;
         when(userBalanceRepository.getAmountByUserId(userId)).thenReturn(Optional.of(BigDecimal.valueOf(1000)));
 
-        // when
         BigDecimal balance = userBalanceService.getBalance(userId);
 
-        // then
         assertEquals(BigDecimal.valueOf(1000), balance);
         verify(userBalanceRepository).getAmountByUserId(userId);
     }
@@ -53,11 +51,9 @@ class UserBalanceServiceUnitTest {
     @Test
     @DisplayName("잔액 조회 - 사용자가 존재하지 않는 경우")
     void getBalanceWhenUserNotExists() {
-        // given
         long userId = 1L;
         when(userBalanceRepository.getAmountByUserId(userId)).thenReturn(Optional.empty());
 
-        // when & then
         assertThrows(IllegalArgumentException.class, () -> userBalanceService.getBalance(userId));
         verify(userBalanceRepository).getAmountByUserId(userId);
     }
@@ -65,64 +61,85 @@ class UserBalanceServiceUnitTest {
     @Test
     @DisplayName("잔액 충전 - 성공 케이스")
     void chargeBalanceSuccess() {
-        // given
         long userId = 1L;
         BigDecimal initialBalance = BigDecimal.valueOf(1000);
         BigDecimal chargeAmount = BigDecimal.valueOf(2000);
         BigDecimal expectedBalance = initialBalance.add(chargeAmount);
 
-        when(userBalanceRepository.getAmountByUserId(userId)).thenReturn(Optional.of(initialBalance));
-        when(userBalanceRepository.saveChargeAmount(userId, expectedBalance)).thenReturn(Optional.of(testUser));
+        when(userBalanceRepository.getAmountByUserIdWithLock(userId)).thenReturn(Optional.of(initialBalance));
+        when(userBalanceRepository.saveChargeAmount(eq(userId), any(BigDecimal.class))).thenReturn(Optional.of(testUser));
 
-        // when
         BigDecimal newBalance = userBalanceService.chargeBalance(new UserBalanceCommand.Create(userId, chargeAmount));
 
-        // then
         assertEquals(expectedBalance, newBalance);
-        verify(userBalanceRepository).getAmountByUserId(userId);
-        verify(userBalanceRepository).saveChargeAmount(userId, expectedBalance);
+        verify(userBalanceRepository).getAmountByUserIdWithLock(userId);
+        verify(userBalanceRepository).saveChargeAmount(eq(userId), eq(expectedBalance));
     }
 
     @Test
     @DisplayName("잔액 충전 - 사용자가 존재하지 않는 경우")
     void chargeBalanceUserNotFound() {
-        // given
         long userId = 1L;
         BigDecimal chargeAmount = BigDecimal.valueOf(1000);
-        when(userBalanceRepository.getAmountByUserId(userId)).thenReturn(Optional.empty());
 
-        // when & then
+        when(userBalanceRepository.getAmountByUserIdWithLock(userId)).thenReturn(Optional.empty());
+
         assertThrows(IllegalArgumentException.class,
                 () -> userBalanceService.chargeBalance(new UserBalanceCommand.Create(userId, chargeAmount)));
-        verify(userBalanceRepository).getAmountByUserId(userId);
+
+        verify(userBalanceRepository).getAmountByUserIdWithLock(userId);
         verify(userBalanceRepository, never()).saveChargeAmount(any(), any());
     }
 
     @Test
-    @DisplayName("잔액 충전 - 여러 번 충전")
-    void chargeBalanceMultipleTimes() {
-        // given
+    @DisplayName("잔액 감소 - 성공 케이스")
+    void decreaseBalanceSuccess() {
         long userId = 1L;
         BigDecimal initialBalance = BigDecimal.valueOf(1000);
-        BigDecimal firstCharge = BigDecimal.valueOf(1000);
-        BigDecimal secondCharge = BigDecimal.valueOf(1000);
+        BigDecimal decreaseAmount = BigDecimal.valueOf(500);
+        BigDecimal expectedBalance = initialBalance.subtract(decreaseAmount);
 
-        when(userBalanceRepository.getAmountByUserId(userId))
-                .thenReturn(Optional.of(initialBalance))
-                .thenReturn(Optional.of(initialBalance.add(firstCharge)));
+        User user = new User(1L,"testUser", initialBalance);
 
-        when(userBalanceRepository.saveChargeAmount(eq(userId), any()))
-                .thenReturn(Optional.of(testUser))
-                .thenReturn(Optional.of(testUser));
+        when(userBalanceRepository.getAmountByUserIdWithLock(userId)).thenReturn(Optional.of(initialBalance));
+        when(userBalanceRepository.saveChargeAmount(eq(userId), any(BigDecimal.class))).thenReturn(Optional.of(user));
 
-        // when
-        BigDecimal balanceAfterFirstCharge = userBalanceService.chargeBalance(new UserBalanceCommand.Create(userId, firstCharge));
-        BigDecimal finalBalance = userBalanceService.chargeBalance(new UserBalanceCommand.Create(userId, secondCharge));
+        userBalanceService.decreaseBalance(user, decreaseAmount);
 
-        // then
-        assertEquals(BigDecimal.valueOf(2000), balanceAfterFirstCharge);
-        assertEquals(BigDecimal.valueOf(3000), finalBalance);
-        verify(userBalanceRepository, times(2)).getAmountByUserId(userId);
-        verify(userBalanceRepository, times(2)).saveChargeAmount(eq(userId), any());
+        verify(userBalanceRepository).getAmountByUserIdWithLock(userId);
+        verify(userBalanceRepository).saveChargeAmount(eq(userId), eq(expectedBalance));
+    }
+
+    @Test
+    @DisplayName("잔액 감소 - 잔액 부족")
+    void decreaseBalanceInsufficientFunds() {
+        long userId = 1L;
+        BigDecimal initialBalance = BigDecimal.valueOf(1000);
+        BigDecimal decreaseAmount = BigDecimal.valueOf(1500);
+
+        User user = new User(1L,"testUser", initialBalance);
+
+        when(userBalanceRepository.getAmountByUserIdWithLock(userId)).thenReturn(Optional.of(initialBalance));
+
+        assertThrows(IllegalArgumentException.class, () -> userBalanceService.decreaseBalance(user, decreaseAmount));
+
+        verify(userBalanceRepository).getAmountByUserIdWithLock(userId);
+        verify(userBalanceRepository, never()).saveChargeAmount(any(), any());
+    }
+
+    @Test
+    @DisplayName("잔액 감소 - 사용자가 존재하지 않는 경우")
+    void decreaseBalanceUserNotFound() {
+        long userId = 1L;
+        BigDecimal decreaseAmount = BigDecimal.valueOf(500);
+
+        User user = new User(1L,"testUser", BigDecimal.ZERO);
+
+        when(userBalanceRepository.getAmountByUserIdWithLock(userId)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> userBalanceService.decreaseBalance(user, decreaseAmount));
+
+        verify(userBalanceRepository).getAmountByUserIdWithLock(userId);
+        verify(userBalanceRepository, never()).saveChargeAmount(any(), any());
     }
 }

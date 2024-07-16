@@ -2,6 +2,7 @@ package com.ecommerce.domain.balance.service;
 
 import com.ecommerce.domain.user.service.UserBalanceCommand;
 import com.ecommerce.domain.user.service.UserBalanceService;
+import com.ecommerce.domain.user.service.UserService;
 import com.ecommerce.domain.user.service.repository.UserBalanceRepository;
 import com.ecommerce.domain.user.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,10 +28,12 @@ class UserBalanceServiceTest {
     private UserBalanceRepository userBalanceRepository;
 
     private User testUser;
+    @Autowired
+    private UserService userService;
 
     @BeforeEach
     void setUp() {
-        testUser = new User("testUser", BigDecimal.ZERO);
+        testUser = new User(1L,"testUser", BigDecimal.ZERO);
     }
 
     @Test
@@ -66,7 +69,7 @@ class UserBalanceServiceTest {
         BigDecimal chargeAmount = BigDecimal.valueOf(2000);
         BigDecimal expectedBalance = initialBalance.add(chargeAmount);
 
-        when(userBalanceRepository.getAmountByUserId(userId)).thenReturn(Optional.of(initialBalance));
+        when(userBalanceRepository.getAmountByUserIdWithLock(userId)).thenReturn(Optional.of(initialBalance));
         when(userBalanceRepository.saveChargeAmount(userId, expectedBalance)).thenReturn(Optional.of(testUser));
 
         UserBalanceCommand.Create request = new UserBalanceCommand.Create(userId, chargeAmount);
@@ -76,7 +79,7 @@ class UserBalanceServiceTest {
 
         // then
         assertEquals(expectedBalance, newBalance);
-        verify(userBalanceRepository).getAmountByUserId(userId);
+        verify(userBalanceRepository).getAmountByUserIdWithLock(userId);
         verify(userBalanceRepository).saveChargeAmount(userId, expectedBalance);
     }
 
@@ -92,7 +95,6 @@ class UserBalanceServiceTest {
 
         // when & then
         assertThrows(IllegalArgumentException.class, () -> userBalanceService.chargeBalance(request));
-        verify(userBalanceRepository).getAmountByUserId(userId);
         verify(userBalanceRepository, never()).saveChargeAmount(anyLong(), any());
     }
 
@@ -105,7 +107,7 @@ class UserBalanceServiceTest {
         BigDecimal firstCharge = BigDecimal.valueOf(1000);
         BigDecimal secondCharge = BigDecimal.valueOf(1000);
 
-        when(userBalanceRepository.getAmountByUserId(userId))
+        when(userBalanceRepository.getAmountByUserIdWithLock(userId))
                 .thenReturn(Optional.of(initialBalance))
                 .thenReturn(Optional.of(initialBalance.add(firstCharge)));
 
@@ -120,7 +122,7 @@ class UserBalanceServiceTest {
         // then
         assertEquals(BigDecimal.valueOf(2000), balanceAfterFirstCharge);
         assertEquals(BigDecimal.valueOf(3000), finalBalance);
-        verify(userBalanceRepository, times(2)).getAmountByUserId(userId);
+        verify(userBalanceRepository, times(2)).getAmountByUserIdWithLock(userId);
         verify(userBalanceRepository, times(2)).saveChargeAmount(eq(userId), any());
     }
 }

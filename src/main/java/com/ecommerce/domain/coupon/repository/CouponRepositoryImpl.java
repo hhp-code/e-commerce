@@ -26,4 +26,10 @@ public class CouponRepositoryImpl implements CouponRepository {
     public Optional<Coupon> getById(Long couponId) {
         return couponJPARepository.findById(couponId);
     }
+
+    @Override
+    public int getRemainingQuantity(Long couponId) {
+        return couponJPARepository.getRemainingQuantity(couponId);
+
+    }
 }

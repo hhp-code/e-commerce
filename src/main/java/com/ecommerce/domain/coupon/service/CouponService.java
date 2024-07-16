@@ -45,4 +45,14 @@ public class CouponService {
         }
         return coupon;
     }
+
+    public void save(Coupon coupon) {
+        couponRepository.save(coupon).orElseThrow(
+                () -> new RuntimeException("쿠폰을 저장할 수 없습니다.")
+        );
+    }
+
+    public int getRemainingQunatity(Long couponId) {
+        return couponRepository.getRemainingQuantity(couponId);
+    }
 }

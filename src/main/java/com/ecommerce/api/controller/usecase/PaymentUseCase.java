@@ -32,13 +32,10 @@ public class PaymentUseCase {
 
     public Order payOrder(OrderCommand.Payment orderPay) {
         User user = userService.getUser(orderPay.userId());
-        System.out.println("orderId"+orderPay.orderId());
         Order order = orderService.getOrder(orderPay.orderId());
-        System.out.println(order.getOrderItems().getFirst().getProduct().getAvailableStock()+"stock");
         List<OrderItem> orderItems = order.getOrderItems();
         try {
             for (OrderItem item : orderItems) {
-                System.out.println("product00: " + item.getProduct());
                 productService.decreaseStock(item.getProduct(), item.getQuantity());
             }
             userBalanceService.decreaseBalance(order.getUser(), order.getTotalAmount());

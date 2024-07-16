@@ -90,6 +90,8 @@ public class Order {
         if (coupon != null && coupon.isValid() && coupon.getQuantity() >= 0) {
             this.coupon = coupon;
             calculateDiscount();
+            coupon.use();
+
         } else {
             throw new IllegalArgumentException("Invalid coupon");
         }

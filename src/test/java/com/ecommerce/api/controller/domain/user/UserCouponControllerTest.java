@@ -1,6 +1,7 @@
 package com.ecommerce.api.controller.domain.user;
 
 import com.ecommerce.api.controller.usecase.CouponUseCase;
+import com.ecommerce.api.scheduler.CouponQueueManager;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
 import com.ecommerce.domain.coupon.service.CouponCommand;
@@ -20,6 +21,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,6 +40,9 @@ public class UserCouponControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
     @MockBean
+    private CouponQueueManager couponQueueManager;
+
+    @MockBean
     private CouponUseCase couponUseCase;
 
     private final Coupon testCoupon = new Coupon(1L, "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
@@ -45,9 +50,10 @@ public class UserCouponControllerTest {
 
     @Test
     void testIssueCouponToUser() throws Exception {
+        CompletableFuture<User>  test = CompletableFuture.completedFuture(testUser);
         Long userId = 1L;
         Long couponId = 1L;
-        when(couponUseCase.issueCouponToUser(any(CouponCommand.Issue.class))).thenReturn(testUser);
+        when(couponQueueManager.addToQueueAsync(any(CouponCommand.Issue.class))).thenReturn(test);
 
         mockMvc.perform(post("/api/users/{userId}/coupons", userId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -73,6 +79,7 @@ public class UserCouponControllerTest {
                 .andExpect(jsonPath("$[0].code").value("SUMMER2024"))
                 .andExpect(jsonPath("$[1].code").value("WELCOME"));
     }
+
     @Test
     void testUseCoupon() throws Exception {
         Long userId = 1L;

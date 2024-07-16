@@ -3,6 +3,8 @@ package com.ecommerce.api.controller.domain.coupon.dto;
 import com.ecommerce.domain.coupon.service.CouponCommand;
 import com.ecommerce.domain.coupon.Coupon;
 
+import java.time.Instant;
+
 public class CouponMapper {
     public static CouponCommand.Create toCoupon(CouponDto.CouponRequest request) {
         return new CouponCommand.Create(request.code(), request.discountAmount(), request.remainingQuantity(),request.type(),
@@ -22,9 +24,7 @@ public class CouponMapper {
     }
 
     public static CouponCommand.Issue toUserCouponCommand(Long userId, Long couponId) {
-        return new CouponCommand.Issue(userId, couponId);
+        return new CouponCommand.Issue(userId, couponId, CouponCommand.Issue.Status.PENDING,Instant.now() );
     }
-
-
 
 }

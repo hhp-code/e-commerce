@@ -39,12 +39,12 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<Coupon> getCouponByUser(User targetUser, Coupon targetCoupon) {
+    public Optional<Coupon> getCouponByUser(long userId, long couponId) {
         return Optional.ofNullable(queryFactory
                 .select(coupon)
                 .from(user)
                 .join(user.coupons, coupon)
-                .where(user.eq(targetUser).and(coupon.eq(targetCoupon)))
+                .where(user.id.eq(userId).and(coupon.id.eq(couponId)))
                 .fetchOne());
     }
 
@@ -71,5 +71,19 @@ public class UserRepositoryImpl implements UserRepository {
     @Transactional
     public void deleteAll() {
         userJPARepository.deleteAll();
+    }
+
+    @Override
+    public boolean hasCoupon(Long aLong, Long aLong1) {
+        return queryFactory.selectFrom(user)
+                .join(user.coupons, coupon)
+                .where(user.id.eq(aLong).and(coupon.id.eq(aLong1)))
+                .fetchFirst() != null;
+    }
+
+    @Override
+    public void saveAll(List<User> users) {
+        userJPARepository.saveAll(users);
+
     }
 }

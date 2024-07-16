@@ -94,11 +94,9 @@ public class Coupon {
         return quantity.get();
     }
 
-    public void setQuantity(int i) {
-        this.quantity.set(i);
-    }
 
-    public int use() {
-        return this.quantity.decrementAndGet();
+
+    public boolean use() {
+        return this.isActive = false;
     }
 }

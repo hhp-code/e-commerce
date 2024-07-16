@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
@@ -85,22 +86,29 @@ class PaymentUseCaseConcurrencyTest {
     }
 
     @Test
+    @Transactional
     void testConcurrentPayments() throws Exception {
         int concurrentRequests = 10;
         ExecutorService executor = Executors.newFixedThreadPool(concurrentRequests);
         CountDownLatch latch = new CountDownLatch(concurrentRequests);
         List<Future<Order>> futures = new ArrayList<>();
 
+
+        int size = testOrder.getOrderItems().size();
         for (int i = 0; i < concurrentRequests; i++) {
             futures.add(executor.submit(() -> {
                 try {
                     OrderCommand.Payment orderPay = new OrderCommand.Payment(testUser.getId(), testOrder.getId());
                     return paymentUseCase.payOrder(orderPay);
+                } catch (Exception e) {
+                    System.out.println("Payment failed: " + e.getMessage());
+                    return null;
                 } finally {
                     latch.countDown();
                 }
             }));
         }
+
 
         latch.await(10, TimeUnit.SECONDS); // 모든 요청이 완료될 때까지 대기 (최대 10초)
 
@@ -118,8 +126,6 @@ class PaymentUseCaseConcurrencyTest {
         Product updatedProduct = productService.getProduct(testProduct.getId());
         int expectedStock = Math.max(0, 10 - (int)successfulOrders);
 
-        System.out.println("Successful orders = " + successfulOrders);
-        System.out.println("Remaining stock = " + updatedProduct.getAvailableStock());
 
         assertEquals(expectedStock, updatedProduct.getAvailableStock(),
                 "Stock should be decreased by " + successfulOrders);

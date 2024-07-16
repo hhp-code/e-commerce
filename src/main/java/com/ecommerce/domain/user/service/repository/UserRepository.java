@@ -11,11 +11,15 @@ public interface UserRepository {
 
     Optional<User> save(User testUser);
 
-    Optional<Coupon> getCouponByUser(User user, Coupon coupon);
+    Optional<Coupon> getCouponByUser(long userId, long couponId);
 
     List<Coupon> getAllCouponsByUserId(Long userId);
 
     Optional<User> getUserByCoupon(Coupon userCoupon);
 
     void deleteAll();
+
+    boolean hasCoupon(Long aLong, Long aLong1);
+
+    void saveAll(List<User> users);
 }

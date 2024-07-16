@@ -16,6 +16,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -44,10 +45,10 @@ class CouponUseCaseTest {
         MockitoAnnotations.openMocks(this);
 
         couponUseCase = new CouponUseCase(orderService, couponService, userService);
-        issue = new CouponCommand.Issue(1L, 1L);
+        issue = new CouponCommand.Issue(1L, 1L, CouponCommand.Issue.Status.PENDING, Instant.now());
         coupon = new Coupon(1L, "CODE123", BigDecimal.TEN, DiscountType.FIXED_AMOUNT, 100,
                 LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
-        user = new User(1L,"test", BigDecimal.ZERO, List.of(coupon));
+        user = new User(1L,"test", BigDecimal.TEN);
     }
 
 
@@ -57,9 +58,7 @@ class CouponUseCaseTest {
         // Given
         Long userId = 1L;
         Long couponId = 1L;
-        coupon.use();
 
-        when(couponService.getCoupon(couponId)).thenReturn(coupon);
 
         // When & Then
         assertThrows(RuntimeException.class, () -> couponUseCase.useCoupon(userId, couponId));
@@ -85,7 +84,7 @@ class CouponUseCaseTest {
 
         when(userService.getUser(issue.userId())).thenReturn(user);
         when(couponService.decrementCouponQuantity(issue.couponId())).thenReturn(coupon);
-        when(userService.updateUserCoupon(coupon)).thenReturn(user);
+        when(userService.updateUserCoupon(user,coupon)).thenReturn(user);
         // When
         User result = couponUseCase.issueCouponToUser(issue);
 

@@ -8,6 +8,7 @@ import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.user.service.UserService;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class CouponUseCase {
@@ -24,21 +25,19 @@ public class CouponUseCase {
 
     public User useCoupon(Long userId, Long couponId) {
         User user = userService.getUser(userId);
-        Coupon coupon = couponService.getCoupon(couponId);
+        Coupon userCoupon = userService.getUserCoupon(userId, couponId);
         Order order = orderService.getOrderByUserId(userId);
-        order.applyCoupon(coupon);
-        coupon.use();
-        couponService.updateCoupon(coupon);
+        order.applyCoupon(userCoupon);
         orderService.saveAndGet(order);
-        return userService.updateUserCoupon(coupon);
-
+        return userService.updateUserCoupon(user,userCoupon);
     }
 
+    @Transactional
     public User issueCouponToUser(CouponCommand.Issue issue) {
         User user = userService.getUser(issue.userId());
         Coupon coupon = couponService.decrementCouponQuantity(issue.couponId());
         user.addCoupon(coupon);
-        return userService.updateUserCoupon(coupon);
+        return userService.updateUserCoupon(user, coupon);
     }
 
 }

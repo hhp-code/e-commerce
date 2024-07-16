@@ -1,6 +1,7 @@
 package com.ecommerce.api.controller.domain.user.dto;
 
 import com.ecommerce.domain.coupon.Coupon;
+import com.ecommerce.domain.coupon.service.CouponCommand;
 import lombok.experimental.UtilityClass;
 
 import java.math.BigDecimal;
@@ -17,6 +18,7 @@ public class UserDto {
     public record CouponResponse(String code, BigDecimal discountAmount,
                                  LocalDateTime validFrom, LocalDateTime validTo, boolean valid) {
     }
+    public record IssueStatusResponse(long userId, long couponId, CouponCommand.Issue.Status couponQueueStatus){}
 
 
 }

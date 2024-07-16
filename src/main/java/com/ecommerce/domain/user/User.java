@@ -65,10 +65,6 @@ public class User {
         this.orders = new ArrayList<>();
     }
 
-    public boolean isDeleted() {
-        return isDeleted;
-    }
-
 
     public void addCoupon(Coupon coupon) {
         coupons.add(coupon);
