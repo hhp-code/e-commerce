@@ -10,6 +10,7 @@ import jakarta.persistence.LockModeType;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,31 +60,63 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<User> getUserByCoupon(Coupon userCoupon) {
-        return Optional.ofNullable(queryFactory
-                .selectFrom(user)
-                .join(user.coupons, coupon)
-                .where(coupon.eq(userCoupon))
-                .fetchOne());
-    }
-
-    @Override
     @Transactional
     public void deleteAll() {
         userJPARepository.deleteAll();
     }
 
     @Override
-    public boolean hasCoupon(Long aLong, Long aLong1) {
-        return queryFactory.selectFrom(user)
-                .join(user.coupons, coupon)
-                .where(user.id.eq(aLong).and(coupon.id.eq(aLong1)))
-                .fetchFirst() != null;
+    public void saveAll(List<User> users) {
+        userJPARepository.saveAll(users);
+    }
+    @Override
+    public Optional<BigDecimal> getAmountByUserId(Long userId) {
+        return Optional.ofNullable(queryFactory
+                .select(user.point)
+                .from(user)
+                .where(user.id.eq(userId))
+                .fetchOne());
     }
 
     @Override
-    public void saveAll(List<User> users) {
-        userJPARepository.saveAll(users);
+    public Optional<User> saveChargeAmount(Long userId, BigDecimal amount) {
+        long updatedCount = queryFactory
+                .update(user)
+                .set(user.point, user.point.add(amount))
+                .where(user.id.eq(userId))
+                .execute();
 
+        if (updatedCount == 0) {
+            return Optional.empty();
+        }
+
+        return getUserByRequest(userId);
+    }
+
+    @Override
+    public Optional<User> getUserByRequest(Long userId) {
+        return Optional.ofNullable(queryFactory
+                .selectFrom(user)
+                .where(user.id.eq(userId))
+                .fetchOne());
+    }
+
+    @Override
+    public Optional<BigDecimal> getAmountByUserIdWithLock(Long userId) {
+        return Optional.ofNullable(queryFactory
+                .select(user.point)
+                .from(user)
+                .where(user.id.eq(userId))
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                .fetchOne());
+    }
+
+    @Override
+    public Optional<User> getByIdWithLock(Long userId) {
+        return Optional.ofNullable(queryFactory
+                .selectFrom(user)
+                .where(user.id.eq(userId))
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                .fetchOne());
     }
 }

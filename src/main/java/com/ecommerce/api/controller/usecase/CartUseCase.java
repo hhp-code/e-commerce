@@ -1,7 +1,6 @@
 package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.domain.order.Order;
-import com.ecommerce.domain.order.OrderItem;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.Product;
@@ -21,19 +20,17 @@ public class CartUseCase {
     public Order addCartItemToOrder(OrderCommand.Add command) {
         Order order = orderService.getOrCreateOrder(command);
         Product product = productService.getProduct(command.productId());
-        if (product.getAvailableStock() < command.quantity()) {
+        if (product.getStock() < command.quantity()) {
             throw new IllegalStateException("상품의 재고가 부족합니다. 상품 ID: " + command.productId());
         }
-
-        OrderItem orderItem = new OrderItem(product, command.quantity());
-        order.addOrderItem(orderItem);
-
+        order.addOrderItem(product, command.quantity());
         return orderService.saveAndGet(order);
     }
 
     public Order deleteCartItemToOrder(OrderCommand.Delete orderDeleteItem) {
         Order order = orderService.getOrder(orderDeleteItem.orderId());
-        order.deleteOrderItem(orderDeleteItem.productId());
+        Product product = productService.getProduct(orderDeleteItem.productId());
+        order.deleteOrderItem(product);
         return orderService.saveAndGet(order);
     }
 }

@@ -44,3 +44,5 @@ settings.gradle
 application.yml
 
 src/main/generated/*
+
+.env

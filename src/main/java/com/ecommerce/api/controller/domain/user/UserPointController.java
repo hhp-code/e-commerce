@@ -1,8 +1,8 @@
 package com.ecommerce.api.controller.domain.user;
 
 import com.ecommerce.api.controller.domain.user.dto.UserDto;
-import com.ecommerce.api.controller.domain.user.dto.UserBalanceMapper;
-import com.ecommerce.domain.user.service.UserBalanceService;
+import com.ecommerce.api.controller.domain.user.dto.UserMapper;
+import com.ecommerce.domain.user.service.UserPointService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,12 +17,12 @@ import java.math.BigDecimal;
 @Tag(name = "user_balance", description = "잔액 관련 API")
 @RestController
 @RequestMapping("/api")
-public class UserBalanceController {
+public class UserPointController {
 
-    private final UserBalanceService userBalanceService;
+    private final UserPointService userPointService;
 
-    public UserBalanceController(UserBalanceService userBalanceService) {
-        this.userBalanceService = userBalanceService;
+    public UserPointController(UserPointService userPointService) {
+        this.userPointService = userPointService;
     }
 
     @GetMapping("/balance/{userId}")
@@ -34,8 +34,8 @@ public class UserBalanceController {
     })
     public UserDto.UserBalanceResponse getBalance(
             @Parameter(description = "사용자 ID") @PathVariable Long userId) {
-        return UserBalanceMapper.toResponse(
-                userBalanceService.getBalance(userId));
+        return UserMapper.toBalanceResponse(
+                userPointService.getPoint(userId));
     }
 
     @PostMapping("/balance/{userId}/charge")
@@ -48,8 +48,11 @@ public class UserBalanceController {
     })
     public UserDto.UserBalanceResponse chargeBalance(
             @Parameter(description = "사용자 ID") @PathVariable Long userId,
-            @Parameter(description = "충전 요청 정보") @RequestBody BigDecimal request) {
-        return UserBalanceMapper.toResponse(
-                userBalanceService.chargeBalance(UserBalanceMapper.toCommand(userId, request)));
+            @Parameter(description = "충전 요청 정보") @RequestBody BigDecimal amount) {
+        if(amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("충전 금액은 0보다 커야 합니다.");
+        }
+        return UserMapper.toBalanceResponse(
+                userPointService.chargePoint(userId, amount));
     }
 }

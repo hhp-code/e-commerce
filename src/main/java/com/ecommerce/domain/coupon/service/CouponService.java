@@ -1,5 +1,6 @@
 package com.ecommerce.domain.coupon.service;
 
+import com.ecommerce.api.exception.domain.CouponException;
 import com.ecommerce.domain.coupon.service.repository.CouponRepository;
 import com.ecommerce.domain.coupon.Coupon;
 import org.springframework.stereotype.Component;
@@ -18,41 +19,35 @@ public class CouponService {
         Coupon coupon = new Coupon(create.code(),
                 create.discountAmount(),
                 create.type(),
-                create.remainingQuantity(),
+                create.quantity(),
                 create.validFrom(),
                 create.validTo(), true);
         return couponRepository.save(coupon).orElseThrow(
-                () -> new RuntimeException("쿠폰을 생성할 수 없습니다.")
+                () -> new CouponException.ServiceException("쿠폰을 생성할 수 없습니다.")
         );
     }
 
+    @Transactional(readOnly = true)
     public Coupon getCoupon(Long couponId) {
         return couponRepository.getById(couponId).orElseThrow(
-                () -> new RuntimeException("쿠폰을 찾을 수 없습니다.")
+                () -> new CouponException.ServiceException("쿠폰을 찾을 수 없습니다.")
         );
     }
 
-    public void updateCoupon(Coupon coupon) {
-        couponRepository.save(coupon).orElseThrow(
-                () -> new RuntimeException("쿠폰을 업데이트할 수 없습니다.")
-        );
-    }
-
-    public Coupon decrementCouponQuantity(Long couponId) {
+    @Transactional
+    public Coupon deductCoupon(Long couponId) {
         Coupon coupon = getCoupon(couponId);
-        if (coupon.decrementQuantity()) {
-            throw new IllegalStateException("쿠폰 수량이 부족합니다.");
+        if (coupon.deductQuantity()) {
+            throw new CouponException.ServiceException("쿠폰 수량이 부족합니다.");
         }
         return coupon;
     }
 
-    public void save(Coupon coupon) {
+    @Transactional
+    public void saveCoupon(Coupon coupon) {
         couponRepository.save(coupon).orElseThrow(
-                () -> new RuntimeException("쿠폰을 저장할 수 없습니다.")
+                () -> new CouponException.ServiceException("쿠폰을 저장할 수 없습니다.")
         );
     }
 
-    public int getRemainingQunatity(Long couponId) {
-        return couponRepository.getRemainingQuantity(couponId);
-    }
 }

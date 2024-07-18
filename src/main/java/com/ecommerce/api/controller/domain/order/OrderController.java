@@ -81,10 +81,10 @@ public class OrderController {
     }
     @DeleteMapping("/orders/{orderId}/items")
     @Operation(
-            summary = "주문 상품 추가",
-            description = "기존 주문에 새로운 상품을 추가합니다.",
+            summary = "주문 상품 제거",
+            description = "기존 주문에 새로운 상품을 제거합니다.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "상품 추가 성공",
+                    @ApiResponse(responseCode = "200", description = "상품 제거 성공",
                             content = @Content(schema = @Schema(implementation = OrderDto.OrderResponse.class))),
                     @ApiResponse(responseCode = "400", description = "잘못된 요청"),
                     @ApiResponse(responseCode = "404", description = "주문을 찾을 수 없음")
@@ -145,4 +145,6 @@ public class OrderController {
         request.validate();
         return OrderMapper.toOrderResponse(paymentUseCase.cancelOrder(OrderMapper.toOrderCancel(request)));
     }
+
+
 }

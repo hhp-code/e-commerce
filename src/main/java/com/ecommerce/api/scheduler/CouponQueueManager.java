@@ -1,6 +1,7 @@
 package com.ecommerce.api.scheduler;
 
 import com.ecommerce.api.controller.usecase.CouponUseCase;
+import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.service.CouponCommand;
 import com.ecommerce.domain.coupon.service.CouponService;
 import com.ecommerce.domain.user.User;
@@ -13,6 +14,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,8 +25,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class CouponQueueManager {
 
+    @Getter
     private final ConcurrentLinkedQueue<CouponCommand.Issue> couponQueue = new ConcurrentLinkedQueue<>();
+    @Getter
     private final Map<Long, CouponCommand.Issue> resultMap = new ConcurrentHashMap<>();
+
     private final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     private final AtomicInteger processedRequestsCount = new AtomicInteger(0);
 
@@ -34,54 +41,65 @@ public class CouponQueueManager {
     private Long currentCouponId;
 
     @Getter @Setter
-    private int rateLimit = 1000; // 초당 처리할 수 있는 최대 요청 수
+    private int rateLimit = 1000;
 
     public CouponQueueManager(CouponUseCase couponUseCase, UserService userService, CouponService couponService) {
         this.couponUseCase = couponUseCase;
         this.userService = userService;
         this.couponService = couponService;
     }
-
+    public boolean shouldProcessCoupons() {
+        return currentCouponId != null;
+    }
     @Scheduled(fixedRate = 1000)
     public void processCouponRequests() {
-        if (currentCouponId == null) {
-            log.warn("No coupon ID set for processing");
+        if(!shouldProcessCoupons()){
+            return;
+        }
+        Coupon coupon = couponService.getCoupon(currentCouponId);
+        int quantity = coupon.getQuantity();
+        if (quantity <= 0) {
+            log.info("쿠폰이 더 없습니다잉");
             return;
         }
 
-        int remainingCoupons = couponService.getRemainingQunatity(currentCouponId);
-        if (remainingCoupons <= 0) {
-            log.info("No more coupons available. Stopping processing.");
-            return;
-        }
-
-        int processLimit = Math.min(Math.min(remainingCoupons, couponQueue.size()), rateLimit);
+        int processLimit = Math.min(Math.min(quantity, couponQueue.size()), rateLimit);
         processedRequestsCount.set(0);
         processRequests(processLimit);
 
-        log.info("Processed {} requests. Remaining coupons: {}", processedRequestsCount.get(), remainingCoupons - processedRequestsCount.get());
+        log.info("처리한 {} 요청. 남은 쿠폰: {}", processedRequestsCount.get(), quantity - processedRequestsCount.get());
     }
 
     private void processRequests(int limit) {
-        for (int i = 0; i < limit; i++) {
+        List<CouponCommand.Issue> batch = new ArrayList<>();
+        for (int i = 0; i < limit && !couponQueue.isEmpty(); i++) {
             CouponCommand.Issue request = couponQueue.poll();
             if (request != null) {
-                executorService.submit(() -> processCouponRequest(request));
-            } else {
-                break;
+                batch.add(request);
             }
+        }
+
+        if (!batch.isEmpty()) {
+            batch.sort(Comparator.comparing(CouponCommand.Issue::timeStamp));
+            executorService.submit(() -> processBatch(batch));
         }
     }
 
-    private void processCouponRequest(CouponCommand.Issue request) {
+    private void processBatch(List<CouponCommand.Issue> batch) {
+        for (CouponCommand.Issue request : batch) {
+            processCouponRequest(request);
+        }
+    }
+
+    public void processCouponRequest(CouponCommand.Issue request) {
         try {
-            log.info("Processing coupon request for user: {}", request.userId());
+            log.info("사용자 쿠폰 처리 요청중: {}", request.userId());
             updateRequestStatus(request, CouponCommand.Issue.Status.PROCESSING);
             couponUseCase.issueCouponToUser(request);
             updateRequestStatus(request, CouponCommand.Issue.Status.COMPLETED);
-            log.info("Coupon request completed for user: {}", request.userId());
+            log.info("사용자 쿠폰 처리 완료: {}", request.userId());
         } catch (Exception e) {
-            log.error("Failed to process coupon request for user: {}", request.userId(), e);
+            log.error("사용자 쿠폰 처리 실패: {}", request.userId(), e);
             updateRequestStatus(request, CouponCommand.Issue.Status.FAILED);
         } finally {
             processedRequestsCount.incrementAndGet();
@@ -102,23 +120,23 @@ public class CouponQueueManager {
 
     private User waitForCompletion(CouponCommand.Issue issue) {
         long startTime = System.currentTimeMillis();
-        long timeout = 60000; // 60 seconds timeout
+        long timeout = 60000;
 
         while (System.currentTimeMillis() - startTime < timeout) {
             CouponCommand.Issue current = resultMap.get(issue.userId());
             if (current.status() == CouponCommand.Issue.Status.COMPLETED) {
                 return userService.getUser(issue.userId());
             } else if (current.status() == CouponCommand.Issue.Status.FAILED) {
-                throw new RuntimeException("Coupon issue failed");
+                throw new RuntimeException("쿠폰 발급 실패");
             }
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new RuntimeException("Interrupted while waiting for coupon issue", e);
+                throw new RuntimeException("쿠폰 발급중 오류가 발생했습니다.", e);
             }
         }
-        throw new RuntimeException("Coupon issue timed out");
+        throw new RuntimeException("쿠폰 발급에 시간이 초과되었습니다.");
     }
 
     public CouponCommand.Issue checkStatus(Long userId) {

@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface CouponJPARepository extends JpaRepository<Coupon, Long> {
     @Query("SELECT c.quantity FROM Coupon c WHERE c.id = :couponId")
-    int getRemainingQuantity(Long couponId);
+    Integer getRemainingQuantity(Long couponId);
 }

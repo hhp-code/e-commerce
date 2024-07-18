@@ -1,14 +1,10 @@
 package com.ecommerce.api.controller.domain.user;
 
-import com.ecommerce.domain.user.service.UserBalanceCommand;
-import com.ecommerce.domain.user.service.UserBalanceService;
-import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.ecommerce.domain.user.service.UserPointService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -23,8 +19,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(UserBalanceController.class)
-class UserBalanceControllerTest {
+@WebMvcTest(UserPointController.class)
+class UserPointControllerTest {
 
     private static final String API_BALANCE = "/api/balance";
     private static final String API_BALANCE_CHARGE = "/api/balance/{userId}/charge";
@@ -38,19 +34,14 @@ class UserBalanceControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private UserBalanceService userBalanceService;
+    private UserPointService userPointService;
 
-    private UserBalanceCommand.Create balanceRequest;
 
-    @BeforeEach
-    void setUp() {
-        balanceRequest = new UserBalanceCommand.Create(USER_ID, INITIAL_BALANCE);
-    }
 
     @Test
     @DisplayName("잔액 조회 성공")
     void getBalance_ShouldReturnBalance_WhenUserExists() throws Exception {
-        given(userBalanceService.getBalance(USER_ID)).willReturn(INITIAL_BALANCE);
+        given(userPointService.getPoint(USER_ID)).willReturn(INITIAL_BALANCE);
 
         mockMvc.perform(get(API_BALANCE + "/{userId}", USER_ID))
                 .andExpect(status().isOk())
@@ -59,13 +50,13 @@ class UserBalanceControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.error").doesNotExist());
 
-        verify(userBalanceService).getBalance(USER_ID);
+        verify(userPointService).getPoint(USER_ID);
     }
 
     @Test
     @DisplayName("잔액 조회 실패 - 사용자 없음")
     void getBalance_ShouldReturnNotFound_WhenUserDoesNotExist() throws Exception {
-        given(userBalanceService.getBalance(USER_ID)).willThrow(new IllegalArgumentException("User not found"));
+        given(userPointService.getPoint(USER_ID)).willThrow(new IllegalArgumentException("User not found"));
 
         mockMvc.perform(get(API_BALANCE + "/{userId}", USER_ID))
                 .andExpect(status().isBadRequest())
@@ -73,14 +64,14 @@ class UserBalanceControllerTest {
                 .andExpect(jsonPath("$.error").exists())
                 .andExpect(jsonPath("$.message").value("User not found"));
 
-        verify(userBalanceService).getBalance(USER_ID);
+        verify(userPointService).getPoint(USER_ID);
     }
 
     @Test
     @DisplayName("잔액 충전 성공")
-    void chargeBalance_ShouldReturnUpdatedBalance_WhenRequestIsValid() throws Exception {
+    void chargeBalance_ShouldReturnUpdatedPoint_WhenRequestIsValid() throws Exception {
         BigDecimal chargeAmount = BigDecimal.valueOf(1000);
-        given(userBalanceService.chargeBalance(any(UserBalanceCommand.Create.class))).willReturn(INITIAL_BALANCE);
+        given(userPointService.chargePoint(any(),any())).willReturn(INITIAL_BALANCE);
 
         mockMvc.perform(post(API_BALANCE_CHARGE, USER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -91,12 +82,12 @@ class UserBalanceControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.error").doesNotExist());
 
-        verify(userBalanceService).chargeBalance(any(UserBalanceCommand.Create.class));
+        verify(userPointService).chargePoint(any(),any());
     }
 
     @Test
     @DisplayName("잔액 충전 실패 - 잘못된 요청")
-    void chargeBalance_ShouldReturnBadRequest_WhenRequestIsInvalid() throws Exception {
+    void chargePoint_ShouldReturnBadRequest_WhenRequestIsInvalid() throws Exception {
         BigDecimal invalidAmount = BigDecimal.valueOf(-1000);  // 음수 값으로 테스트
         mockMvc.perform(post(API_BALANCE_CHARGE, USER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -104,6 +95,6 @@ class UserBalanceControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("금액은 0하고 같거나 커야 합니다."));
+                .andExpect(jsonPath("$.message").value("충전 금액은 0보다 커야 합니다."));
     }
 }

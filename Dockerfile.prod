@@ -1,0 +1,8 @@
+FROM openjdk:21-slim as builder
+WORKDIR /app
+COPY . .
+RUN ./gradlew build -x test
+
+FROM openjdk:21-slim
+COPY --from=builder /app/build/libs/your-app.jar app.jar
+CMD ["java", "-jar", "app.jar"]

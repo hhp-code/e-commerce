@@ -6,6 +6,7 @@ import com.ecommerce.domain.coupon.service.CouponCommand;
 import com.ecommerce.domain.coupon.service.CouponService;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.user.User;
+import com.ecommerce.domain.user.service.UserCouponService;
 import com.ecommerce.domain.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -30,6 +30,8 @@ class CouponUseCaseTest {
 
     @Mock
     private UserService userService;
+    @Mock
+    private UserCouponService userCouponService;
 
     @Mock
     private OrderService orderService;
@@ -44,7 +46,7 @@ class CouponUseCaseTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        couponUseCase = new CouponUseCase(orderService, couponService, userService);
+        couponUseCase = new CouponUseCase(orderService, couponService, userService,userCouponService);
         issue = new CouponCommand.Issue(1L, 1L, CouponCommand.Issue.Status.PENDING, Instant.now());
         coupon = new Coupon(1L, "CODE123", BigDecimal.TEN, DiscountType.FIXED_AMOUNT, 100,
                 LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
@@ -83,8 +85,8 @@ class CouponUseCaseTest {
 
 
         when(userService.getUser(issue.userId())).thenReturn(user);
-        when(couponService.decrementCouponQuantity(issue.couponId())).thenReturn(coupon);
-        when(userService.updateUserCoupon(user,coupon)).thenReturn(user);
+        when(couponService.deductCoupon(issue.couponId())).thenReturn(coupon);
+        when(userCouponService.updateUserCoupon(user,coupon)).thenReturn(user);
         // When
         User result = couponUseCase.issueCouponToUser(issue);
 

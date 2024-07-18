@@ -1,7 +1,9 @@
 package com.ecommerce.api.controller.domain.product;
 
+import com.ecommerce.api.controller.domain.order.dto.OrderDto;
 import com.ecommerce.api.controller.domain.product.dto.ProductDto;
 import com.ecommerce.api.controller.domain.product.dto.ProductMapper;
+import com.ecommerce.api.controller.usecase.PopularProductCase;
 import com.ecommerce.domain.product.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,9 +20,11 @@ import org.springframework.web.bind.annotation.*;
 public class ProductController {
 
     private final ProductService productService;
+    private final PopularProductCase popularProductCase;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, PopularProductCase popularProductCase) {
         this.productService = productService;
+        this.popularProductCase = popularProductCase;
     }
 
     @GetMapping
@@ -54,7 +58,7 @@ public class ProductController {
                     content = @Content(schema = @Schema(implementation = ProductDto.ProductListResponse.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
-    public ProductDto.ProductListResponse getPopularProducts() {
-        return ProductMapper.toProductListResponse(productService.getPopularProducts());
+    public OrderDto.PopularListResponse getPopularProducts() {
+        return ProductMapper.toPopulartListResponse(popularProductCase.getPopularProducts());
     }
 }

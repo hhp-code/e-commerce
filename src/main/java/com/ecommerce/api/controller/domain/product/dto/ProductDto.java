@@ -12,5 +12,4 @@ public class ProductDto {
     }
     public record ProductListResponse(List<Product> products) {
     }
-
 }

@@ -30,6 +30,7 @@ public class UserCouponController {
         this.couponQueueManager = couponQueueManager;
         this.userService = userService;
     }
+
     @PostMapping("/users/{userId}/coupons")
     @Operation(summary = "사용자에게 쿠폰 발급", description = "특정 사용자에게 쿠폰을 발급합니다.",
             responses = {

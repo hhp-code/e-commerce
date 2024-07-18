@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -21,6 +22,7 @@ import java.util.concurrent.*;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class CouponQueueManagerTest {
 
     @Autowired
@@ -43,7 +45,7 @@ public class CouponQueueManagerTest {
 
     private void createTestData() {
         Coupon coupon = new Coupon("TESTCOUPON", BigDecimal.valueOf(30), DiscountType.FIXED_AMOUNT, COUPON_COUNT);
-        couponService.save(coupon);
+        couponService.saveCoupon(coupon);
 
         List<User> users = new ArrayList<>();
         for (int i = 0; i < USER_COUNT; i++) {
@@ -92,11 +94,11 @@ public class CouponQueueManagerTest {
         });
 
         System.out.println("Success count: " + successCount);
-        assertEquals(successCount, couponQueueManager.getResultMap().values().stream()
+        assertEquals(Double.valueOf((float) successCount), couponQueueManager.getResultMap().values().stream()
                 .filter(issue -> issue.status().equals(CouponCommand.Issue.Status.COMPLETED))
                 .count());
         System.out.println("Fail count: " + failCount);
-        assertEquals(failCount, couponQueueManager.getResultMap().values().stream()
+        assertEquals(Float.valueOf(failCount), couponQueueManager.getResultMap().values().stream()
                 .filter(issue -> issue.status().equals(CouponCommand.Issue.Status.FAILED))
                 .count());
     }

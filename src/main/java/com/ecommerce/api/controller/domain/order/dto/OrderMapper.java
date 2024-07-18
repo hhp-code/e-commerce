@@ -3,8 +3,10 @@ package com.ecommerce.api.controller.domain.order.dto;
 
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.Order;
+import com.ecommerce.domain.product.Product;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class OrderMapper {
@@ -13,23 +15,24 @@ public class OrderMapper {
     }
 
     private static OrderDto.OrderResponse convertToOrderResponse(Order order) {
-        return new OrderDto.OrderResponse(order.getId(),
-                order.getOrderDate(),
-                order.getRegularPrice(),
-                order.getSalePrice(),
-                order.getSellingPrice(),
-                order.getOrderStatus(),
-                order.isDeleted(),
-                order.getDeletedAt(),
-                order.getOrderItems());
+        return convertOrderResponse(order);
     }
 
     public static OrderCommand.Create toOrder(OrderDto.OrderCreateRequest request) {
+
         return new OrderCommand.Create(request.customerId(),request.items());
     }
 
 
     public static OrderDto.OrderResponse toOrderResponse(Order order) {
+        return convertOrderResponse(order);
+
+    }
+
+    private static OrderDto.OrderResponse convertOrderResponse(Order order) {
+        Map<Product, Integer> orderItems = order.getOrderItems();
+        Map<Long,Integer> items = orderItems.entrySet().stream()
+                .collect(Collectors.toMap(entry -> entry.getKey().getId(), Map.Entry::getValue));
         return new OrderDto.OrderResponse(order.getId(),
                 order.getOrderDate(),
                 order.getRegularPrice(),
@@ -38,8 +41,7 @@ public class OrderMapper {
                 order.getOrderStatus(),
                 order.isDeleted(),
                 order.getDeletedAt(),
-                order.getOrderItems());
-
+                items);
     }
 
     public static OrderCommand.Search toSearch(OrderDto.OrderListRequest request) {

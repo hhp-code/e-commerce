@@ -20,5 +20,4 @@ public class UserDto {
     }
     public record IssueStatusResponse(long userId, long couponId, CouponCommand.Issue.Status couponQueueStatus){}
 
-
 }

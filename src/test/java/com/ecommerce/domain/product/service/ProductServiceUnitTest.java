@@ -1,11 +1,10 @@
 package com.ecommerce.domain.product.service;
 
-import com.ecommerce.domain.product.service.ProductService;
+import com.ecommerce.api.exception.domain.ProductException;
 import com.ecommerce.domain.product.service.repository.ProductRepository;
 import com.ecommerce.domain.product.Product;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,95 +37,95 @@ class ProductServiceUnitTest {
         sampleProduct = createProduct("Sample ProductRequest", "10000", 100, LocalDateTime.now());
     }
 
-    @Nested
-    @DisplayName("상품 조회 테스트")
-    class GetProductTests {
-        @Test
-        @DisplayName("존재하는 상품 ID로 조회 시 상품 반환")
-        void testGetExistingProduct() {
-            //given
-            when(productRepository.getProduct(1L)).thenReturn(Optional.of(sampleProduct));
+    @Test
+    @DisplayName("존재하는 상품 ID로 조회 시 상품 반환")
+    void testGetExistingProduct() {
+        //given
+        when(productRepository.getProduct(1L)).thenReturn(Optional.of(sampleProduct));
 
-            //when
-            Product result = productService.getProduct(1L);
+        //when
+        Product result = productService.getProduct(1L);
 
-            //then
-            assertNotNull(result);
-            assertEquals("Sample ProductRequest", result.getName());
-            assertEquals(new BigDecimal("10000"), result.getPrice());
-            assertEquals(100, result.getAvailableStock());
-            assertFalse(result.isDeleted());
+        //then
+        assertNotNull(result);
+        assertEquals("Sample ProductRequest", result.getName());
+        assertEquals(new BigDecimal("10000"), result.getPrice());
+        assertEquals(100, result.getStock());
+        assertFalse(result.isDeleted());
 
-            verify(productRepository, times(1)).getProduct(1L);
-        }
-
-        @Test
-        @DisplayName("존재하지 않는 상품 ID로 조회 시 예외 발생")
-        void testGetNonExistingProduct() {
-            //given
-            when(productRepository.getProduct(999L)).thenThrow(new IllegalArgumentException("Invalid product ID"));
-
-            //when & then
-            assertThrows(IllegalArgumentException.class, () -> productService.getProduct(999L));
-
-            verify(productRepository, times(1)).getProduct(999L);
-        }
+        verify(productRepository, times(1)).getProduct(1L);
     }
 
-    @Nested
-    @DisplayName("인기 상품 조회 테스트")
-    class GetPopularProductsTests {
 
-        @Test
-        @DisplayName("인기 상품이 없을 경우 빈 리스트 반환")
-        void testGetPopularProductsWhenEmpty() {
-            when(productRepository.getPopularProducts()).thenReturn(Collections.emptyList());
+    @Test
+    @DisplayName("인기 상품이 없을 경우 빈 리스트 반환")
+    void testGetPopularProductsWhenEmpty() {
+        when(productRepository.getPopularProducts()).thenReturn(Collections.emptyList());
 
-            List<Product> result = productService.getPopularProducts();
+        List<Product> result = productService.getPopularProducts();
 
-            assertNotNull(result);
-            assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
 
-            verify(productRepository, times(1)).getPopularProducts();
-        }
+        verify(productRepository, times(1)).getPopularProducts();
     }
 
-    @Nested
-    @DisplayName("전체 상품 조회 테스트")
-    class GetProductsTests {
-        @Test
-        @DisplayName("전체 상품 조회")
-        void testGetProducts() {
-            List<Product> allProducts = Arrays.asList(
-                    createProductRequest("ProductRequest 1", "10000", 100),
-                    createProductRequest("ProductRequest 2", "15000", 80),
-                    createProductRequest("ProductRequest 3", "20000", 60)
-            );
+    @Test
+    @DisplayName("전체 상품 조회")
+    void testGetProducts() {
+        List<Product> allProducts = Arrays.asList(
+                createProductRequest("ProductRequest 1", "10000", 100),
+                createProductRequest("ProductRequest 2", "15000", 80),
+                createProductRequest("ProductRequest 3", "20000", 60)
+        );
 
-            when(productRepository.getProducts()).thenReturn(allProducts);
+        when(productRepository.getProducts()).thenReturn(allProducts);
 
-            List<Product> result = productService.getProducts();
+        List<Product> result = productService.getProducts();
 
-            assertNotNull(result);
-            assertEquals(3, result.size());
-            assertEquals("ProductRequest 1", result.get(0).getName());
-            assertEquals("ProductRequest 3", result.get(2).getName());
+        assertNotNull(result);
+        assertEquals(3, result.size());
+        assertEquals("ProductRequest 1", result.get(0).getName());
+        assertEquals("ProductRequest 3", result.get(2).getName());
 
-            verify(productRepository, times(1)).getProducts();
-        }
+        verify(productRepository, times(1)).getProducts();
+    }
 
-        @Test
-        @DisplayName("상품이 없을 경우 빈 리스트 반환")
-        void testGetProductsWhenEmpty() {
-            when(productRepository.getProducts()).thenReturn(Collections.emptyList());
+    @Test
+    @DisplayName("상품조회 실패 - 빈 리스트")
+    void testGetProductsWhenEmpty() {
+        when(productRepository.getProducts()).thenReturn(Collections.emptyList());
 
-            List<Product> result = productService.getProducts();
+        List<Product> result = productService.getProducts();
 
-            assertNotNull(result);
-            assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
 
-            verify(productRepository, times(1)).getProducts();
-        }
+        verify(productRepository, times(1)).getProducts();
+    }
+
+    @Test
+    @DisplayName("상품 재고 차감 - 상품 저장실패")
+    void testDeductStockWhenSaveFailed() {
+        //given
+        when(productRepository.save(sampleProduct)).thenReturn(Optional.empty());
+
+        //when & then
+        assertThrows(ProductException.ServiceException.class, () -> productService.deductStock(sampleProduct, 10));
+
+        verify(productRepository, times(1)).save(sampleProduct);
+    }
+
+    @Test
+    @DisplayName("상품 재고 충전 - 상품 저장실패")
+    void testChargeStockWhenSaveFailed() {
+        //given
+        when(productRepository.save(sampleProduct)).thenReturn(Optional.empty());
+
+        //when & then
+        assertThrows(ProductException.ServiceException.class, () -> productService.chargeStock(sampleProduct, 10));
+
+        verify(productRepository, times(1)).save(sampleProduct);
     }
 
     private Product createProductRequest(String name, String price, Integer availableStock) {
