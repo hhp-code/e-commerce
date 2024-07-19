@@ -113,6 +113,7 @@ public class CouponQueueManager {
 
     public CompletableFuture<User> addToQueueAsync(CouponCommand.Issue issue) {
         CouponCommand.Issue pending = new CouponCommand.Issue(issue.couponId(), issue.userId(), CouponCommand.Issue.Status.PENDING, issue.timeStamp());
+        setCurrentCouponId(issue.couponId());
         resultMap.put(issue.userId(), pending);
         couponQueue.offer(pending);
         return CompletableFuture.supplyAsync(() -> waitForCompletion(issue), executorService);
