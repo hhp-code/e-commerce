@@ -8,7 +8,6 @@ import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
 import jakarta.annotation.PreDestroy;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -37,16 +36,18 @@ public class CouponQueueManager {
     private final UserService userService;
     private final CouponService couponService;
 
-    @Getter @Setter
+    @Getter
     private Long currentCouponId;
 
-    @Getter @Setter
-    private int rateLimit = 1000;
+    @Getter
+    private final int rateLimit;
 
     public CouponQueueManager(CouponUseCase couponUseCase, UserService userService, CouponService couponService) {
         this.couponUseCase = couponUseCase;
         this.userService = userService;
         this.couponService = couponService;
+        this.currentCouponId = null;
+        this.rateLimit = 1000;
     }
     public boolean shouldProcessCoupons() {
         return currentCouponId != null;
@@ -113,7 +114,7 @@ public class CouponQueueManager {
 
     public CompletableFuture<User> addToQueueAsync(CouponCommand.Issue issue) {
         CouponCommand.Issue pending = new CouponCommand.Issue(issue.couponId(), issue.userId(), CouponCommand.Issue.Status.PENDING, issue.timeStamp());
-        setCurrentCouponId(issue.couponId());
+        this.currentCouponId = issue.couponId();
         resultMap.put(issue.userId(), pending);
         couponQueue.offer(pending);
         return CompletableFuture.supplyAsync(() -> waitForCompletion(issue), executorService);
