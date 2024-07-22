@@ -38,7 +38,6 @@ public class CouponQueueManagerTest {
     @BeforeEach
     void setUp() {
         createTestData();
-        couponQueueManager.setCurrentCouponId(1L);
     }
 
     private void createTestData() {

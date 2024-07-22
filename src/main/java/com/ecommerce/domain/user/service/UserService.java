@@ -4,14 +4,24 @@ import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.hibernate.Hibernate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 @Component
 public class UserService {
     private final UserRepository userRepository;
+    @Autowired
+    @Qualifier("asyncExecutor")
+    private Executor asyncExecutor;
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -64,5 +74,17 @@ public class UserService {
 
     public void saveAll(List<User> users) {
         userRepository.saveAll(users);
+    }
+
+
+    public void deleteAll() {
+        userRepository.deleteAll();
+    }
+    @Transactional(readOnly = true)
+    public User getUserWithCoupon(Long aLong) {
+        return userRepository.getUserWithCoupon(aLong).orElseThrow(
+                () -> new RuntimeException("사용자 정보를 찾을 수 없습니다.")
+        );
+
     }
 }

@@ -55,4 +55,12 @@ public class CouponService {
     public int getRemainingQunatity(Long couponId) {
         return couponRepository.getRemainingQuantity(couponId);
     }
+
+    public void deleteAll() {
+        couponRepository.deleteAll();
+    }
+
+    public int getRemainingQuantity(Long currentCouponId) {
+        return couponRepository.getRemainingQuantity(currentCouponId);
+    }
 }

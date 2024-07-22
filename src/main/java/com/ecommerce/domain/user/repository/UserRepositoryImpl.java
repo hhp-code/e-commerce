@@ -86,4 +86,9 @@ public class UserRepositoryImpl implements UserRepository {
         userJPARepository.saveAll(users);
 
     }
+
+    @Override
+    public Optional<User> getUserWithCoupon(Long userId) {
+        return userJPARepository.getUserWithCoupon(userId);
+    }
 }

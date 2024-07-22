@@ -2,6 +2,7 @@ package com.ecommerce.domain.coupon.repository;
 
 import com.ecommerce.domain.coupon.service.repository.CouponRepository;
 import com.ecommerce.domain.coupon.Coupon;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -29,7 +30,14 @@ public class CouponRepositoryImpl implements CouponRepository {
 
     @Override
     public int getRemainingQuantity(Long couponId) {
-        return couponJPARepository.getRemainingQuantity(couponId);
+        Coupon coupon = couponJPARepository.findById(couponId)
+                .orElseThrow(() -> new EntityNotFoundException("쿠폰을 찾을 수 없습니다: " + couponId));
+        return coupon.getQuantity();
 
+    }
+
+    @Override
+    public void deleteAll() {
+        couponJPARepository.deleteAll();
     }
 }

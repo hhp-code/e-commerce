@@ -11,4 +11,6 @@ public interface CouponRepository {
     Optional<Coupon> getById(Long couponId);
 
     int getRemainingQuantity(Long couponId);
+
+    void deleteAll();
 }

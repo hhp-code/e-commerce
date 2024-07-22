@@ -22,4 +22,7 @@ public interface UserRepository {
     boolean hasCoupon(Long aLong, Long aLong1);
 
     void saveAll(List<User> users);
+
+
+    Optional<User> getUserWithCoupon(Long userId);
 }
