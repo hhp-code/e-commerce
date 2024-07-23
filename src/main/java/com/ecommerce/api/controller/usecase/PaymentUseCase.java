@@ -6,8 +6,7 @@ import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
-import com.ecommerce.domain.user.service.UserBalanceCommand;
-import com.ecommerce.domain.user.service.UserBalanceService;
+import com.ecommerce.domain.user.service.UserPointService;
 import com.ecommerce.domain.user.service.UserService;
 import com.ecommerce.domain.order.service.external.DummyPlatform;
 import org.springframework.stereotype.Component;
@@ -19,14 +18,14 @@ public class PaymentUseCase {
     private final OrderService orderService;
     private final ProductService productService;
     private final DummyPlatform dummyPlatform;
-    private final UserBalanceService userBalanceService;
+    private final UserPointService userPointService;
     private final UserService userService;
 
-    public PaymentUseCase(OrderService orderService, ProductService productService, DummyPlatform dummyPlatformUseCase, UserBalanceService userBalanceService, UserService userService) {
+    public PaymentUseCase(OrderService orderService, ProductService productService, DummyPlatform dummyPlatformUseCase, UserPointService userPointService, UserService userService) {
         this.orderService = orderService;
         this.productService = productService;
         this.dummyPlatform = dummyPlatformUseCase;
-        this.userBalanceService = userBalanceService;
+        this.userPointService = userPointService;
         this.userService = userService;
     }
 
@@ -38,7 +37,7 @@ public class PaymentUseCase {
             for (OrderItem item : orderItems) {
                 productService.decreaseStock(item.getProduct(), item.getQuantity());
             }
-            userBalanceService.decreaseBalance(order.getUser(), order.getTotalAmount());
+            userPointService.deductPoint(orderPay.userId(), order.getTotalAmount());
             orderService.saveAndGet(order).finish();
             boolean externalSystemSuccess = dummyPlatform.send(order);
             if (!externalSystemSuccess) {
@@ -60,8 +59,7 @@ public class PaymentUseCase {
         for (OrderItem item : orderItems) {
             productService.increaseStock(item.getProduct(), item.getQuantity());
         }
-        UserBalanceCommand.Create request = new UserBalanceCommand.Create(order.getUser().getId(), order.getTotalAmount());
-        userBalanceService.chargeBalance(request);
+        userPointService.chargePoint(order.getUser().getId(), order.getTotalAmount());
         orderService.saveAndGet(order).cancel();
         dummyPlatform.send(order);
         return order;

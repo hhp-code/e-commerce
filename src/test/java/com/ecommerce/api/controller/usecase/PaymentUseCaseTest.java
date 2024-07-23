@@ -8,8 +8,7 @@ import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
-import com.ecommerce.domain.user.service.UserBalanceCommand;
-import com.ecommerce.domain.user.service.UserBalanceService;
+import com.ecommerce.domain.user.service.UserPointService;
 import com.ecommerce.domain.order.service.external.DummyPlatform;
 import com.ecommerce.domain.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
@@ -35,7 +34,7 @@ class PaymentUseCaseTest {
     @Mock
     private ProductService productService;
     @Mock
-    private UserBalanceService userBalanceService;
+    private UserPointService userPointService;
     @Mock
     private DummyPlatform dummyPlatform;
     @Mock
@@ -80,7 +79,7 @@ class PaymentUseCaseTest {
         Order mockOrder = createMockOrder();
         OrderCommand.Payment paymentCommand = new OrderCommand.Payment(USER_ID,ORDER_ID);
         when(orderService.getOrder(ORDER_ID)).thenReturn(mockOrder);
-        doThrow(new RuntimeException("잔액 부족")).when(userBalanceService).decreaseBalance(any(User.class), any(BigDecimal.class));
+        doThrow(new RuntimeException("잔액 부족")).when(userPointService).deductPoint(any(Long.class), any(BigDecimal.class));
 
         // When & Then
         assertThrows(RuntimeException.class, () -> paymentUseCase.payOrder(paymentCommand));

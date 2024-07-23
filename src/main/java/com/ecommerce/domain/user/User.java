@@ -24,7 +24,7 @@ public class User {
 
     @Setter
     @Getter
-    private BigDecimal balance;
+    private BigDecimal point;
 
     private boolean isDeleted;
     private LocalDateTime deletedAt;
@@ -43,7 +43,7 @@ public class User {
 
     public User(String username, BigDecimal initialBalance) {
         this.username = username;
-        this.balance = initialBalance;
+        this.point = initialBalance;
         this.isDeleted = false;
         this.coupons = new ArrayList<>();
         this.orders = new ArrayList<>();
@@ -51,7 +51,7 @@ public class User {
     public User(long userId, String username, BigDecimal initialBalance) {
         this.id = userId;
         this.username = username;
-        this.balance = initialBalance;
+        this.point = initialBalance;
         this.isDeleted = false;
         this.coupons = new ArrayList<>();
         this.orders = new ArrayList<>();
@@ -59,7 +59,7 @@ public class User {
     public User(long userId, String username, BigDecimal initialBalance, List<Coupon> coupons) {
         this.id = userId;
         this.username = username;
-        this.balance = initialBalance;
+        this.point = initialBalance;
         this.isDeleted = false;
         this.coupons = coupons;
         this.orders = new ArrayList<>();

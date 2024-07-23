@@ -1,9 +1,7 @@
-package com.ecommerce.domain.balance.service;
+package com.ecommerce.domain.user;
 
-import com.ecommerce.domain.user.User;
-import com.ecommerce.domain.user.service.UserBalanceCommand;
-import com.ecommerce.domain.user.service.UserBalanceService;
-import com.ecommerce.domain.user.service.repository.UserBalanceRepository;
+import com.ecommerce.domain.user.service.UserPointService;
+import com.ecommerce.domain.user.service.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,13 +19,13 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UserBalanceServiceUnitTest {
+class UserPointServiceUnitTest {
 
     @Mock
-    private UserBalanceRepository userBalanceRepository;
+    private UserRepository userBalanceRepository;
 
     @InjectMocks
-    private UserBalanceService userBalanceService;
+    private UserPointService userPointService;
 
     private User testUser;
 
@@ -38,11 +36,11 @@ class UserBalanceServiceUnitTest {
 
     @Test
     @DisplayName("잔액 조회 - 사용자가 존재하는 경우")
-    void getBalanceWhenUserExists() {
+    void getPointWhenUserExists() {
         long userId = 1L;
         when(userBalanceRepository.getAmountByUserId(userId)).thenReturn(Optional.of(BigDecimal.valueOf(1000)));
 
-        BigDecimal balance = userBalanceService.getBalance(userId);
+        BigDecimal balance = userPointService.getPoint(userId);
 
         assertEquals(BigDecimal.valueOf(1000), balance);
         verify(userBalanceRepository).getAmountByUserId(userId);
@@ -50,17 +48,17 @@ class UserBalanceServiceUnitTest {
 
     @Test
     @DisplayName("잔액 조회 - 사용자가 존재하지 않는 경우")
-    void getBalanceWhenUserNotExists() {
+    void getPointWhenUserNotExists() {
         long userId = 1L;
         when(userBalanceRepository.getAmountByUserId(userId)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> userBalanceService.getBalance(userId));
+        assertThrows(IllegalArgumentException.class, () -> userPointService.getPoint(userId));
         verify(userBalanceRepository).getAmountByUserId(userId);
     }
 
     @Test
     @DisplayName("잔액 충전 - 성공 케이스")
-    void chargeBalanceSuccess() {
+    void chargePointSuccess() {
         long userId = 1L;
         BigDecimal initialBalance = BigDecimal.valueOf(1000);
         BigDecimal chargeAmount = BigDecimal.valueOf(2000);
@@ -69,7 +67,7 @@ class UserBalanceServiceUnitTest {
         when(userBalanceRepository.getAmountByUserIdWithLock(userId)).thenReturn(Optional.of(initialBalance));
         when(userBalanceRepository.saveChargeAmount(eq(userId), any(BigDecimal.class))).thenReturn(Optional.of(testUser));
 
-        BigDecimal newBalance = userBalanceService.chargeBalance(new UserBalanceCommand.Create(userId, chargeAmount));
+        BigDecimal newBalance = userPointService.chargePoint(userId, chargeAmount);
 
         assertEquals(expectedBalance, newBalance);
         verify(userBalanceRepository).getAmountByUserIdWithLock(userId);
@@ -78,14 +76,14 @@ class UserBalanceServiceUnitTest {
 
     @Test
     @DisplayName("잔액 충전 - 사용자가 존재하지 않는 경우")
-    void chargeBalanceUserNotFound() {
+    void chargePointUserNotFound() {
         long userId = 1L;
         BigDecimal chargeAmount = BigDecimal.valueOf(1000);
 
         when(userBalanceRepository.getAmountByUserIdWithLock(userId)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
-                () -> userBalanceService.chargeBalance(new UserBalanceCommand.Create(userId, chargeAmount)));
+                () -> userPointService.chargePoint(userId, chargeAmount));
 
         verify(userBalanceRepository).getAmountByUserIdWithLock(userId);
         verify(userBalanceRepository, never()).saveChargeAmount(any(), any());
@@ -93,7 +91,7 @@ class UserBalanceServiceUnitTest {
 
     @Test
     @DisplayName("잔액 감소 - 성공 케이스")
-    void decreaseBalanceSuccess() {
+    void deductPointSuccess() {
         long userId = 1L;
         BigDecimal initialBalance = BigDecimal.valueOf(1000);
         BigDecimal decreaseAmount = BigDecimal.valueOf(500);
@@ -104,7 +102,7 @@ class UserBalanceServiceUnitTest {
         when(userBalanceRepository.getAmountByUserIdWithLock(userId)).thenReturn(Optional.of(initialBalance));
         when(userBalanceRepository.saveChargeAmount(eq(userId), any(BigDecimal.class))).thenReturn(Optional.of(user));
 
-        userBalanceService.decreaseBalance(user, decreaseAmount);
+        userPointService.deductPoint(1L, decreaseAmount);
 
         verify(userBalanceRepository).getAmountByUserIdWithLock(userId);
         verify(userBalanceRepository).saveChargeAmount(eq(userId), eq(expectedBalance));
@@ -112,7 +110,7 @@ class UserBalanceServiceUnitTest {
 
     @Test
     @DisplayName("잔액 감소 - 잔액 부족")
-    void decreaseBalanceInsufficientFunds() {
+    void deductPointInsufficientFunds() {
         long userId = 1L;
         BigDecimal initialBalance = BigDecimal.valueOf(1000);
         BigDecimal decreaseAmount = BigDecimal.valueOf(1500);
@@ -121,7 +119,7 @@ class UserBalanceServiceUnitTest {
 
         when(userBalanceRepository.getAmountByUserIdWithLock(userId)).thenReturn(Optional.of(initialBalance));
 
-        assertThrows(IllegalArgumentException.class, () -> userBalanceService.decreaseBalance(user, decreaseAmount));
+        assertThrows(IllegalArgumentException.class, () -> userPointService.deductPoint(1L, decreaseAmount));
 
         verify(userBalanceRepository).getAmountByUserIdWithLock(userId);
         verify(userBalanceRepository, never()).saveChargeAmount(any(), any());
@@ -129,7 +127,7 @@ class UserBalanceServiceUnitTest {
 
     @Test
     @DisplayName("잔액 감소 - 사용자가 존재하지 않는 경우")
-    void decreaseBalanceUserNotFound() {
+    void deductPointUserNotFound() {
         long userId = 1L;
         BigDecimal decreaseAmount = BigDecimal.valueOf(500);
 
@@ -137,7 +135,7 @@ class UserBalanceServiceUnitTest {
 
         when(userBalanceRepository.getAmountByUserIdWithLock(userId)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> userBalanceService.decreaseBalance(user, decreaseAmount));
+        assertThrows(IllegalArgumentException.class, () -> userPointService.deductPoint(1L, decreaseAmount));
 
         verify(userBalanceRepository).getAmountByUserIdWithLock(userId);
         verify(userBalanceRepository, never()).saveChargeAmount(any(), any());

@@ -9,7 +9,7 @@ import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.product.service.repository.ProductRepository;
 import com.ecommerce.domain.user.User;
-import com.ecommerce.domain.user.service.UserBalanceService;
+import com.ecommerce.domain.user.service.UserPointService;
 import com.ecommerce.domain.user.service.UserService;
 import com.ecommerce.domain.user.service.repository.UserRepository;
 import com.ecommerce.domain.order.service.external.DummyPlatform;
@@ -29,7 +29,6 @@ import java.util.concurrent.*;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -44,7 +43,7 @@ class PaymentUseCaseConcurrencyTest {
     @Mock
     private DummyPlatform dummyPlatform;
     @Autowired
-    private UserBalanceService userBalanceService;
+    private UserPointService userPointService;
 
     @Autowired
     private PaymentUseCase paymentUseCase;
@@ -82,7 +81,7 @@ class PaymentUseCaseConcurrencyTest {
 
         when(dummyPlatform.send(any(Order.class))).thenReturn(true);
 
-        paymentUseCase = new PaymentUseCase(orderService, productService, dummyPlatform, userBalanceService, userService);
+        paymentUseCase = new PaymentUseCase(orderService, productService, dummyPlatform, userPointService, userService);
     }
 
     @Test

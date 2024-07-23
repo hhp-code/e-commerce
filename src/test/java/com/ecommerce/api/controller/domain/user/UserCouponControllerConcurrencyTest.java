@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -33,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class UserCouponControllerConcurrencyTest {
     @Autowired
     private MockMvc mockMvc;
@@ -55,6 +57,7 @@ class UserCouponControllerConcurrencyTest {
         Coupon coupon2 = new Coupon(2L,"WINTER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 500
                 , LocalDateTime.now(),LocalDateTime.now().plusDays(7),true);
         couponService.save(coupon);
+        couponService.save(coupon2);
         for(int i=0; i<1000; i++){
             userService.saveUser(new User("TestUser"+i, BigDecimal.ZERO));
         }
@@ -108,7 +111,7 @@ class UserCouponControllerConcurrencyTest {
     @Test
     @DisplayName("타이밍 관련 테스트")
     void timingTest() throws Exception {
-        final long COUPON_ID = 1L;
+        final long COUPON_ID = 2L;
         CountDownLatch processingLatch = new CountDownLatch(1);
         CountDownLatch completionLatch = new CountDownLatch(2);
 
@@ -153,7 +156,7 @@ class UserCouponControllerConcurrencyTest {
 
         completionLatch.await(30, TimeUnit.SECONDS);
 
-        assertEquals(998, couponService.getRemainingQuantity(COUPON_ID), "두 요청 모두 처리되어야 합니다.");
+        assertEquals(498, couponService.getRemainingQuantity(COUPON_ID), "두 요청 모두 처리되어야 합니다.");
         assertTrue(couponQueueManager.getCouponQueue().isEmpty(), "처리 완료 후 큐가 비어있어야 합니다.");
     }
 

@@ -9,11 +9,11 @@ import java.util.concurrent.CompletableFuture;
 
 public class UserMapper {
     public static UserDto.UserResponse toUserResponse(User user) {
-        return new UserDto.UserResponse(user.getUsername(), user.getBalance(), user.getCoupons());
+        return new UserDto.UserResponse(user.getUsername(), user.getPoint(), user.getCoupons());
     }
     public static UserDto.UserResponse toUserAsyncResponse(CompletableFuture<User> userFuture) {
         User user = userFuture.join();
-        return new UserDto.UserResponse(user.getUsername(), user.getBalance(), user.getCoupons());
+        return new UserDto.UserResponse(user.getUsername(), user.getPoint(), user.getCoupons());
     }
     public static List<UserDto.CouponResponse> toUserCouponResponseList(List<Coupon> userCoupons) {
         List<UserDto.CouponResponse> convertedResponse = new ArrayList<>();

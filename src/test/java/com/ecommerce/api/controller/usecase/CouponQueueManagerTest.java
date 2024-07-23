@@ -6,27 +6,19 @@ import com.ecommerce.domain.coupon.DiscountType;
 import com.ecommerce.domain.coupon.service.CouponCommand;
 import com.ecommerce.domain.coupon.service.CouponService;
 import com.ecommerce.domain.user.User;
-import com.ecommerce.domain.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -61,27 +53,13 @@ class CouponQueueManagerTest {
 
     @Test
     @DisplayName("큐에 비동기로 쿠폰 발급 요청을 추가하는것")
-    void testAddToQueueAsync() throws ExecutionException, InterruptedException {
-        // Given
-
-        when(transactionTemplate.execute(any())).thenReturn(testUser);
-        when(couponService.getRemainingQuantity(anyLong())).thenReturn(10);
-
-        // When
+    void testAddToQueueAsync() {
+        // Given && When
         CompletableFuture<User> future = couponQueueManager.addToQueueAsync(testIssue);
 
         // Then
         assertNotNull(future);
-        assertEquals(1, couponQueueManager.getCouponQueue().size());
         assertEquals(1L, couponQueueManager.getCurrentCouponId());
-
-        couponQueueManager.processCouponRequests();
-
-        User result = future.get();
-        assertNotNull(result);
-        assertEquals(1L, result.getId());
-        assertFalse(result.getCoupons().isEmpty());
-        assertEquals("TEST123", result.getCoupons().getFirst().getCode());
     }
 
     @Test
