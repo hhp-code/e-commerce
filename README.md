@@ -51,3 +51,6 @@ domain
         ├── repository
 
 ```
+## 프로젝트 진행중 마주했던 어려움들.
+1. 풍부한 도메인 모델에 관하여(https://medium.com/@gangfunction/항플5기-be-java-서버-구축-1-3a869130309e)
+2. 작성중..  
