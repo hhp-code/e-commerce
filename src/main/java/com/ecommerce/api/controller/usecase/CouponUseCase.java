@@ -37,6 +37,7 @@ public class CouponUseCase {
         User user = userService.getUser(issue.userId());
         Coupon coupon = couponService.decrementCouponQuantity(issue.couponId());
         user.addCoupon(coupon);
+        user.getCoupons().size();
         return userService.updateUserCoupon(user, coupon);
     }
 

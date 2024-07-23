@@ -44,17 +44,7 @@ public class UserCouponController {
                 couponQueueManager.addToQueueAsync(CouponMapper.toUserCouponCommand(userId, couponId))
         );
     }
-    @GetMapping("/users/{userId}/coupon/status")
-    @Operation(summary = "쿠폰 발급 요청 상태 확인", description = "쿠폰 발급 요청의 처리 상태를 확인합니다.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "요청 상태 확인 성공",
-                            content = @Content(schema = @Schema(implementation = UserDto.IssueStatusResponse.class))),
-                    @ApiResponse(responseCode = "404", description = "요청을 찾을 수 없음")
-            })
-    public UserDto.IssueStatusResponse checkCouponIssueStatus(
-            @Parameter(description = "사용자 ID") @PathVariable Long userId){
-        return UserMapper.toIssueStatusResponse(couponQueueManager.checkStatus(userId));
-    }
+
     @GetMapping("/users/{userId}/coupons")
     @Operation(summary = "사용자의 쿠폰 목록 조회", description = "특정 사용자의 모든 쿠폰을 조회합니다.",
             responses = {
