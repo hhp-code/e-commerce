@@ -45,6 +45,21 @@ public class CouponQueueManager {
         scheduleCleanup();
     }
 
+    public CompletableFuture<User> addToQueueAsync(CouponCommand.Issue issue) {
+        this.currentCouponId = issue.couponId();
+        couponQueue.offer(issue);
+
+        CompletableFuture<User> future = new CompletableFuture<>();
+        userFutureMap.put(issue.userId(), future);
+
+        return future.thenApplyAsync(this::logUserCouponInfo, executorService)
+                .exceptionally(e -> {
+                    log.error("사용자 {}에게 쿠폰 발급 실패", issue.userId(), e);
+                    throw new CompletionException(e);
+                });
+    }
+
+
     @Scheduled(fixedRate = 1000)
     public void processCouponRequests() {
         if (currentCouponId == null) return;
@@ -54,31 +69,31 @@ public class CouponQueueManager {
             log.info("쿠폰이 모두 소진되었습니다. 처리를 중단합니다.");
             return;
         }
-
         int processLimit = Math.min(Math.min(remainingCoupons, couponQueue.size()), DEFAULT_RATE_LIMIT);
         processedRequestsCount.set(0);
-        processRequests(processLimit);
-        logProcessingResult(remainingCoupons);
-    }
 
-    private void processRequests(int limit) {
-        for (int i = 0; i < limit; i++) {
+        for (int i = 0; i < processLimit; i++) {
             CouponCommand.Issue request = couponQueue.poll();
             if (request == null) break;
-            CompletableFuture.runAsync(() -> processCouponRequest(request), executorService)
-                    .exceptionally(this::handleProcessingError);
+            CompletableFuture.runAsync(() -> processCouponRequest(request), executorService);
         }
+        log.info("처리된 요청: {}. 남은 쿠폰: {}", processedRequestsCount.get(), remainingCoupons - processedRequestsCount.get());
+
     }
 
     private void processCouponRequest(CouponCommand.Issue request) {
-        setMDC(request);
+        MDC.put("userId", String.valueOf(request.userId()));
+        MDC.put("couponId", String.valueOf(request.couponId()));
         try {
             log.info("쿠폰 요청 처리 중");
-            User user = executeInTransaction(request);
-            completeFuture(request.userId(), user);
+            User user =  transactionTemplate.execute(status -> couponUseCase.issueCouponToUser(request));
+            CompletableFuture<User> future = userFutureMap.remove(request.userId());
+            if (future != null) {
+                future.complete(user);
+            }
             log.info("쿠폰 요청 처리 완료");
         } catch (Exception e) {
-            handleProcessingError(e);
+            log.error("쿠폰 요청 처리 중 오류 발생", e);
         } finally {
             processedRequestsCount.incrementAndGet();
             MDC.clear();
@@ -93,37 +108,11 @@ public class CouponQueueManager {
                 TimeUnit.MILLISECONDS
         );
     }
+
     private void cleanupCompletedFutures() {
         userFutureMap.entrySet().removeIf(entry -> entry.getValue().isDone());
     }
 
-
-    private User executeInTransaction(CouponCommand.Issue request) {
-        return transactionTemplate.execute(status -> couponUseCase.issueCouponToUser(request));
-    }
-
-    private void completeFuture(Long userId, User user) {
-        CompletableFuture<User> future = userFutureMap.remove(userId);
-        if (future != null) {
-            future.complete(user);
-        }
-    }
-
-    private Void handleProcessingError(Throwable e) {
-        log.error("쿠폰 요청 처리 중 오류 발생", e);
-        return null;
-    }
-
-    public CompletableFuture<User> addToQueueAsync(CouponCommand.Issue issue) {
-        this.currentCouponId = issue.couponId();
-        couponQueue.offer(issue);
-
-        CompletableFuture<User> future = new CompletableFuture<>();
-        userFutureMap.put(issue.userId(), future);
-
-        return future.thenApplyAsync(this::logUserCouponInfo, executorService)
-                .exceptionally(e -> handleCouponIssuanceFailure(e, issue.userId()));
-    }
 
     private User logUserCouponInfo(User user) {
         if (!user.getCoupons().isEmpty()) {
@@ -136,19 +125,6 @@ public class CouponQueueManager {
         return user;
     }
 
-    private User handleCouponIssuanceFailure(Throwable e, Long userId) {
-        log.error("사용자 {}에게 쿠폰 발급 실패", userId, e);
-        throw new CompletionException(e);
-    }
-
-    private void setMDC(CouponCommand.Issue request) {
-        MDC.put("userId", String.valueOf(request.userId()));
-        MDC.put("couponId", String.valueOf(request.couponId()));
-    }
-
-    private void logProcessingResult(int remainingCoupons) {
-        log.info("처리된 요청: {}. 남은 쿠폰: {}", processedRequestsCount.get(), remainingCoupons - processedRequestsCount.get());
-    }
 
     @PreDestroy
     public void shutdown() {
