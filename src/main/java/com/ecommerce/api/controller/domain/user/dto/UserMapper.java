@@ -1,7 +1,6 @@
 package com.ecommerce.api.controller.domain.user.dto;
 
 import com.ecommerce.domain.coupon.Coupon;
-import com.ecommerce.domain.coupon.service.CouponCommand;
 import com.ecommerce.domain.user.User;
 
 import java.util.ArrayList;
@@ -24,7 +23,4 @@ public class UserMapper {
         return convertedResponse;
     }
 
-    public static UserDto.IssueStatusResponse toIssueStatusResponse(CouponCommand.Issue user) {
-        return new UserDto.IssueStatusResponse(user.userId(), user.couponId(), user.status());
-    }
 }

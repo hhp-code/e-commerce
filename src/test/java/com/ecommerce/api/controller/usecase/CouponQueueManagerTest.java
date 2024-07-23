@@ -3,50 +3,99 @@ package com.ecommerce.api.controller.usecase;
 import com.ecommerce.api.scheduler.CouponQueueManager;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
+import com.ecommerce.domain.coupon.service.CouponCommand;
 import com.ecommerce.domain.coupon.service.CouponService;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
-import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
-@SpringBootTest
-public class CouponQueueManagerTest {
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-    @Autowired
-    private CouponQueueManager couponQueueManager;
+@ExtendWith(MockitoExtension.class)
+class CouponQueueManagerTest {
 
-    @Autowired
+    @Mock
+    private TransactionTemplate transactionTemplate;
+
+    @Mock
+    private CouponUseCase couponUseCase;
+
+
+    @Mock
     private CouponService couponService;
 
-    @Autowired
-    private UserService userService;
+    private CouponQueueManager couponQueueManager;
 
-    private static final int COUPON_COUNT = 5;
-    private static final int USER_COUNT = 10;
+    private CouponCommand.Issue testIssue;
+    private User testUser;
 
     @BeforeEach
     void setUp() {
-        createTestData();
+        Coupon testCoupon = new Coupon("TEST123", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT, 10);
+        testIssue =new CouponCommand.Issue(1L, 1L, Instant.now());
+        testUser = new User(1L, "test", null, List.of(testCoupon));
+
+        couponQueueManager = new CouponQueueManager(transactionTemplate, couponUseCase, couponService);
     }
 
-    private void createTestData() {
-        Coupon coupon = new Coupon("TESTCOUPON", BigDecimal.valueOf(30), DiscountType.FIXED_AMOUNT, COUPON_COUNT);
-        couponService.save(coupon);
+    @Test
+    @DisplayName("큐에 비동기로 쿠폰 발급 요청을 추가하는것")
+    void testAddToQueueAsync() throws ExecutionException, InterruptedException {
+        // Given
 
-        List<User> users = new ArrayList<>();
-        for (int i = 0; i < USER_COUNT; i++) {
-            users.add(new User("user" + i + "@example.com", BigDecimal.valueOf(1000)));
-        }
-        userService.saveAll(users);
+        when(transactionTemplate.execute(any())).thenReturn(testUser);
+        when(couponService.getRemainingQuantity(anyLong())).thenReturn(10);
+
+        // When
+        CompletableFuture<User> future = couponQueueManager.addToQueueAsync(testIssue);
+
+        // Then
+        assertNotNull(future);
+        assertEquals(1, couponQueueManager.getCouponQueue().size());
+        assertEquals(1L, couponQueueManager.getCurrentCouponId());
+
+        couponQueueManager.processCouponRequests();
+
+        User result = future.get();
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertFalse(result.getCoupons().isEmpty());
+        assertEquals("TEST123", result.getCoupons().getFirst().getCode());
     }
 
+    @Test
+    @DisplayName("쿠폰요청을 처리해야하는데 남은 쿠폰이 없을때")
+    void testProcessCouponRequests_NoRemainingCoupons() {
+        // Given
+        when(couponService.getRemainingQuantity(anyLong())).thenReturn(0);
+        couponQueueManager.addToQueueAsync(testIssue);
 
+        // When
+        couponQueueManager.processCouponRequests();
+
+        // Then
+        verify(couponUseCase, never()).issueCouponToUser(any());
+    }
 
 }

@@ -18,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -45,7 +44,7 @@ class CouponUseCaseTest {
         MockitoAnnotations.openMocks(this);
 
         couponUseCase = new CouponUseCase(orderService, couponService, userService);
-        issue = new CouponCommand.Issue(1L, 1L, CouponCommand.Issue.Status.PENDING, Instant.now());
+        issue = new CouponCommand.Issue(1L, 1L, Instant.now());
         coupon = new Coupon(1L, "CODE123", BigDecimal.TEN, DiscountType.FIXED_AMOUNT, 100,
                 LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
         user = new User(1L,"test", BigDecimal.TEN);

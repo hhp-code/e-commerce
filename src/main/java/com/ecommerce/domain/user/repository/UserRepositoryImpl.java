@@ -91,4 +91,9 @@ public class UserRepositoryImpl implements UserRepository {
     public Optional<User> getUserWithCoupon(Long userId) {
         return userJPARepository.getUserWithCoupon(userId);
     }
+
+    @Override
+    public List<User> getAll() {
+       return queryFactory.selectFrom(user).fetch();
+    }
 }

@@ -12,10 +12,8 @@ public class CouponCommand {
     public record Create(String code, BigDecimal discountAmount, int remainingQuantity, DiscountType type,
                          LocalDateTime validFrom, LocalDateTime validTo, boolean active) {
     }
-    public record Issue(Long couponId, Long userId,Status status,  Instant timeStamp) implements Comparable<Issue> {
-        public enum Status{
-            PENDING, PROCESSING, COMPLETED, FAILED
-        }
+    public record Issue(Long userId,Long couponId, Instant timeStamp) implements Comparable<Issue> {
+
         @Override
         public int compareTo(Issue o) {
             return this.timeStamp.compareTo(o.timeStamp);

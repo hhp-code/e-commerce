@@ -7,11 +7,12 @@ import com.ecommerce.domain.user.User;
 import jakarta.annotation.PreDestroy;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -60,7 +61,7 @@ public class CouponQueueManager {
     }
 
 
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = 100)
     public void processCouponRequests() {
         if (currentCouponId == null) return;
 
@@ -71,34 +72,29 @@ public class CouponQueueManager {
         }
         int processLimit = Math.min(Math.min(remainingCoupons, couponQueue.size()), DEFAULT_RATE_LIMIT);
         processedRequestsCount.set(0);
-
+        List<CouponCommand.Issue> batch = new ArrayList<>();
         for (int i = 0; i < processLimit; i++) {
             CouponCommand.Issue request = couponQueue.poll();
             if (request == null) break;
-            CompletableFuture.runAsync(() -> processCouponRequest(request), executorService);
+            batch.add(request);
         }
-        log.info("처리된 요청: {}. 남은 쿠폰: {}", processedRequestsCount.get(), remainingCoupons - processedRequestsCount.get());
-
+        CompletableFuture.runAsync(() -> processCouponBatchRequest(batch), executorService)
+                .thenRunAsync(() -> log.info("처리된 요청: {}. 남은 쿠폰: {}", processedRequestsCount.get(), remainingCoupons - processedRequestsCount.get()), executorService);
     }
-
-    private void processCouponRequest(CouponCommand.Issue request) {
-        MDC.put("userId", String.valueOf(request.userId()));
-        MDC.put("couponId", String.valueOf(request.couponId()));
-        try {
-            log.info("쿠폰 요청 처리 중");
-            User user =  transactionTemplate.execute(status -> couponUseCase.issueCouponToUser(request));
-            CompletableFuture<User> future = userFutureMap.remove(request.userId());
-            if (future != null) {
-                future.complete(user);
+    private void processCouponBatchRequest(List<CouponCommand.Issue> batch) {
+        transactionTemplate.execute(status -> {
+            for (CouponCommand.Issue issue : batch) {
+                User user = couponUseCase.issueCouponToUser(issue);
+                CompletableFuture<User> future = userFutureMap.remove(issue.userId());
+                if (future != null) {
+                    future.complete(user);
+                }
             }
-            log.info("쿠폰 요청 처리 완료");
-        } catch (Exception e) {
-            log.error("쿠폰 요청 처리 중 오류 발생", e);
-        } finally {
-            processedRequestsCount.incrementAndGet();
-            MDC.clear();
-        }
+            return null;
+        });
+        processedRequestsCount.addAndGet(batch.size());
     }
+
     private void scheduleCleanup() {
         long cleanupInterval = 30000L;
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(

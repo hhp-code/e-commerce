@@ -94,7 +94,6 @@ class PaymentUseCaseConcurrencyTest {
         List<Future<Order>> futures = new ArrayList<>();
 
 
-        int size = testOrder.getOrderItems().size();
         for (int i = 0; i < concurrentRequests; i++) {
             futures.add(executor.submit(() -> {
                 try {

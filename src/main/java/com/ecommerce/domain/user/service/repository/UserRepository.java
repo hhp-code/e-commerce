@@ -25,4 +25,6 @@ public interface UserRepository {
 
 
     Optional<User> getUserWithCoupon(Long userId);
+
+    List<User> getAll();
 }
