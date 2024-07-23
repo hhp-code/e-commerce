@@ -1,7 +1,6 @@
 package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.domain.order.Order;
-import com.ecommerce.domain.order.OrderItem;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.order.service.repository.OrderRepository;
@@ -18,12 +17,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.*;
 
@@ -33,6 +33,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class PaymentUseCaseConcurrencyTest {
     @Autowired
     private UserService userService;
@@ -48,8 +49,6 @@ class PaymentUseCaseConcurrencyTest {
     @Autowired
     private PaymentUseCase paymentUseCase;
 
-    @Autowired
-    private TransactionTemplate transactionTemplate;
 
     private User testUser;
     private Order testOrder;
@@ -73,10 +72,9 @@ class PaymentUseCaseConcurrencyTest {
         userService.saveUser(testUser);
         testProduct = new Product(1L, "test", BigDecimal.TEN, 10);
         productService.saveAndGet(testProduct);
-        OrderItem testOrderItem = new OrderItem(testProduct, 1);
-        testOrder = new Order(testUser, List.of(testOrderItem));
-        Order order = orderService.saveAndGet(testOrder);
-        System.out.println(order.getOrderItems().getFirst().getProduct().getAvailableStock()+"stock");
+        Map<Product,Integer> orderItem= Map.of(testProduct, 1);
+        testOrder = new Order(testUser, orderItem);
+        orderService.saveAndGet(testOrder);
 
 
         when(dummyPlatform.send(any(Order.class))).thenReturn(true);
@@ -125,7 +123,7 @@ class PaymentUseCaseConcurrencyTest {
         int expectedStock = Math.max(0, 10 - (int)successfulOrders);
 
 
-        assertEquals(expectedStock, updatedProduct.getAvailableStock(),
+        assertEquals(expectedStock, updatedProduct.getStock(),
                 "Stock should be decreased by " + successfulOrders);
 
         executor.shutdown();

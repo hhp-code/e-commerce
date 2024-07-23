@@ -1,88 +1,64 @@
 package com.ecommerce.domain.coupon.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.ecommerce.domain.coupon.Coupon;
+import com.ecommerce.domain.coupon.DiscountType;
+import com.ecommerce.domain.user.User;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
-import com.ecommerce.domain.coupon.Coupon;
-import com.ecommerce.domain.coupon.DiscountType;
-import com.ecommerce.domain.coupon.service.repository.CouponRepository;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-@ExtendWith(MockitoExtension.class)
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+@SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class CouponServiceTest {
 
-    @Mock
-    private CouponRepository couponRepository;
-
-    @InjectMocks
+    @Autowired
     private CouponService couponService;
 
-    @Nested
-    @DisplayName("createCoupon 메서드")
-    class CreateCouponTest {
-        @Test
-        @DisplayName("쿠폰 생성 성공")
-        void createCouponSuccess() {
-            // Given
-            CouponCommand.Create command = new CouponCommand.Create(
-                    "CODE123", BigDecimal.TEN,  100,DiscountType.FIXED_AMOUNT,
-                    LocalDateTime.now(), LocalDateTime.now().plusDays(30), true
-            );
-            Coupon expectedCoupon = new Coupon(command.code(), command.discountAmount(),
-                    command.type(), command.remainingQuantity(), command.validFrom(),
-                    command.validTo(), command.active());
-
-            when(couponRepository.save(any(Coupon.class))).thenReturn(Optional.of(expectedCoupon));
-
-            // When
-            Coupon result = couponService.createCoupon(command);
-
-            // Then
-            assertNotNull(result);
-            assertEquals(command.code(), result.getCode());
-            verify(couponRepository).save(any(Coupon.class));
-        }
-
-        @Test
-        @DisplayName("쿠폰 생성 실패")
-        void createCouponFailure() {
-            // Given
-            CouponCommand.Create command = new CouponCommand.Create(
-                    "CODE123", BigDecimal.TEN, 100, DiscountType.FIXED_AMOUNT,
-                    LocalDateTime.now(), LocalDateTime.now().plusDays(30), true
-            );
-            when(couponRepository.save(any(Coupon.class))).thenReturn(Optional.empty());
-
-            // When & Then
-            assertThrows(RuntimeException.class, () -> couponService.createCoupon(command));
-        }
-    }
 
 
     @Test
-    @DisplayName("getCoupon 메서드")
-    void getCouponSuccess() {
-        // Given
-        Long couponId = 1L;
-        Coupon expectedCoupon = new Coupon();
-        when(couponRepository.getById(couponId)).thenReturn(Optional.of(expectedCoupon));
+    @DisplayName("쿠폰 생성 성공 시나리오")
+    void createCoupon() {
+        // given
+        CouponCommand.Create create = new CouponCommand.Create(
+                "testCoupon",
+                BigDecimal.valueOf(1000), 10,
+                DiscountType.FIXED_AMOUNT,  LocalDateTime.now(), LocalDateTime.now().plusDays(7),true);
+        //when
+        Coupon coupon = couponService.createCoupon(create);
 
-        // When
-        Coupon result = couponService.getCoupon(couponId);
-
-        // Then
-        assertNotNull(result);
-        assertEquals(expectedCoupon, result);
+        //then
+        assertNotNull(coupon);
+        assertEquals(create.code(), coupon.getCode());
+        assertThat(create.discountAmount()).isEqualByComparingTo(coupon.getDiscountAmount());
+        assertEquals(create.quantity(), coupon.getQuantity());
     }
+
+    @Test
+    @DisplayName("쿠폰 조회 성공 시나리오")
+    void getCoupon() {
+        //given
+        User user = new User(1L, "testUser", BigDecimal.ZERO);
+        Coupon coupon = new Coupon("testCoupon", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT, 10, LocalDateTime.now(), LocalDateTime.now().plusDays(7), true);
+        user.addCoupon(coupon);
+        couponService.createCoupon(new CouponCommand.Create("testCoupon", BigDecimal.valueOf(1000), 10, DiscountType.FIXED_AMOUNT, LocalDateTime.now(), LocalDateTime.now().plusDays(7), true));
+
+        //when
+        Coupon coupon1 = couponService.getCoupon(1L);
+
+        //then
+        assertThat(coupon1).isNotNull();
+        assertEquals(coupon.getCode(), coupon1.getCode());
+        assertThat(coupon.getDiscountAmount()).isEqualByComparingTo(coupon1.getDiscountAmount());
+        assertEquals(coupon.getQuantity(), coupon1.getQuantity());
+    }
+
+
 }

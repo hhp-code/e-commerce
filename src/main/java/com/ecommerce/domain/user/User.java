@@ -1,10 +1,10 @@
 package com.ecommerce.domain.user;
 
+import com.ecommerce.api.exception.domain.UserException;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.order.Order;
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -22,7 +22,6 @@ public class User {
     @Getter
     private String username;
 
-    @Setter
     @Getter
     private BigDecimal point;
 
@@ -75,11 +74,31 @@ public class User {
         return coupons.stream()
                 .filter(coupon -> coupon.getId().equals(couponId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("사용자에게 발급된 쿠폰을 찾을 수 없습니다."));
+                .orElseThrow(() -> new UserException("사용자에게 발급된 쿠폰을 찾을 수 없습니다."));
     }
 
     public void addOrder(Order order) {
         orders.add(order);
+    }
+
+    public BigDecimal chargePoint(BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new UserException("충전 금액은 0보다 커야 합니다.");
+        }
+        this.point = this.point.add(amount);
+        return this.point;
+    }
+
+    public BigDecimal deductPoint(BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new UserException("차감 금액은 0보다 커야 합니다.") {
+            };
+        }
+        if (this.point.compareTo(amount) < 0) {
+            throw new UserException("잔액이 부족합니다.");
+        }
+        this.point = this.point.subtract(amount);
+        return this.point;
     }
 
 }

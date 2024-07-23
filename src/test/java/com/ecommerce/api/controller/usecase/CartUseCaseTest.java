@@ -1,7 +1,6 @@
 package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.domain.order.Order;
-import com.ecommerce.domain.order.OrderItem;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.Product;
@@ -17,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,12 +66,8 @@ class CartUseCaseTest {
         return new Product(1L,"test", BigDecimal.TWO, 1000);
     }
 
-    private OrderItem createMockCartItem() {
-        return new OrderItem(createMockProduct(), 1);
-    }
 
     private Order createMockOrder() {
-        Order order = new Order(ORDER_ID, createMockUser(), List.of(createMockCartItem()));
-        return order;
+        return new Order(ORDER_ID, createMockUser(), Map.of(createMockProduct(), 1));
     }
 }

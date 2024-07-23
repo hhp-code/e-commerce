@@ -19,4 +19,6 @@ public interface OrderRepository {
     Optional<Order> findByUserIdAndStatus(Long id, OrderStatus orderStatus);
 
     void deleteAll();
+
+    List<Order> getFinishedOrderWithDays(int durationDays);
 }

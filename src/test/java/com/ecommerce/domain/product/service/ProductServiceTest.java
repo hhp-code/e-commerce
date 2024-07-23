@@ -1,6 +1,5 @@
 package com.ecommerce.domain.product.service;
 
-import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.product.service.repository.ProductRepository;
 import com.ecommerce.domain.product.Product;
 import org.junit.jupiter.api.AfterEach;
@@ -45,12 +44,9 @@ class ProductServiceTest {
         assertEquals(sampleProduct.getId(), result.getId());
         assertEquals("Sample ProductRequest", result.getName());
         assertEquals(new BigDecimal("100.00"), result.getPrice());
-        assertEquals(50, result.getAvailableStock());
+        assertEquals(50, result.getStock());
         assertFalse(result.isDeleted());
     }
-
-
-
 
     @Test
     @DisplayName("전체 상품 조회 테스트")

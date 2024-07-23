@@ -1,7 +1,6 @@
 package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.domain.order.Order;
-import com.ecommerce.domain.order.OrderItem;
 import com.ecommerce.domain.order.OrderStatus;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
@@ -19,7 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -66,7 +65,7 @@ class PaymentUseCaseTest {
         Order mockOrder = createMockOrder();
         OrderCommand.Payment paymentCommand = new OrderCommand.Payment(USER_ID,ORDER_ID);
         when(orderService.getOrder(ORDER_ID)).thenReturn(mockOrder);
-        doThrow(new RuntimeException("재고 부족")).when(productService).decreaseStock(any(Product.class), anyInt());
+        doThrow(new RuntimeException("재고 부족")).when(productService).deductStock(any(Product.class), anyInt());
         // When & Then
         assertThrows(RuntimeException.class, () -> paymentUseCase.payOrder(paymentCommand));
 
@@ -79,7 +78,6 @@ class PaymentUseCaseTest {
         Order mockOrder = createMockOrder();
         OrderCommand.Payment paymentCommand = new OrderCommand.Payment(USER_ID,ORDER_ID);
         when(orderService.getOrder(ORDER_ID)).thenReturn(mockOrder);
-        doThrow(new RuntimeException("잔액 부족")).when(userPointService).deductPoint(any(Long.class), any(BigDecimal.class));
 
         // When & Then
         assertThrows(RuntimeException.class, () -> paymentUseCase.payOrder(paymentCommand));
@@ -93,11 +91,9 @@ class PaymentUseCaseTest {
         return new Product(1L, "test", BigDecimal.TWO, 1000);
     }
 
-    private OrderItem createMockCartItem() {
-        return new OrderItem(createMockProduct(), 1);
-    }
+
 
     private Order createMockOrder() {
-        return new Order(ORDER_ID, createMockUser(), List.of(createMockCartItem()));
+        return new Order(ORDER_ID, createMockUser(), Map.of(createMockProduct(),1));
     }
 }

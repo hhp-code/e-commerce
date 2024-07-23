@@ -1,6 +1,7 @@
 package com.ecommerce.domain.product.service;
 
 
+import com.ecommerce.api.exception.domain.ProductException;
 import com.ecommerce.domain.product.service.repository.ProductRepository;
 import com.ecommerce.domain.product.Product;
 import org.springframework.stereotype.Component;
@@ -19,10 +20,9 @@ public class ProductService {
 
     public Product getProduct(Long productId) {
         return productRepository.getProduct(productId).orElseThrow(
-                () -> new RuntimeException("Product not found")
+                () -> new ProductException.ServiceException("상품을 찾을 수 없습니다.")
         );
     }
-
 
     @Transactional
     public List<Product> getPopularProducts() {
@@ -35,32 +35,26 @@ public class ProductService {
     }
 
     @Transactional
-    public void decreaseStock(Product product, int quantity) {
-        productUpdate(productRepository.decreaseAvailableStock(product.getId(), quantity),
-                "상품의 재고가 부족합니다. 상품 ID: ", product.getId());
-        productUpdate(productRepository.increaseReservedStock(product.getId(), quantity),
-                "상품의 예약 재고가 전환되지 않았습니다. 상품 ID: ", product.getId());
-
+    public void deductStock(Product product, Integer quantity) {
+        product.deductStock(quantity);
+        productRepository.save(product).orElseThrow(
+                ()-> new ProductException.ServiceException("재고 차감에 실패했습니다.")
+        );
     }
 
 
     @Transactional
-    public void increaseStock(Product product, Integer quantity) {
-        long id = product.getId();
-        productUpdate(productRepository.decreaseReservedStock(id, quantity), "상품의 예약 재고가 부족합니다. 상품 ID: ", id);
-        productUpdate(productRepository.increaseAvailableStock(id, quantity), "상품의 재고가 전환되지 않았습니다. 상품 ID: ", id);
-
+    public void chargeStock(Product product, Integer quantity) {
+        product.chargeStock(quantity);
+        productRepository.save(product).orElseThrow(
+                () -> new ProductException.ServiceException("재고 입고에 실패했습니다.")
+        );
     }
 
-    private void productUpdate(int productRepository, String x, long id) {
-        if (productRepository == 0) {
-            throw new RuntimeException(x + id);
-        }
-    }
-
+    @Transactional
     public Product saveAndGet(Product testProduct) {
         return productRepository.save(testProduct).orElseThrow(
-                () -> new RuntimeException("Product not found")
+                () -> new ProductException.ServiceException("상품 저장에 실패했습니다.")
         );
     }
 }

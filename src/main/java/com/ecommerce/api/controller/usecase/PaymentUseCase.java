@@ -1,6 +1,5 @@
 package com.ecommerce.api.controller.usecase;
 
-import com.ecommerce.domain.order.OrderItem;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
@@ -10,8 +9,6 @@ import com.ecommerce.domain.user.service.UserPointService;
 import com.ecommerce.domain.user.service.UserService;
 import com.ecommerce.domain.order.service.external.DummyPlatform;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class PaymentUseCase {
@@ -32,12 +29,9 @@ public class PaymentUseCase {
     public Order payOrder(OrderCommand.Payment orderPay) {
         User user = userService.getUser(orderPay.userId());
         Order order = orderService.getOrder(orderPay.orderId());
-        List<OrderItem> orderItems = order.getOrderItems();
         try {
-            for (OrderItem item : orderItems) {
-                productService.decreaseStock(item.getProduct(), item.getQuantity());
-            }
-            userPointService.deductPoint(orderPay.userId(), order.getTotalAmount());
+            order.getOrderItems().forEach(productService::deductStock);
+            userPointService.deductPoint(user.getId(), order.getTotalAmount());
             orderService.saveAndGet(order).finish();
             boolean externalSystemSuccess = dummyPlatform.send(order);
             if (!externalSystemSuccess) {
@@ -55,11 +49,8 @@ public class PaymentUseCase {
 
     public Order cancelOrder(OrderCommand.Cancel orderCancel) {
         Order order = orderService.getOrder(orderCancel.orderId());
-        List<OrderItem> orderItems = order.getOrderItems();
-        for (OrderItem item : orderItems) {
-            productService.increaseStock(item.getProduct(), item.getQuantity());
-        }
-        userPointService.chargePoint(order.getUser().getId(), order.getTotalAmount());
+        order.getOrderItems().forEach(productService::chargeStock);
+        userPointService.chargePoint(orderCancel.userId(), order.getTotalAmount());
         orderService.saveAndGet(order).cancel();
         dummyPlatform.send(order);
         return order;

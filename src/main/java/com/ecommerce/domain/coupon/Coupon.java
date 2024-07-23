@@ -27,9 +27,9 @@ public class Coupon {
     @JoinColumn(name = "user_id")
     private User user;
 
-
     @Convert(converter = AtomicIntegerConverter.class)
     private AtomicInteger quantity;
+
     @Getter
     private LocalDateTime validFrom;
     @Getter
@@ -74,11 +74,12 @@ public class Coupon {
         this.isActive = isActive;
     }
 
+
     public boolean isValid() {
         LocalDateTime now = LocalDateTime.now();
         return isActive && quantity.get() > 0 && now.isAfter(validFrom) && now.isBefore(validTo);
     }
-    public boolean decrementQuantity() {
+    public boolean deductQuantity() {
         while (true) {
             int current = quantity.get();
             if (current <= 0) return true;
@@ -98,5 +99,9 @@ public class Coupon {
 
     public boolean use() {
         return this.isActive = false;
+    }
+
+    public int getRemainingQuantity() {
+        return quantity.get();
     }
 }

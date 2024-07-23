@@ -6,7 +6,6 @@ import com.ecommerce.domain.user.QUser;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.repository.UserRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,45 +60,15 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<User> getUserByCoupon(Coupon userCoupon) {
-        return Optional.ofNullable(queryFactory
-                .selectFrom(user)
-                .join(user.coupons, coupon)
-                .where(coupon.eq(userCoupon))
-                .fetchOne());
-    }
-
-    @Override
     @Transactional
     public void deleteAll() {
         userJPARepository.deleteAll();
     }
 
     @Override
-    public boolean hasCoupon(Long aLong, Long aLong1) {
-        return queryFactory.selectFrom(user)
-                .join(user.coupons, coupon)
-                .where(user.id.eq(aLong).and(coupon.id.eq(aLong1)))
-                .fetchFirst() != null;
-    }
-
-    @Override
     public void saveAll(List<User> users) {
         userJPARepository.saveAll(users);
-
     }
-
-    @Override
-    public Optional<User> getUserWithCoupon(Long userId) {
-        return userJPARepository.getUserWithCoupon(userId);
-    }
-
-    @Override
-    public List<User> getAll() {
-       return queryFactory.selectFrom(user).fetch();
-    }
-
-
     @Override
     public Optional<BigDecimal> getAmountByUserId(Long userId) {
         return Optional.ofNullable(queryFactory
@@ -110,7 +79,6 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    @Transactional
     public Optional<User> saveChargeAmount(Long userId, BigDecimal amount) {
         long updatedCount = queryFactory
                 .update(user)
@@ -134,7 +102,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<BigDecimal> getAmountByUserIdWithLock(long userId) {
+    public Optional<BigDecimal> getAmountByUserIdWithLock(Long userId) {
         return Optional.ofNullable(queryFactory
                 .select(user.point)
                 .from(user)
@@ -144,16 +112,11 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<User> saveDeductAmount(long userId, BigDecimal totalAmount) {
-        long updatedCount = queryFactory
-                .update(user)
-                .set(user.point, user.point.subtract(totalAmount))
+    public Optional<User> getByIdWithLock(Long userId) {
+        return Optional.ofNullable(queryFactory
+                .selectFrom(user)
                 .where(user.id.eq(userId))
-                .execute();
-
-        if (updatedCount == 0) {
-            return Optional.empty();
-        }
-        return getUserByRequest(userId);
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                .fetchOne());
     }
 }

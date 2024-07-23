@@ -1,7 +1,7 @@
-package com.ecommerce.domain.usercoupon.service;
+package com.ecommerce.domain.user.service;
 
 import com.ecommerce.domain.coupon.Coupon;
-import com.ecommerce.domain.user.service.UserService;
+import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,21 +11,22 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class UserCouponServiceTest {
+public class UserServiceUnitTest {
     @Mock
     private UserRepository userRepository;
-
     @InjectMocks
     private UserService userService;
-
     private List<Coupon> testCoupons;
 
     @BeforeEach
@@ -38,7 +39,9 @@ class UserCouponServiceTest {
     void getUserCouponsSuccess() {
         // Given
         Long userId = 1L;
-        when(userRepository.getAllCouponsByUserId(userId)).thenReturn(testCoupons);
+        when(userRepository.getById(userId)).thenReturn(
+                Optional.of(new User(userId, "testUser", BigDecimal.ZERO, testCoupons))
+        );
 
         // When
         List<Coupon> result = userService.getUserCoupons(userId);
@@ -46,6 +49,6 @@ class UserCouponServiceTest {
         // Then
         assertNotNull(result);
         assertEquals(testCoupons.size(), result.size());
-        verify(userRepository).getAllCouponsByUserId(userId);
+        verify(userRepository).getById(userId);
     }
 }

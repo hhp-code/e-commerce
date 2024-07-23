@@ -1,12 +1,11 @@
 package com.ecommerce.domain.product;
 
-import com.ecommerce.domain.order.OrderItem;
+import com.ecommerce.api.exception.domain.ProductException;
 import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 public class Product {
@@ -19,16 +18,12 @@ public class Product {
     private String name;
     @Getter
     private BigDecimal price;
-    private Integer availableStock;
     @Getter
-    private Integer reservedStock;
+    private Integer stock;
     @Getter
     private LocalDateTime lastUpdated;
     private final boolean isDeleted;
     private LocalDateTime deletedAt;
-
-    @OneToMany(mappedBy = "product")
-    private List<OrderItem> orderItems;
 
 
     public Product() {
@@ -36,36 +31,40 @@ public class Product {
         this.isDeleted = false;
     }
 
-    public Product(String name, BigDecimal price, Integer availableStock) {
+    public Product(String name, BigDecimal price, Integer stock) {
         this();
         this.name = name;
         this.price = price;
-        this.availableStock = availableStock;
-        this.reservedStock = 0;
+        this.stock = stock;
+        this.lastUpdated = LocalDateTime.now();
     }
-    public Product(long id, String name, BigDecimal price, Integer availableStock) {
+    public Product(long id, String name, BigDecimal price, Integer stock) {
         this();
         this.id = id;
         this.name = name;
         this.price = price;
-        this.availableStock = availableStock;
-        this.reservedStock = 0;
+        this.stock = stock;
+        this.lastUpdated = LocalDateTime.now();
     }
 
 
-    public int getAvailableStock() {
-        return availableStock;
-    }
 
     public boolean isDeleted() {
         return isDeleted;
     }
 
-    public void decreaseReservedStock(Integer quantity) {
-        this.reservedStock -= quantity;
+    public void deductStock(int orderedQuantity) {
+        if(this.stock < orderedQuantity) {
+            throw new ProductException("재고가 부족합니다.");
+        }
+        this.stock -= orderedQuantity;
+        this.lastUpdated = LocalDateTime.now();
     }
-
-    public void decreaseAvailableStock(int orderedQuantity) {
-        this.availableStock -= orderedQuantity;
+    public void chargeStock(Integer quantity) {
+        if(quantity < 0) {
+            throw new ProductException("충전 수량은 0보다 커야 합니다.");
+        }
+        this.stock += quantity;
+        this.lastUpdated = LocalDateTime.now();
     }
 }

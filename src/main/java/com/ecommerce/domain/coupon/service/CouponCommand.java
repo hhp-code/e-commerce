@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @UtilityClass
 public class CouponCommand {
-    public record Create(String code, BigDecimal discountAmount, int remainingQuantity, DiscountType type,
+    public record Create(String code, BigDecimal discountAmount, int quantity, DiscountType type,
                          LocalDateTime validFrom, LocalDateTime validTo, boolean active) {
     }
     public record Issue(Long userId,Long couponId, Instant timeStamp) implements Comparable<Issue> {
