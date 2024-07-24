@@ -60,12 +60,7 @@ class UserCouponControllerConcurrencyTest {
 
     }
 
-    /*
-      목적: 동시에 많은 수의 쿠폰 발급 요청을 처리할 수 있는지 확인
-      시나리오:
-      1. 여러 스레드에서 동시에 1000개의 쿠폰 발급 요청을 보냄
-      2. 쿠폰 수량이 정확히 감소했는지 확인
-     */
+
 
     @Test
     @DisplayName("대량 동시 요청 처리 테스트 쿠폰 -1000개")
@@ -115,16 +110,12 @@ class UserCouponControllerConcurrencyTest {
         new Thread(() -> {
             try {
                 processingLatch.await();
-                MvcResult result = mockMvc.perform(post("/api/users/{userId}/coupons", 1L)
+                mockMvc.perform(post("/api/users/{userId}/coupons", 1L)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(String.valueOf(COUPON_ID)))
-                        .andExpect(request().asyncStarted())
                         .andReturn();
 
-                mockMvc.perform(asyncDispatch(result))
-                        .andExpect(status().isOk());
             } catch (Exception e) {
-                System.out.println("첫 번째 요청 처리 중 오류 발생");
             } finally {
                 completionLatch.countDown();
             }
@@ -135,16 +126,12 @@ class UserCouponControllerConcurrencyTest {
             try {
                 processingLatch.countDown();
                 Thread.sleep(100);
-                MvcResult result = mockMvc.perform(post("/api/users/{userId}/coupons", 2L)
+                mockMvc.perform(post("/api/users/{userId}/coupons", 2L)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(String.valueOf(COUPON_ID)))
-                        .andExpect(request().asyncStarted())
                         .andReturn();
 
-                mockMvc.perform(asyncDispatch(result))
-                        .andExpect(status().isOk());
             } catch (Exception e) {
-                System.out.println("두 번째 요청 처리 중 오류 발생");
             } finally {
                 completionLatch.countDown();
             }

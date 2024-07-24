@@ -17,8 +17,6 @@ public class CouponCommand {
         public int compareTo(Issue o) {
             return issuedAt.compareTo(o.issuedAt);
         }
-
-
     }
 
 }

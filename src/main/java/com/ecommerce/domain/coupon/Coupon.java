@@ -91,7 +91,7 @@ public class Coupon {
         return isActive;
     }
 
-    public int getQuantity() {
+    public Integer getQuantity() {
         return quantity.get();
     }
 
