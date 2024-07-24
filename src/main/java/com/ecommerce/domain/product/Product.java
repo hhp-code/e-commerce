@@ -47,12 +47,9 @@ public class Product {
         this.lastUpdated = LocalDateTime.now();
     }
 
-
-
     public boolean isDeleted() {
         return isDeleted;
     }
-
     public void deductStock(int orderedQuantity) {
         if(this.stock < orderedQuantity) {
             throw new ProductException("재고가 부족합니다.");
@@ -67,4 +64,5 @@ public class Product {
         this.stock += quantity;
         this.lastUpdated = LocalDateTime.now();
     }
+
 }

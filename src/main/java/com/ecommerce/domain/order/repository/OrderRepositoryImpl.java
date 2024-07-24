@@ -36,11 +36,11 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public List<Order> getOrders(Long customerId) {
+    public List<Order> getOrders(Long orderId) {
         return queryFactory
                 .selectFrom(order)
                 .leftJoin(order.user).fetchJoin()
-                .where(userIdEq(customerId))
+                .where(order.id.in(orderId))
                 .fetch();
     }
 

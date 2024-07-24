@@ -108,24 +108,24 @@ class ProductServiceUnitTest {
     @DisplayName("상품 재고 차감 - 상품 저장실패")
     void testDeductStockWhenSaveFailed() {
         //given
-        when(productRepository.save(sampleProduct)).thenReturn(Optional.empty());
+        when(productRepository.deductStock(sampleProduct.getId(), 10)).thenReturn(0);
 
         //when & then
         assertThrows(ProductException.ServiceException.class, () -> productService.deductStock(sampleProduct, 10));
 
-        verify(productRepository, times(1)).save(sampleProduct);
+        verify(productRepository, times(1)).deductStock(sampleProduct.getId(), 10);
     }
 
     @Test
     @DisplayName("상품 재고 충전 - 상품 저장실패")
     void testChargeStockWhenSaveFailed() {
         //given
-        when(productRepository.save(sampleProduct)).thenReturn(Optional.empty());
+        when(productRepository.chargeStock(sampleProduct.getId(), 10)).thenReturn(0);
 
         //when & then
         assertThrows(ProductException.ServiceException.class, () -> productService.chargeStock(sampleProduct, 10));
 
-        verify(productRepository, times(1)).save(sampleProduct);
+        verify(productRepository, times(1)).chargeStock(sampleProduct.getId(), 10);
     }
 
     private Product createProductRequest(String name, String price, Integer availableStock) {

@@ -62,4 +62,10 @@ public class CouponService {
     public void save(Coupon coupon) {
         couponRepository.save(coupon);
     }
+
+    public Coupon saveAndGet(Coupon coupon) {
+        return couponRepository.save(coupon).orElseThrow(
+                () -> new CouponException.ServiceException("쿠폰 저장에 실패했습니다.")
+        );
+    }
 }

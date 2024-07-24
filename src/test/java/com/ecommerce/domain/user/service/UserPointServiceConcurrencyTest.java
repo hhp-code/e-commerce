@@ -1,89 +1,75 @@
 package com.ecommerce.domain.user.service;
 
 import com.ecommerce.domain.user.User;
-import com.ecommerce.domain.user.service.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class UserPointServiceConcurrencyTest {
-    @Mock
-    UserRepository userRepository;
     @Autowired
     UserPointService userPointService;
     @Autowired
     private UserService userService;
 
-    private User user;
+    private User charge;
+    private User deduct;
+
     @BeforeEach
+    @Transactional
     void setUp() {
-        userService.deleteAll();
-        user = new User("testUser", BigDecimal.valueOf(100));
-        userService.saveUser(user);
+        User chargeUser = new User("testChargeUser", BigDecimal.valueOf(100));
+        User deductUser = new User("testDeductUser", BigDecimal.valueOf(100));
+        charge = userService.saveUser(chargeUser);
+        deduct = userService.saveUser(deductUser);
     }
 
 
     @Test
-    public void testConcurrentChargePoint() throws InterruptedException {
-        long userId = 1L;
-        int threadCount = 10;
+    public void testConcurrentChargePoint() {
+        int taskCount = 10;
+        long userId = charge.getId();
 
         BigDecimal chargeAmount = BigDecimal.valueOf(10);
 
-        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-        CountDownLatch latch = new CountDownLatch(threadCount);
+        List<CompletableFuture<Void>> futures = IntStream.range(0, taskCount)
+                .mapToObj(i -> CompletableFuture.runAsync(() ->
+                        userPointService.chargePoint(userId, chargeAmount)))
+                .toList();
 
-        for (int i = 0; i < threadCount; i++) {
-            executorService.submit(() -> {
-                try {
-                    userPointService.chargePoint(userId, chargeAmount);
-                } finally {
-                    latch.countDown();
-                }
-            });
-        }
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
-        latch.await();
+
         assertThat(userService.getUser(userId).getPoint()).isEqualByComparingTo(BigDecimal.valueOf(200));
     }
     @Test
-    public void testConcurrentDeductPoint() throws InterruptedException {
-        Long userId = 1L;
-        BigDecimal decreaseAmount = new BigDecimal("10");
-        int threadCount = 5;
+    public void testConcurrentDeductPoint() {
+        int taskCount = 5;
+        long userId = deduct.getId();
 
+        BigDecimal deductAmount = BigDecimal.valueOf(10);
 
+        List<CompletableFuture<Void>> futures = IntStream.range(0, taskCount)
+                .mapToObj(i -> CompletableFuture.runAsync(() -> {
+                    try {
+                        userPointService.deductPoint(userId, deductAmount);
+                    } catch (Exception e) {
+                        System.err.println("포인트 차감 중 오류 발생: " + e.getMessage());
+                    }
+                }))
+                .toList();
 
-        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-        CountDownLatch latch = new CountDownLatch(threadCount);
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
-        for (int i = 0; i < threadCount; i++) {
-            executorService.submit(() -> {
-                try {
-                    userPointService.deductPoint(1L, decreaseAmount);
-                } finally {
-                    latch.countDown();
-                }
-            });
-        }
-
-        latch.await();
         assertThat(userService.getUser(userId).getPoint()).isEqualByComparingTo(BigDecimal.valueOf(50));
-
     }
-
-
-
 }

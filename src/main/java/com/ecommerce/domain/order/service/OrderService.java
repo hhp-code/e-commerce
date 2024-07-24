@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Component
@@ -36,13 +35,15 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<Order> getOrders(OrderCommand.Search search) {
-        long id = search.id();
-        return orderRepository.getOrders(id);
+        long id = search.orderId();
+        List<Order> orders = orderRepository.getOrders(id);
+        orders.size();
+        return orders;
     }
 
     @Transactional
     public Order createOrder(OrderCommand.Create command) {
-        User user = userService.getUser(command.id());
+        User user = userService.getUser(command.userId());
         Map<Product, Integer> convertedOrders = getProductIntegerMap(command);
         Order order = new Order(user, convertedOrders);
         return orderRepository.saveAndGet(order)

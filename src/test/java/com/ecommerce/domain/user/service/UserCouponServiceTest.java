@@ -4,6 +4,8 @@ import com.ecommerce.api.exception.domain.UserException;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
 import com.ecommerce.domain.user.User;
+import com.ecommerce.domain.user.repository.UserRepositoryImpl;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserCouponServiceTest {
     @Autowired
     private UserCouponService userCouponService;
@@ -53,6 +54,9 @@ public class UserCouponServiceTest {
         assertThrows(UserException.ServiceException.class, () -> userCouponService.getUserCoupon(userId, couponId));
     }
 
-
+    @AfterEach
+    void tearDown() {
+        userService.deleteAll();
+    }
 
 }

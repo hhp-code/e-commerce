@@ -22,12 +22,10 @@ public class ProductRepositoryImpl implements ProductRepository {
     private final ProductJPARepository productJPARepository;
     private final JPAQueryFactory queryFactory;
     private final QProduct product = QProduct.product;
-    private final QOrder order = QOrder.order;
-    private final EntityManager entityManager;
-    public ProductRepositoryImpl(ProductJPARepository productJPARepository, EntityManager entityManager, EntityManager entityManager1) {
+
+    public ProductRepositoryImpl(ProductJPARepository productJPARepository, EntityManager entityManager) {
         this.productJPARepository = productJPARepository;
         this.queryFactory = new JPAQueryFactory(entityManager);
-        this.entityManager = entityManager1;
     }
 
     @Override
@@ -84,7 +82,23 @@ public class ProductRepositoryImpl implements ProductRepository {
                 .execute();
     }
 
+    @Override
+    public Integer deductStock(Long productId, Integer quantity) {
+        return Math.toIntExact(queryFactory
+                .update(product)
+                .set(product.stock, product.stock.subtract(quantity))
+                .where(product.id.eq(productId))
+                .execute());
+    }
 
+    @Override
+    public Integer chargeStock(Long productId, Integer quantity) {
+        return Math.toIntExact(queryFactory
+                .update(product)
+                .set(product.stock, product.stock.add(quantity))
+                .where(product.id.eq(productId))
+                .execute());
+    }
 
 
 }

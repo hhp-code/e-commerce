@@ -29,7 +29,9 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
-
+    //LockManager
+    implementation 'net.javacrumbs.shedlock:shedlock-spring:4.42.0'
+    implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:4.42.0'
     // QueryDSL
     implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
 

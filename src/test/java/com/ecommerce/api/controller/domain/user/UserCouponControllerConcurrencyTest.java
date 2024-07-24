@@ -13,8 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -33,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class UserCouponControllerConcurrencyTest {
     @Autowired
     private MockMvc mockMvc;
@@ -43,17 +46,18 @@ class UserCouponControllerConcurrencyTest {
     @Autowired
     private UserService userService;
 
+    private Coupon testCoupon;
+    private Coupon testCoupon2;
+
     @BeforeEach
     void setUp(){
-        couponService.deleteAll();
-        userService.deleteAll();
 
         Coupon coupon = new Coupon(1L,"SUMMER2024", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT, 1000
         , LocalDateTime.now(),LocalDateTime.now().plusDays(7),true);
         Coupon coupon2 = new Coupon(2L,"WINTER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 500
                 , LocalDateTime.now(),LocalDateTime.now().plusDays(7),true);
-        couponService.save(coupon);
-        couponService.save(coupon2);
+        testCoupon=couponService.saveAndGet(coupon);
+        testCoupon2= couponService.saveAndGet(coupon2);
         for(int i=0; i<1000; i++){
             userService.saveUser(new User("TestUser"+i, BigDecimal.ZERO));
         }
@@ -65,7 +69,6 @@ class UserCouponControllerConcurrencyTest {
     @Test
     @DisplayName("대량 동시 요청 처리 테스트 쿠폰 -1000개")
     void batchTest() throws InterruptedException {
-        final long COUPON_ID = 1L;
         int THREAD_COUNT = 1000;
         CountDownLatch latch = new CountDownLatch(THREAD_COUNT);
         ExecutorService executorService = Executors.newFixedThreadPool(10);
@@ -77,7 +80,7 @@ class UserCouponControllerConcurrencyTest {
                 try {
                     MvcResult result = mockMvc.perform(post("/api/users/{userId}/coupons", userId)
                                     .contentType(MediaType.APPLICATION_JSON)
-                                    .content(String.valueOf(COUPON_ID)))
+                                    .content(String.valueOf(testCoupon.getId())))
                             .andExpect(request().asyncStarted())
                             .andReturn();
 
@@ -94,7 +97,7 @@ class UserCouponControllerConcurrencyTest {
         }
 
         latch.await(30, TimeUnit.SECONDS);
-        assertEquals(0, couponService.getRemainingQuantity(COUPON_ID), "쿠폰이 모두 소진되어야 합니다.");
+        assertEquals(0, couponService.getRemainingQuantity(testCoupon.getId()), "쿠폰이 모두 소진되어야 합니다.");
     }
 
 

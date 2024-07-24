@@ -65,7 +65,7 @@ class PaymentUseCaseTest {
         Order mockOrder = createMockOrder();
         OrderCommand.Payment paymentCommand = new OrderCommand.Payment(USER_ID,ORDER_ID);
         when(orderService.getOrder(ORDER_ID)).thenReturn(mockOrder);
-        doThrow(new RuntimeException("재고 부족")).when(productService).deductStock(any(Product.class), anyInt());
+        doThrow(new RuntimeException("재고 부족")).when(productService).deductStock(any(Product.class),anyInt());
         // When & Then
         assertThrows(RuntimeException.class, () -> paymentUseCase.payOrder(paymentCommand));
 

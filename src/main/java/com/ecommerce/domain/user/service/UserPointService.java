@@ -1,19 +1,31 @@
 package com.ecommerce.domain.user.service;
 
 import com.ecommerce.api.exception.domain.UserException;
+import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.util.concurrent.TimeoutException;
 
 @Component
 public class UserPointService {
     private final UserRepository userRepository;
 
-    public UserPointService(UserRepository userRepository) {
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
+    private final QuantumLockManager quantumLockManager;
+
+
+    public UserPointService(UserRepository userRepository, QuantumLockManager quantumLockManager) {
         this.userRepository = userRepository;
+        this.quantumLockManager = quantumLockManager;
     }
 
     @Transactional(readOnly = true)
@@ -22,23 +34,40 @@ public class UserPointService {
                 new UserException.ServiceException("사용자를 찾을수 없습니다."));
     }
 
-    @Transactional
+
     public BigDecimal chargePoint(Long userId, BigDecimal amount) {
-        User user = userRepository.getByIdWithLock(userId)
-                .orElseThrow(() ->
-                        new UserException.ServiceException("사용자를 찾을수 없습니다."));
-        BigDecimal newBalance = user.chargePoint(amount);
-        userRepository.save(user);
-        return newBalance;
+        String lockKey = "user:" + userId;
+        Duration timeout = Duration.ofSeconds(5);
+        try {
+            return quantumLockManager.executeWithLock(lockKey, timeout, () -> {
+                User user = userRepository.getById(userId)
+                        .orElseThrow(() -> new UserException.ServiceException("사용자를 찾을 수 없습니다."));
+                BigDecimal newBalance = user.chargePoint(amount);
+                userRepository.save(user);
+                return newBalance;
+            });
+        } catch (TimeoutException e) {
+            throw new UserException.ServiceException("포인트 충전 중 락 획득 시간 초과");
+        } catch (Exception e) {
+            throw new UserException.ServiceException("포인트 충전 중 오류 발생");
+        }
     }
 
-    @Transactional
     public BigDecimal deductPoint(Long userId, BigDecimal amount) {
-        User user = userRepository.getByIdWithLock(userId)
-                .orElseThrow(() -> new UserException.ServiceException("사용자를 찾을수 없습니다."));
-        BigDecimal newBalance = user.deductPoint(amount);
-        userRepository.save(user);
-        return newBalance;
+        String lockKey = "user:" + userId;
+        Duration timeout = Duration.ofSeconds(5);
+        try {
+            return quantumLockManager.executeWithLock(lockKey, timeout, () -> {
+                User user = userRepository.getById(userId)
+                        .orElseThrow(() -> new UserException.ServiceException("사용자를 찾을 수 없습니다."));
+                BigDecimal newBalance = user.deductPoint(amount);
+                userRepository.save(user);
+                return newBalance;
+            });
+        } catch (TimeoutException e) {
+            throw new UserException.ServiceException("포인트 충전 중 락 획득 시간 초과");
+        } catch (Exception e) {
+            throw new UserException.ServiceException("포인트 충전 중 오류 발생");
+        }
     }
-
 }

@@ -50,16 +50,6 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<Coupon> getAllCouponsByUserId(Long userId) {
-        return queryFactory
-                .select(coupon)
-                .from(user)
-                .join(user.coupons, coupon)
-                .where(user.id.eq(userId))
-                .fetch();
-    }
-
-    @Override
     @Transactional
     public void deleteAll() {
         userJPARepository.deleteAll();
@@ -69,6 +59,11 @@ public class UserRepositoryImpl implements UserRepository {
     public void saveAll(List<User> users) {
         userJPARepository.saveAll(users);
     }
+
+
+
+
+
     @Override
     public Optional<BigDecimal> getAmountByUserId(Long userId) {
         return Optional.ofNullable(queryFactory

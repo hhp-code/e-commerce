@@ -60,13 +60,13 @@ class OrderServiceUnitTest {
     void getOrders_WithSearchCondition_ShouldReturnOrderList() {
         OrderCommand.Search searchCommand = new OrderCommand.Search(VALID_USER_ID);
         List<Order> mockOrders = Arrays.asList(createMockOrder(), createMockOrder());
-        when(orderRepository.getOrders(searchCommand.id())).thenReturn(mockOrders);
+        when(orderRepository.getOrders(searchCommand.orderId())).thenReturn(mockOrders);
 
         List<Order> result = orderService.getOrders(searchCommand);
 
         assertNotNull(result);
         assertEquals(2, result.size());
-        verify(orderRepository).getOrders(searchCommand.id());
+        verify(orderRepository).getOrders(searchCommand.orderId());
     }
 
 

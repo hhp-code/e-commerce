@@ -19,35 +19,32 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class UserServiceTest {
 
     @Autowired
     private UserService userService;
 
     private List<Coupon> testCoupons;
+    private User user;
 
     @BeforeEach
     void setup(){
         User testUser = new User(1L, "testUser", BigDecimal.ZERO);
-        User user = userService.saveUser(testUser);
+        User initialUser = userService.saveUser(testUser);
         testCoupons = Arrays.asList(
                 new Coupon("testCoupon1", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT,10),
                 new Coupon("testCoupon2", BigDecimal.valueOf(2000), DiscountType.FIXED_AMOUNT,10));
         for(Coupon coupon : testCoupons){
-            user.addCoupon(coupon);
+            initialUser.addCoupon(coupon);
         }
-        userService.saveUser(user);
+        user = userService.saveUser(initialUser);
     }
 
     @Test
     @DisplayName("사용자의 쿠폰 목록 조회 성공")
     void getUserCouponsSuccess() {
-        // Given
-        Long userId = 1L;
-
-        // When
-        List<Coupon> result = userService.getUserCoupons(userId);
+        // Given && When
+        List<Coupon> result = userService.getUserCoupons(user.getId());
 
         // Then
         assertNotNull(result);

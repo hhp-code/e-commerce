@@ -3,6 +3,7 @@ package com.ecommerce.domain.coupon.service;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
 import com.ecommerce.domain.user.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,23 +16,26 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class CouponServiceTest {
 
     @Autowired
     private CouponService couponService;
 
+    CouponCommand.Create create;
+    @BeforeEach
+    void setUp() {
+        couponService.deleteAll();
+        create = new CouponCommand.Create(
+                "testCoupon",
+                BigDecimal.valueOf(1000), 10,
+                DiscountType.FIXED_AMOUNT,  LocalDateTime.now(), LocalDateTime.now().plusDays(7),true);
+    }
 
 
     @Test
     @DisplayName("쿠폰 생성 성공 시나리오")
     void createCoupon() {
-        // given
-        CouponCommand.Create create = new CouponCommand.Create(
-                "testCoupon",
-                BigDecimal.valueOf(1000), 10,
-                DiscountType.FIXED_AMOUNT,  LocalDateTime.now(), LocalDateTime.now().plusDays(7),true);
-        //when
+        // given //when
         Coupon coupon = couponService.createCoupon(create);
 
         //then
@@ -45,13 +49,10 @@ class CouponServiceTest {
     @DisplayName("쿠폰 조회 성공 시나리오")
     void getCoupon() {
         //given
-        User user = new User(1L, "testUser", BigDecimal.ZERO);
-        Coupon coupon = new Coupon("testCoupon", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT, 10, LocalDateTime.now(), LocalDateTime.now().plusDays(7), true);
-        user.addCoupon(coupon);
-        couponService.createCoupon(new CouponCommand.Create("testCoupon", BigDecimal.valueOf(1000), 10, DiscountType.FIXED_AMOUNT, LocalDateTime.now(), LocalDateTime.now().plusDays(7), true));
+        Coupon coupon1 = couponService.createCoupon(create);
 
         //when
-        Coupon coupon1 = couponService.getCoupon(1L);
+        Coupon coupon = couponService.getCoupon(1L);
 
         //then
         assertThat(coupon1).isNotNull();

@@ -3,14 +3,11 @@ package com.ecommerce.api.controller.usecase;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
-import com.ecommerce.domain.order.service.repository.OrderRepository;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
-import com.ecommerce.domain.product.service.repository.ProductRepository;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserPointService;
 import com.ecommerce.domain.user.service.UserService;
-import com.ecommerce.domain.user.service.repository.UserRepository;
 import com.ecommerce.domain.order.service.external.DummyPlatform;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +30,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class PaymentUseCaseConcurrencyTest {
     @Autowired
     private UserService userService;
@@ -55,22 +51,12 @@ class PaymentUseCaseConcurrencyTest {
     private Product testProduct;
 
 
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private ProductRepository productRepository;
-    @Autowired
-    private OrderRepository orderRepository;
-
 
     @BeforeEach
     void setUp() {
-        userRepository.deleteAll();
-        productRepository.deleteAll();
-        orderRepository.deleteAll();
-        testUser = new User(1L, "test", BigDecimal.valueOf(1000));
+        testUser = new User( "test", BigDecimal.valueOf(1000));
         userService.saveUser(testUser);
-        testProduct = new Product(1L, "test", BigDecimal.TEN, 10);
+        testProduct = new Product( "test", BigDecimal.TEN, 10);
         productService.saveAndGet(testProduct);
         Map<Product,Integer> orderItem= Map.of(testProduct, 1);
         testOrder = new Order(testUser, orderItem);

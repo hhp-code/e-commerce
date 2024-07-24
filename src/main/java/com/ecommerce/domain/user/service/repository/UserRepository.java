@@ -14,8 +14,6 @@ public interface UserRepository {
 
     Optional<Coupon> getCouponByUser(long userId, long couponId);
 
-    List<Coupon> getAllCouponsByUserId(Long userId);
-
     void deleteAll();
 
     Optional<BigDecimal> getAmountByUserId(Long userId);
@@ -29,4 +27,5 @@ public interface UserRepository {
     Optional<User> getByIdWithLock(Long userId);
 
     void saveAll(List<User> users);
+
 }
