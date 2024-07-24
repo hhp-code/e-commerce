@@ -51,7 +51,7 @@ public class UserCouponControllerTest {
         CompletableFuture<User>  test = CompletableFuture.completedFuture(testUser);
         Long userId = 1L;
         Long couponId = 1L;
-        when(couponQueueManager.addToQueueAsync(any(CouponCommand.Issue.class))).thenReturn(test);
+        when(couponQueueManager.addToQueueAsync(any(CouponCommand.Issue.class))).thenReturn(testUser);
 
         mockMvc.perform(post("/api/users/{userId}/coupons", userId)
                         .contentType(MediaType.APPLICATION_JSON)

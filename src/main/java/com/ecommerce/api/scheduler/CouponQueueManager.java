@@ -7,120 +7,80 @@ import com.ecommerce.domain.user.User;
 import jakarta.annotation.PreDestroy;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 @Component
 public class CouponQueueManager {
-    private static final int DEFAULT_RATE_LIMIT = 1000;
     private static final long SHUTDOWN_TIMEOUT = 60L;
 
     @Getter
-    private final ConcurrentLinkedQueue<CouponCommand.Issue> couponQueue = new ConcurrentLinkedQueue<>();
     private final Map<Long, CompletableFuture<User>> userFutureMap = new ConcurrentHashMap<>();
 
     private final ExecutorService executorService;
-    private final AtomicInteger processedRequestsCount = new AtomicInteger(0);
+    private final PriorityBlockingQueue<CouponCommand.Issue> couponQueue;
 
-    private final TransactionTemplate transactionTemplate;
     private final CouponUseCase couponUseCase;
     private final CouponService couponService;
 
     @Getter
-    private volatile Long currentCouponId;
+    private final AtomicReference<Long> currentCouponId = new AtomicReference<>();
 
-    public CouponQueueManager(TransactionTemplate transactionTemplate, CouponUseCase couponUseCase,
-                              CouponService couponService) {
+    private final ReentrantLock couponProcessLock = new ReentrantLock();
+
+    public CouponQueueManager(CouponUseCase couponUseCase, CouponService couponService) {
         this.executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        this.transactionTemplate = transactionTemplate;
+        this.couponQueue = new PriorityBlockingQueue<>(11, Comparator.comparing(CouponCommand.Issue::issuedAt));
         this.couponUseCase = couponUseCase;
         this.couponService = couponService;
-        scheduleCleanup();
+        startProcessingQueue();
     }
 
-    public CompletableFuture<User> addToQueueAsync(CouponCommand.Issue issue) {
-        this.currentCouponId = issue.couponId();
-        couponQueue.offer(issue);
-
+    public User addToQueueAsync(CouponCommand.Issue issue) {
+        currentCouponId.set(issue.couponId());
         CompletableFuture<User> future = new CompletableFuture<>();
         userFutureMap.put(issue.userId(), future);
-
-        return future.thenApplyAsync(this::logUserCouponInfo, executorService)
-                .exceptionally(e -> {
-                    log.error("사용자 {}에게 쿠폰 발급 실패", issue.userId(), e);
-                    throw new CompletionException(e);
-                });
+        couponQueue.offer(issue);
+        return future.join();
     }
 
-
-    @Scheduled(fixedRate = 100)
-    public void processCouponRequests() {
-        if (currentCouponId == null) return;
-
-        int remainingCoupons = couponService.getRemainingQuantity(currentCouponId);
-        if (remainingCoupons <= 0) {
-            log.info("쿠폰이 모두 소진되었습니다. 처리를 중단합니다.");
-            return;
-        }
-        int processLimit = Math.min(Math.min(remainingCoupons, couponQueue.size()), DEFAULT_RATE_LIMIT);
-        processedRequestsCount.set(0);
-        List<CouponCommand.Issue> batch = new ArrayList<>();
-        for (int i = 0; i < processLimit; i++) {
-            CouponCommand.Issue request = couponQueue.poll();
-            if (request == null) break;
-            batch.add(request);
-        }
-        CompletableFuture.runAsync(() -> processCouponBatchRequest(batch), executorService)
-                .thenRunAsync(() -> log.info("처리된 요청: {}. 남은 쿠폰: {}", processedRequestsCount.get(), remainingCoupons - processedRequestsCount.get()), executorService);
-    }
-    private void processCouponBatchRequest(List<CouponCommand.Issue> batch) {
-        transactionTemplate.execute(status -> {
-            for (CouponCommand.Issue issue : batch) {
-                User user = couponUseCase.issueCouponToUser(issue);
-                CompletableFuture<User> future = userFutureMap.remove(issue.userId());
-                if (future != null) {
-                    future.complete(user);
+    private void startProcessingQueue() {
+        executorService.submit(() -> {
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    CouponCommand.Issue issue = couponQueue.take();
+                    User user = processCouponRequest(issue);
+                    CompletableFuture<User> future = userFutureMap.remove(issue.userId());
+                    if (future != null) {
+                        future.complete(user);
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } catch (Exception e) {
+                    log.error("쿠폰 처리 중 오류 발생", e);
                 }
             }
-            return null;
         });
-        processedRequestsCount.addAndGet(batch.size());
     }
 
-    private void scheduleCleanup() {
-        long cleanupInterval = 30000L;
-        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(
-                this::cleanupCompletedFutures,
-                cleanupInterval,
-                cleanupInterval,
-                TimeUnit.MILLISECONDS
-        );
-    }
-
-    private void cleanupCompletedFutures() {
-        userFutureMap.entrySet().removeIf(entry -> entry.getValue().isDone());
-    }
-
-
-    private User logUserCouponInfo(User user) {
-        if (!user.getCoupons().isEmpty()) {
-            log.info("사용자 {}에게 쿠폰 발급 성공, 쿠폰 수: {}, 첫 번째 쿠폰 코드: {}",
-                    user.getId(), user.getCoupons().size(),
-                    user.getCoupons().getFirst().getCode());
-        } else {
-            log.info("사용자 {}에게 쿠폰 발급 성공했지만, 쿠폰이 없습니다.", user.getId());
+    private User processCouponRequest(CouponCommand.Issue issue) {
+        couponProcessLock.lock();
+        try {
+            int remainingCoupons = couponService.getRemainingQuantity(issue.couponId());
+            if (remainingCoupons <= 0) {
+                throw new RuntimeException("쿠폰이 모두 소진되었습니다.");
+            }
+            return couponUseCase.issueCouponToUser(issue);
+        } finally {
+            couponProcessLock.unlock();
         }
-        return user;
     }
-
 
     @PreDestroy
     public void shutdown() {

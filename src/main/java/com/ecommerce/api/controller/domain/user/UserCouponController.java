@@ -40,7 +40,7 @@ public class UserCouponController {
     public UserDto.UserResponse issueCouponToUser(
             @Parameter(description = "사용자 ID") @PathVariable Long userId,
             @RequestBody Long couponId) {
-        return UserMapper.toUserAsyncResponse(
+        return UserMapper.toUserResponse(
                 couponQueueManager.addToQueueAsync(CouponMapper.toUserCouponCommand(userId, couponId))
         );
     }

@@ -24,7 +24,7 @@ public class CouponMapper {
     }
 
     public static CouponCommand.Issue toUserCouponCommand(Long userId, Long couponId) {
-        return new CouponCommand.Issue(userId, couponId,Instant.now() );
+        return new CouponCommand.Issue(userId, couponId, Instant.now());
     }
 
 }

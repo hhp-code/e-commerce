@@ -16,7 +16,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class UserPointServiceTest {
 
     @Autowired
@@ -27,6 +26,7 @@ class UserPointServiceTest {
 
     @BeforeEach
     void setup(){
+        userRepository.deleteAll();
         User testUser = new User(1L,"testUser", BigDecimal.valueOf(1000));
         userRepository.save(testUser);
     }

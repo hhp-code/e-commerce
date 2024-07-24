@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -34,7 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class UserCouponControllerConcurrencyTest {
     @Autowired
     private MockMvc mockMvc;
@@ -43,15 +41,13 @@ class UserCouponControllerConcurrencyTest {
     private CouponService couponService;
 
     @Autowired
-    private CouponQueueManager couponQueueManager;
-
-    @Autowired
     private UserService userService;
 
     @BeforeEach
     void setUp(){
         couponService.deleteAll();
         userService.deleteAll();
+
         Coupon coupon = new Coupon(1L,"SUMMER2024", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT, 1000
         , LocalDateTime.now(),LocalDateTime.now().plusDays(7),true);
         Coupon coupon2 = new Coupon(2L,"WINTER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 500
@@ -128,7 +124,7 @@ class UserCouponControllerConcurrencyTest {
                 mockMvc.perform(asyncDispatch(result))
                         .andExpect(status().isOk());
             } catch (Exception e) {
-                // 예외 처리
+                System.out.println("첫 번째 요청 처리 중 오류 발생");
             } finally {
                 completionLatch.countDown();
             }
@@ -148,16 +144,15 @@ class UserCouponControllerConcurrencyTest {
                 mockMvc.perform(asyncDispatch(result))
                         .andExpect(status().isOk());
             } catch (Exception e) {
-                // 예외 처리
+                System.out.println("두 번째 요청 처리 중 오류 발생");
             } finally {
                 completionLatch.countDown();
             }
         }).start();
 
-        completionLatch.await(30, TimeUnit.SECONDS);
+        assertTrue(completionLatch.await(30, TimeUnit.SECONDS), "테스트가 시간 초과되었습니다.");
 
         assertEquals(498, couponService.getRemainingQuantity(COUPON_ID), "두 요청 모두 처리되어야 합니다.");
-        assertTrue(couponQueueManager.getCouponQueue().isEmpty(), "처리 완료 후 큐가 비어있어야 합니다.");
     }
 
 }
