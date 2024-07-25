@@ -2,7 +2,6 @@ package com.ecommerce.domain.product.service;
 
 
 import com.ecommerce.api.exception.domain.ProductException;
-import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.product.service.repository.ProductRepository;
 import com.ecommerce.domain.product.Product;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+
 @Slf4j
 @Component
 public class ProductService {

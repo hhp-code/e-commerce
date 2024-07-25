@@ -1,7 +1,6 @@
 package com.ecommerce.domain.user.service;
 
 import com.ecommerce.api.exception.domain.UserException;
-import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +17,6 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeoutException;
 
-import static org.assertj.core.api.FactoryBasedNavigableListAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 

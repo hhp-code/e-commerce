@@ -1,6 +1,5 @@
 package com.ecommerce.api.controller.usecase;
 
-import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;

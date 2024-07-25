@@ -1,7 +1,6 @@
 package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.api.scheduler.CouponQueueManager;
-import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
 import com.ecommerce.domain.coupon.service.CouponCommand;

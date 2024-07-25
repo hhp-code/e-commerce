@@ -1,7 +1,6 @@
 package com.ecommerce.domain.user.service;
 
 import com.ecommerce.api.exception.domain.UserException;
-import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
