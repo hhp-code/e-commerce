@@ -1,13 +1,11 @@
 package com.ecommerce.domain.coupon;
 
-import com.ecommerce.domain.coupon.service.AtomicIntegerConverter;
 import com.ecommerce.domain.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Entity
 public class Coupon {
@@ -27,8 +25,8 @@ public class Coupon {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Convert(converter = AtomicIntegerConverter.class)
-    private AtomicInteger quantity;
+    @Getter
+    private Integer quantity;
 
     @Getter
     private LocalDateTime validFrom;
@@ -44,7 +42,7 @@ public class Coupon {
         this.code = code;
         this.discountAmount = discountAmount;
         this.discountType = discountType;
-        this.quantity = new AtomicInteger(quantity);
+        this.quantity = quantity;
         this.validFrom = LocalDateTime.now();
         this.validTo = LocalDateTime.now().plusDays(7);
         this.isActive = true;
@@ -56,7 +54,7 @@ public class Coupon {
         this.code = code;
         this.discountAmount = discountAmount;
         this.discountType = discountType;
-        this.quantity = new AtomicInteger(quantity);
+        this.quantity = quantity;
         this.validFrom = validFrom;
         this.validTo = validTo;
         this.isActive = isActive;
@@ -68,7 +66,7 @@ public class Coupon {
         this.code = code;
         this.discountAmount = discountAmount;
         this.discountType = discountType;
-        this.quantity = new AtomicInteger(quantity);
+        this.quantity = quantity;
         this.validFrom = validFrom;
         this.validTo = validTo;
         this.isActive = isActive;
@@ -77,31 +75,23 @@ public class Coupon {
 
     public boolean isValid() {
         LocalDateTime now = LocalDateTime.now();
-        return isActive && quantity.get() > 0 && now.isAfter(validFrom) && now.isBefore(validTo);
+        return isActive && quantity > 0 && now.isAfter(validFrom) && now.isBefore(validTo);
     }
     public boolean deductQuantity() {
-        while (true) {
-            int current = quantity.get();
-            if (current <= 0) return true;
-            if (quantity.compareAndSet(current, current - 1)) return false;
+        if (quantity <= 0) {
+            return false;
         }
+        quantity = quantity -1;
+        return true;
     }
 
     public boolean getActive() {
         return isActive;
     }
 
-    public Integer getQuantity() {
-        return quantity.get();
+
+    public void use() {
+        this.isActive = false;
     }
 
-
-
-    public boolean use() {
-        return this.isActive = false;
-    }
-
-    public int getRemainingQuantity() {
-        return quantity.get();
-    }
 }

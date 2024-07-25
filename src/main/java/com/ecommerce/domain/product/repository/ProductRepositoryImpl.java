@@ -82,23 +82,9 @@ public class ProductRepositoryImpl implements ProductRepository {
                 .execute();
     }
 
-    @Override
-    public Integer deductStock(Long productId, Integer quantity) {
-        return Math.toIntExact(queryFactory
-                .update(product)
-                .set(product.stock, product.stock.subtract(quantity))
-                .where(product.id.eq(productId))
-                .execute());
-    }
 
-    @Override
-    public Integer chargeStock(Long productId, Integer quantity) {
-        return Math.toIntExact(queryFactory
-                .update(product)
-                .set(product.stock, product.stock.add(quantity))
-                .where(product.id.eq(productId))
-                .execute());
-    }
+
+
 
 
 }

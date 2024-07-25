@@ -27,10 +27,8 @@ class UserPointServiceConcurrencyTest {
     @BeforeEach
     @Transactional
     void setUp() {
-        User chargeUser = new User("testChargeUser", BigDecimal.valueOf(100));
-        User deductUser = new User("testDeductUser", BigDecimal.valueOf(100));
-        charge = userService.saveUser(chargeUser);
-        deduct = userService.saveUser(deductUser);
+        charge = userService.saveUser( new User("testChargeUser", BigDecimal.valueOf(100)));
+        deduct = userService.saveUser(new User("testDeductUser", BigDecimal.valueOf(100)));
     }
 
 

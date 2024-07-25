@@ -5,12 +5,14 @@ import com.ecommerce.api.exception.domain.ProductException;
 import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.product.service.repository.ProductRepository;
 import com.ecommerce.domain.product.Product;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.List;
-
+import java.util.concurrent.atomic.AtomicInteger;
+@Slf4j
 @Component
 public class ProductService {
 
@@ -39,13 +41,15 @@ public class ProductService {
         return productRepository.getProducts();
     }
 
-    public void deductStock(Product product, Integer quantity) {
+
+    public Product deductStock(Product product, Integer quantity) {
         String lockKey = "product:" + product.getId();
         Duration timeout = Duration.ofSeconds(5);
         try {
-            quantumLockManager.executeWithLock(lockKey, timeout, () -> {
-                product.deductStock(quantity);
-                return productRepository.save(product).orElseThrow(
+            return quantumLockManager.executeWithLock(lockKey, timeout, () -> {
+                Product myProduct = getProduct(product.getId());
+                myProduct.deductStock(quantity);
+                return productRepository.save(myProduct).orElseThrow(
                         () -> new ProductException.ServiceException("재고 차감에 실패했습니다.")
                 );
             });

@@ -15,6 +15,4 @@ public interface ProductRepository {
     Optional<Product> save(Product oldProduct);
 
     void deleteAll();
-    Integer deductStock(Long productId, Integer quantity);
-    Integer chargeStock(Long productId, Integer quantity);
 }

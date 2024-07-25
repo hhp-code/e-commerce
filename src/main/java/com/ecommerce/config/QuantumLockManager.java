@@ -1,5 +1,6 @@
 package com.ecommerce.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.*;
@@ -9,6 +10,7 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.function.Supplier;
 import java.time.Duration;
 import java.util.UUID;
+@Slf4j
 @Component
 public class QuantumLockManager {
 

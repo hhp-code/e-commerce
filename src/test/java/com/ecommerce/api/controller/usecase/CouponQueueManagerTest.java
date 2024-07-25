@@ -17,8 +17,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
 class CouponQueueManagerTest {
@@ -35,11 +33,12 @@ class CouponQueueManagerTest {
 
     private CouponQueueManager couponQueueManager;
 
+    @Mock
+    private QuantumLockManager quantumLockManager;
+
     private CouponCommand.Issue testIssue;
     private User testUser;
 
-    @Mock
-    private QuantumLockManager quantumLockManager;
     @BeforeEach
     void setUp() {
         Coupon testCoupon = new Coupon("TEST123", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT, 10);

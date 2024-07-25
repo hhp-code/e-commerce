@@ -8,9 +8,9 @@ import com.ecommerce.domain.user.User;
 import jakarta.annotation.PreDestroy;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.*;
@@ -35,6 +35,7 @@ public class CouponQueueManager {
     private final AtomicReference<Long> currentCouponId = new AtomicReference<>();
 
     private final ReentrantLock couponProcessLock = new ReentrantLock();
+    private final QuantumLockManager quantumLockManager;
 
     public CouponQueueManager(CouponUseCase couponUseCase, CouponService couponService, QuantumLockManager quantumLockManager) {
         this.quantumLockManager = quantumLockManager;
@@ -72,18 +73,21 @@ public class CouponQueueManager {
         });
     }
 
-    private final QuantumLockManager quantumLockManager;
     private User processCouponRequest(CouponCommand.Issue issue) {
-        couponProcessLock.lock();
-        try {
-            int remainingCoupons = couponService.getStock(issue.couponId());
-            log.info("남은 쿠폰 수량: {}", remainingCoupons);
-            if (remainingCoupons <= 0) {
-                throw new RuntimeException("쿠폰이 모두 소진되었습니다.");
-            }
-            return couponUseCase.issueCouponToUser(issue);
-        } finally {
-            couponProcessLock.unlock();
+        String lockKey = "coupon:" + issue.couponId();
+        Duration timeout = Duration.ofSeconds(5);
+        try{
+            return quantumLockManager.executeWithLock(lockKey,timeout, () -> {
+                int remainingCoupons = couponService.getStock(issue.couponId());
+                log.info("남은 쿠폰 수량: {}", remainingCoupons);
+                if (remainingCoupons <= 0) {
+                    throw new RuntimeException("쿠폰이 모두 소진되었습니다.");
+                }
+                return couponUseCase.issueCouponToUser(issue);
+        }
+        );
+        } catch (Exception e) {
+            throw new RuntimeException("쿠폰 발급에 실패했습니다.", e);
         }
     }
 

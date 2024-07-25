@@ -29,7 +29,7 @@ class UserServiceTest {
 
     @BeforeEach
     void setup(){
-        User testUser = new User(1L, "testUser", BigDecimal.ZERO);
+        User testUser = new User( "testUser", BigDecimal.ZERO);
         User initialUser = userService.saveUser(testUser);
         testCoupons = Arrays.asList(
                 new Coupon("testCoupon1", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT,10),

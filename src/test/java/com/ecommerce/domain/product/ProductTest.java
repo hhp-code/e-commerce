@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 class ProductTest {
 
@@ -30,7 +31,9 @@ class ProductTest {
     @Test
     @DisplayName("재고 차감 실패 테스트")
     void testDeductStockInsufficientStock() {
-        assertThrows(ProductException.class, () -> product.deductStock(15));
+        Product innerProduct = new Product("Test Product", BigDecimal.valueOf(100), 10);
+
+        assertFalse(innerProduct.deductStock(15));
     }
 
     @Test
@@ -43,7 +46,8 @@ class ProductTest {
     @Test
     @DisplayName("재고 추가 실패 테스트")
     void testChargeStockNegativeQuantity() {
-        assertThrows(ProductException.class, () -> product.chargeStock(-5));
+
+        assertFalse(product.chargeStock(-5));
     }
 
     @Test

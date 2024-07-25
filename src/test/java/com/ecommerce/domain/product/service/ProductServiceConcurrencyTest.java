@@ -1,7 +1,6 @@
 package com.ecommerce.domain.product.service;
 
 import com.ecommerce.domain.product.Product;
-import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

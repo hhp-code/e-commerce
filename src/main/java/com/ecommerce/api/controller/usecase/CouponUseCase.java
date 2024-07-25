@@ -1,5 +1,6 @@
 package com.ecommerce.api.controller.usecase;
 
+import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.coupon.service.CouponCommand;
 import com.ecommerce.domain.coupon.service.CouponService;
 import com.ecommerce.domain.coupon.Coupon;
@@ -11,19 +12,23 @@ import com.ecommerce.domain.user.service.UserService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+
 @Component
 public class CouponUseCase {
     private final OrderService orderService;
     private final CouponService couponService;
     private final UserService userService;
     private final UserCouponService userCouponService;
+    private final QuantumLockManager quantumLockManager;
 
     public CouponUseCase(OrderService orderService,
-                         CouponService couponService, UserService userService, UserCouponService userCouponService) {
+                         CouponService couponService, UserService userService, UserCouponService userCouponService, QuantumLockManager quantumLockManager) {
         this.orderService = orderService;
         this.couponService = couponService;
         this.userService = userService;
         this.userCouponService = userCouponService;
+        this.quantumLockManager = quantumLockManager;
     }
 
     public User useCoupon(Long userId, Long couponId) {
@@ -37,11 +42,23 @@ public class CouponUseCase {
 
     @Transactional
     public User issueCouponToUser(CouponCommand.Issue issue) {
-        User user = userService.getUser(issue.userId());
-        Coupon coupon = couponService.deductCoupon(issue.couponId());
-        user.addCoupon(coupon);
-        user.getCoupons().size();
-        return userCouponService.updateUserCoupon(user, coupon);
+        String lockKey = "coupon:" + issue.couponId();
+        Duration timeout = Duration.ofSeconds(5);
+        try{
+            return quantumLockManager.executeWithLock(lockKey, timeout, () ->
+            {
+                User user = userService.getUser(issue.userId());
+                Coupon coupon = couponService.deductCoupon(issue.couponId());
+                user.addCoupon(coupon);
+                user.getCoupons().size();
+                return userCouponService.updateUserCoupon(user, coupon);
+            });
+        }
+        catch (Exception e){
+            throw new RuntimeException("Coupon issue failed", e);
+        }
+
+
     }
 
 }

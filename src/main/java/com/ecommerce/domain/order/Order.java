@@ -152,8 +152,9 @@ public class Order {
     }
 
 
-    public void finish() {
+    public Order finish() {
         this.orderStatus = OrderStatus.ORDERED;
+        return this;
     }
 
     public String getOrderStatus() {

@@ -1,12 +1,13 @@
 package com.ecommerce.domain.product;
 
-import com.ecommerce.api.exception.domain.ProductException;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Slf4j
 @Entity
 public class Product {
     @Getter
@@ -52,19 +53,21 @@ public class Product {
     }
 
 
-    public void deductStock(int orderedQuantity) {
-        if(this.stock < orderedQuantity) {
-            throw new ProductException("재고가 부족합니다.");
+    public boolean deductStock(int quantity) {
+        if(stock < quantity) {
+            return false;
         }
-        this.stock -= orderedQuantity;
+        stock -= quantity;
         this.lastUpdated = LocalDateTime.now();
+        return true;
     }
-    public void chargeStock(Integer quantity) {
-        if(quantity < 0) {
-            throw new ProductException("충전 수량은 0보다 커야 합니다.");
+    public boolean chargeStock(int quantity) {
+        if(quantity<=0 || stock < quantity) {
+            return false;
         }
-        this.stock += quantity;
+        stock += quantity;
         this.lastUpdated = LocalDateTime.now();
+        return true;
     }
 
 }
