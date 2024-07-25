@@ -43,7 +43,7 @@ class PaymentUseCaseTest {
 
     @Test
     @DisplayName("주문을 결제 처리한다")
-    void payOrder_ShouldProcessPayment_WhenValidCommandProvided() {
+    void processPayment_ShouldPayOrder_WhenValidCommandProvided() {
         Order mockOrder = createMockOrder();
         OrderCommand.Payment paymentCommand = new OrderCommand.Payment(USER_ID,ORDER_ID);
 

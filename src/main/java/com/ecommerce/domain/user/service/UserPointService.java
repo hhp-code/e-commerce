@@ -41,7 +41,8 @@ public class UserPointService {
                 userRepository.save(user);
                 return newBalance;
             });
-        } catch (TimeoutException e) {
+        }
+        catch (TimeoutException e) {
             throw new UserException.ServiceException("포인트 충전 중 락 획득 시간 초과");
         } catch (Exception e) {
             throw new UserException.ServiceException("포인트 충전 중 오류 발생");
@@ -60,9 +61,9 @@ public class UserPointService {
                 return newBalance;
             });
         } catch (TimeoutException e) {
-            throw new UserException.ServiceException("포인트 충전 중 락 획득 시간 초과");
+            throw new UserException.ServiceException("포인트 감소 중 락 획득 시간 초과");
         } catch (Exception e) {
-            throw new UserException.ServiceException("포인트 충전 중 오류 발생");
+            throw new UserException.ServiceException("포인트 감소 중 오류 발생");
         }
     }
 }

@@ -77,7 +77,7 @@ public class OrderController {
             @RequestBody OrderDto.OrderAddItemRequest request
     ) {
         request.validate();
-        return OrderMapper.toOrderResponse(cartUseCase.addCartItemToOrder(OrderMapper.toOrderAddItem(orderId, request)));
+        return OrderMapper.toOrderResponse(cartUseCase.addItemToOrder(OrderMapper.toOrderAddItem(orderId, request)));
     }
     @DeleteMapping("/orders/{orderId}/items")
     @Operation(
@@ -96,7 +96,7 @@ public class OrderController {
     ) {
         request.validate();
         return OrderMapper.toOrderResponse(
-                cartUseCase.deleteCartItemToOrder(OrderMapper.toOrderDeleteItem(orderId, request))
+                cartUseCase.deleteItemFromOrder(OrderMapper.toOrderDeleteItem(orderId, request))
         );
     }
 

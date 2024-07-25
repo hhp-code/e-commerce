@@ -1,6 +1,5 @@
 package com.ecommerce.api.controller.domain.user;
 
-import com.ecommerce.api.scheduler.CouponQueueManager;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
 import com.ecommerce.domain.coupon.service.CouponService;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
 class UserCouponControllerConcurrencyTest {
     @Autowired
     private MockMvc mockMvc;
@@ -50,6 +47,7 @@ class UserCouponControllerConcurrencyTest {
     private Coupon testCoupon2;
 
     @BeforeEach
+    @Transactional
     void setUp(){
 
         Coupon coupon = new Coupon(1L,"SUMMER2024", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT, 1000
@@ -97,7 +95,7 @@ class UserCouponControllerConcurrencyTest {
         }
 
         latch.await(30, TimeUnit.SECONDS);
-        assertEquals(0, couponService.getRemainingQuantity(testCoupon.getId()), "쿠폰이 모두 소진되어야 합니다.");
+        assertEquals(0, couponService.getStock(testCoupon.getId()), "쿠폰이 모두 소진되어야 합니다.");
     }
 
 
@@ -105,7 +103,7 @@ class UserCouponControllerConcurrencyTest {
     @Test
     @DisplayName("타이밍 관련 테스트")
     void timingTest() throws Exception {
-        final long COUPON_ID = 2L;
+        final long COUPON_ID = testCoupon2.getId();
         CountDownLatch processingLatch = new CountDownLatch(1);
         CountDownLatch completionLatch = new CountDownLatch(2);
 
@@ -142,7 +140,7 @@ class UserCouponControllerConcurrencyTest {
 
         assertTrue(completionLatch.await(30, TimeUnit.SECONDS), "테스트가 시간 초과되었습니다.");
 
-        assertEquals(498, couponService.getRemainingQuantity(COUPON_ID), "두 요청 모두 처리되어야 합니다.");
+        assertEquals(498, couponService.getStock(COUPON_ID), "두 요청 모두 처리되어야 합니다.");
     }
 
 }

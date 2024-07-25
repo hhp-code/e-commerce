@@ -51,8 +51,8 @@ public class CouponService {
     }
 
     @Transactional
-    public int getRemainingQuantity(Long currentCouponId) {
-        return couponRepository.getById(currentCouponId).map(Coupon::getQuantity).orElse(0);
+    public int getStock(Long currentCouponId) {
+        return couponRepository.getStock(currentCouponId);
     }
 
     public void deleteAll() {

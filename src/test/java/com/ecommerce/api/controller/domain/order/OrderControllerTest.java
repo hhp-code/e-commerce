@@ -143,7 +143,7 @@ class OrderControllerTest {
         OrderCommand.Add request = new OrderCommand.Add(VALID_USER_ID, ORDER_ID, 1);
         Order order = createSampleOrder();
 
-        when(cartUseCase.addCartItemToOrder(request)).thenReturn(order);
+        when(cartUseCase.addItemToOrder(request)).thenReturn(order);
 
         mockMvc.perform(patch(API_ORDERS +"/{orderId}"+"/items",order.getId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -158,7 +158,7 @@ class OrderControllerTest {
         OrderCommand.Delete request = new OrderCommand.Delete(ORDER_ID,PRODUCT_ID);
         Order order = createSampleOrder();
 
-        when(cartUseCase.deleteCartItemToOrder(request)).thenReturn(order);
+        when(cartUseCase.deleteItemFromOrder(request)).thenReturn(order);
 
         mockMvc.perform(delete(API_ORDERS +"/{orderID}"+ "/items",order.getId())
                         .contentType(MediaType.APPLICATION_JSON)

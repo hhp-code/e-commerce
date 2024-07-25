@@ -15,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -51,7 +50,7 @@ class CartUseCaseTest {
             when(orderService.saveAndGet(any(Order.class))).thenReturn(mockOrder);
 
             //when
-            Order result = cartUseCase.addCartItemToOrder(addCommand);
+            Order result = cartUseCase.addItemToOrder(addCommand);
 
             //then
             assertNotNull(result);

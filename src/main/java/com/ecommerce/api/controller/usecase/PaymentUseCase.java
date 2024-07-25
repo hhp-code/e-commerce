@@ -47,9 +47,10 @@ public class PaymentUseCase {
 
 
     public Order cancelOrder(OrderCommand.Cancel orderCancel) {
+        User user = userService.getUser(orderCancel.userId());
         Order order = orderService.getOrder(orderCancel.orderId());
         order.getOrderItems().forEach(productService::chargeStock);
-        userPointService.chargePoint(orderCancel.userId(), order.getTotalAmount());
+        userPointService.chargePoint(user.getId(), order.getTotalAmount());
         orderService.saveAndGet(order).cancel();
         dummyPlatform.send(order);
         return order;

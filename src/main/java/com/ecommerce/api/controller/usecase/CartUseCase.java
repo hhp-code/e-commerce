@@ -17,7 +17,7 @@ public class CartUseCase {
         this.productService = productService;
     }
 
-    public Order addCartItemToOrder(OrderCommand.Add command) {
+    public Order addItemToOrder(OrderCommand.Add command) {
         Order order = orderService.getOrCreateOrder(command);
         Product product = productService.getProduct(command.productId());
         if (product.getStock() < command.quantity()) {
@@ -27,7 +27,7 @@ public class CartUseCase {
         return orderService.saveAndGet(order);
     }
 
-    public Order deleteCartItemToOrder(OrderCommand.Delete orderDeleteItem) {
+    public Order deleteItemFromOrder(OrderCommand.Delete orderDeleteItem) {
         Order order = orderService.getOrder(orderDeleteItem.orderId());
         Product product = productService.getProduct(orderDeleteItem.productId());
         order.deleteOrderItem(product);

@@ -1,12 +1,14 @@
 package com.ecommerce.api.scheduler;
 
 import com.ecommerce.api.controller.usecase.CouponUseCase;
+import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.coupon.service.CouponCommand;
 import com.ecommerce.domain.coupon.service.CouponService;
 import com.ecommerce.domain.user.User;
 import jakarta.annotation.PreDestroy;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
@@ -34,7 +36,8 @@ public class CouponQueueManager {
 
     private final ReentrantLock couponProcessLock = new ReentrantLock();
 
-    public CouponQueueManager(CouponUseCase couponUseCase, CouponService couponService) {
+    public CouponQueueManager(CouponUseCase couponUseCase, CouponService couponService, QuantumLockManager quantumLockManager) {
+        this.quantumLockManager = quantumLockManager;
         this.executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         this.couponQueue = new PriorityBlockingQueue<>(11, Comparator.comparing(CouponCommand.Issue::issuedAt));
         this.couponUseCase = couponUseCase;
@@ -69,10 +72,12 @@ public class CouponQueueManager {
         });
     }
 
+    private final QuantumLockManager quantumLockManager;
     private User processCouponRequest(CouponCommand.Issue issue) {
         couponProcessLock.lock();
         try {
-            int remainingCoupons = couponService.getRemainingQuantity(issue.couponId());
+            int remainingCoupons = couponService.getStock(issue.couponId());
+            log.info("남은 쿠폰 수량: {}", remainingCoupons);
             if (remainingCoupons <= 0) {
                 throw new RuntimeException("쿠폰이 모두 소진되었습니다.");
             }
