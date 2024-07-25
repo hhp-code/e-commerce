@@ -70,7 +70,6 @@ public class User {
     }
 
     public Coupon getCoupon(long couponId) {
-        System.out.println(couponId + "wow");
         return coupons.stream()
                 .filter(coupon -> coupon.getId().equals(couponId))
                 .findFirst()

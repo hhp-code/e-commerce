@@ -63,7 +63,6 @@ class UserPointServiceConcurrencyTest {
                     try {
                         userPointService.deductPoint(userId, deductAmount);
                     } catch (Exception e) {
-                        System.err.println("포인트 차감 중 오류 발생: " + e.getMessage());
                     }
                 }))
                 .toList();

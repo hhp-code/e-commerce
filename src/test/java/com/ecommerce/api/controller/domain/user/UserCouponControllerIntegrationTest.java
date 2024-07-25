@@ -52,13 +52,8 @@ class UserCouponControllerIntegrationTest {
         userService.deleteAll();
         testCoupon = new Coupon(1L, "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
         couponService.save(testCoupon);
-        Coupon coupon = couponService.getCoupon(1L);
-        System.out.println(coupon.getId()+"couponId");
         testUser = new User(1L,"test", BigDecimal.ZERO, List.of(testCoupon));
-        User savedUser = userService.saveUser(testUser);
-        Long id = testUser.getId();
-        System.out.println(id+"userId");
-        System.out.println(savedUser.getId()+"savedUserId");
+        userService.saveUser(testUser);
     }
 
     @TestConfiguration

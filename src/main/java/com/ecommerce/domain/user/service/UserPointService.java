@@ -4,13 +4,14 @@ import com.ecommerce.api.exception.domain.UserException;
 import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.concurrent.TimeoutException;
-
+@Slf4j
 @Component
 public class UserPointService {
     private final UserRepository userRepository;
@@ -35,6 +36,7 @@ public class UserPointService {
         Duration timeout = Duration.ofSeconds(5);
         try {
             return quantumLockManager.executeWithLock(lockKey, timeout, () -> {
+                log.info("chargePoint lockKey: {}", lockKey);
                 User user = userRepository.getById(userId)
                         .orElseThrow(() -> new UserException.ServiceException("사용자를 찾을 수 없습니다."));
                 BigDecimal newBalance = user.chargePoint(amount);

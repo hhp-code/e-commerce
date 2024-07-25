@@ -10,10 +10,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-
+@Slf4j
 @Tag(name = "user_balance", description = "잔액 관련 API")
 @RestController
 @RequestMapping("/api")
@@ -25,7 +26,7 @@ public class UserPointController {
         this.userPointService = userPointService;
     }
 
-    @GetMapping("/balance/{userId}")
+    @GetMapping("/point/{userId}")
     @Operation(summary = "잔액 조회", description = "사용자의 잔액을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "잔액 조회 성공",
@@ -38,7 +39,7 @@ public class UserPointController {
                 userPointService.getPoint(userId));
     }
 
-    @PostMapping("/balance/{userId}/charge")
+    @PostMapping("/point/{userId}/charge")
     @Operation(summary = "잔액 충전", description = "사용자의 잔액을 충전합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "잔액 충전 성공",

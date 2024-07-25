@@ -82,7 +82,6 @@ class PaymentUseCaseConcurrencyTest {
                     OrderCommand.Payment orderPay = new OrderCommand.Payment(testUser.getId(), testOrder.getId());
                     return paymentUseCase.payOrder(orderPay);
                 } catch (Exception e) {
-                    System.out.println("Payment failed: " + e.getMessage());
                     return null;
                 } finally {
                     latch.countDown();
