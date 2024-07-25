@@ -4,10 +4,8 @@ import com.ecommerce.api.exception.domain.UserException;
 import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -16,9 +14,6 @@ import java.util.concurrent.TimeoutException;
 @Component
 public class UserPointService {
     private final UserRepository userRepository;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
 
     private final QuantumLockManager quantumLockManager;
 

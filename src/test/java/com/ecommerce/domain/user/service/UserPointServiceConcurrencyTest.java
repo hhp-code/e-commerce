@@ -72,4 +72,23 @@ class UserPointServiceConcurrencyTest {
 
         assertThat(userService.getUser(userId).getPoint()).isEqualByComparingTo(BigDecimal.valueOf(50));
     }
+    @Test
+    public void testDeadlockScenario() {
+        long user1Id = charge.getId();
+        long user2Id = deduct.getId();
+
+        CompletableFuture<Void> future1 = CompletableFuture.runAsync(() -> {
+            userPointService.chargePoint(user1Id, BigDecimal.TEN);
+            userPointService.deductPoint(user2Id, BigDecimal.TEN);
+        });
+
+        CompletableFuture<Void> future2 = CompletableFuture.runAsync(() -> {
+            userPointService.deductPoint(user1Id, BigDecimal.TEN);
+            userPointService.chargePoint(user2Id, BigDecimal.TEN);
+        });
+
+        CompletableFuture.allOf(future1, future2).join();
+        assertThat(userService.getUser(user1Id).getPoint()).isEqualByComparingTo(BigDecimal.valueOf(100));
+        assertThat(userService.getUser(user2Id).getPoint()).isEqualByComparingTo(BigDecimal.valueOf(100));
+    }
 }

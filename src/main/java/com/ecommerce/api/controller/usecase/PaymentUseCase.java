@@ -3,15 +3,12 @@ package com.ecommerce.api.controller.usecase;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
-import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserPointService;
 import com.ecommerce.domain.user.service.UserService;
 import com.ecommerce.domain.order.service.external.DummyPlatform;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 @Component
 public class PaymentUseCase {
@@ -40,7 +37,6 @@ public class PaymentUseCase {
             if (!externalSystemSuccess) {
                 throw new RuntimeException("Failed to send order to external system");
             }
-
             return order;
         } catch (Exception e) {
             cancelOrder(new OrderCommand.Cancel(user.getId(), order.getId()));

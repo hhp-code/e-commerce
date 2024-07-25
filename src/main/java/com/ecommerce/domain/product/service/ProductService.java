@@ -2,11 +2,13 @@ package com.ecommerce.domain.product.service;
 
 
 import com.ecommerce.api.exception.domain.ProductException;
+import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.product.service.repository.ProductRepository;
 import com.ecommerce.domain.product.Product;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.List;
 
 @Component
@@ -14,8 +16,11 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
-    public ProductService(ProductRepository productRepository) {
+    private final QuantumLockManager quantumLockManager;
+
+    public ProductService(ProductRepository productRepository, QuantumLockManager quantumLockManager) {
         this.productRepository = productRepository;
+        this.quantumLockManager = quantumLockManager;
     }
 
     public Product getProduct(Long productId) {
@@ -34,21 +39,35 @@ public class ProductService {
         return productRepository.getProducts();
     }
 
-    @Transactional
     public void deductStock(Product product, Integer quantity) {
-        product.deductStock(quantity);
-        productRepository.save(product).orElseThrow(
-                ()-> new ProductException.ServiceException("재고 차감에 실패했습니다.")
-        );
+        String lockKey = "product:" + product.getId();
+        Duration timeout = Duration.ofSeconds(5);
+        try {
+            quantumLockManager.executeWithLock(lockKey, timeout, () -> {
+                product.deductStock(quantity);
+                return productRepository.save(product).orElseThrow(
+                        () -> new ProductException.ServiceException("재고 차감에 실패했습니다.")
+                );
+            });
+        } catch (Exception e) {
+            throw new ProductException.ServiceException("재고 차감 중 오류 발생");
+        }
     }
 
 
-    @Transactional
     public void chargeStock(Product product, Integer quantity) {
-        product.chargeStock(quantity);
-        productRepository.save(product).orElseThrow(
-                () -> new ProductException.ServiceException("재고 입고에 실패했습니다.")
-        );
+        String lockKey = "product:" + product.getId();
+        Duration timeout = Duration.ofSeconds(5);
+        try {
+            quantumLockManager.executeWithLock(lockKey, timeout, () -> {
+                product.chargeStock(quantity);
+                return productRepository.save(product).orElseThrow(
+                        () -> new ProductException.ServiceException("재고 차감에 실패했습니다.")
+                );
+            });
+        } catch (Exception e) {
+            throw new ProductException.ServiceException("재고 차감 중 오류 발생");
+        }
     }
 
     @Transactional

@@ -50,6 +50,8 @@ public class Product {
     public boolean isDeleted() {
         return isDeleted;
     }
+
+
     public void deductStock(int orderedQuantity) {
         if(this.stock < orderedQuantity) {
             throw new ProductException("재고가 부족합니다.");

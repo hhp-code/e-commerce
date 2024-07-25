@@ -167,11 +167,6 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.id").value(VALID_USER_ID));
     }
 
-
-
-
-
-
     private Order createSampleOrder() {
         User user = new User(VALID_USER_ID, "test", PRODUCT_PRICE);
         Map<Product, Integer> items = new HashMap<>();
