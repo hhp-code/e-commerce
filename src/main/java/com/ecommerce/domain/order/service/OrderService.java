@@ -51,6 +51,12 @@ public class OrderService {
     }
 
     private Map<Product, Integer> getProductIntegerMap(OrderCommand.Create command) {
+        Map<Long, Integer> items = command.items();
+        for(Long productId : items.keySet()) {
+            if(productService.getProduct(productId).getStock() < items.get(productId)) {
+                throw new OrderException.ServiceException("상품의 재고가 부족합니다.");
+            }
+        }
         return command.items().entrySet().stream()
                 .collect(Collectors.toMap(entry -> productService.getProduct(entry.getKey()), Map.Entry::getValue));
     }

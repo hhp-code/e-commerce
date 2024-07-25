@@ -43,4 +43,8 @@ public class UserService {
     public void deleteAll() {
         userRepository.deleteAll();
     }
+
+    public List<User> getAllUsers() {
+        return userRepository.getAll();
+    }
 }

@@ -28,4 +28,5 @@ public interface UserRepository {
 
     void saveAll(List<User> users);
 
+    List<User> getAll();
 }

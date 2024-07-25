@@ -60,8 +60,10 @@ public class UserRepositoryImpl implements UserRepository {
         userJPARepository.saveAll(users);
     }
 
-
-
+    @Override
+    public List<User> getAll() {
+        return userJPARepository.findAll();
+    }
 
 
     @Override

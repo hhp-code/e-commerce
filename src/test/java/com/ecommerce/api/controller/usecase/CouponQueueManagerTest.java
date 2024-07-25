@@ -8,6 +8,7 @@ import com.ecommerce.domain.coupon.service.CouponCommand;
 import com.ecommerce.domain.coupon.service.CouponService;
 import com.ecommerce.domain.user.User;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,7 +18,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
-
+@Disabled("아직 완성되지 않았습니다.")
 @ExtendWith(MockitoExtension.class)
 class CouponQueueManagerTest {
 

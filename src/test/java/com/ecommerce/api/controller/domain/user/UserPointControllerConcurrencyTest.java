@@ -1,6 +1,5 @@
 package com.ecommerce.api.controller.domain.user;
 
-import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserPointService;
 import com.ecommerce.domain.user.service.UserService;
@@ -23,7 +22,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,8 +38,6 @@ class UserPointControllerConcurrencyTest {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private QuantumLockManager quantumLockManager;
 
     @Autowired
     private UserPointService userPointService;
