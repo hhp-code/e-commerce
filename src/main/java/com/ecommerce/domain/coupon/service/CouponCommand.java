@@ -9,16 +9,13 @@ import java.time.LocalDateTime;
 
 @UtilityClass
 public class CouponCommand {
-    public record Create(String code, BigDecimal discountAmount, int remainingQuantity, DiscountType type,
+    public record Create(String code, BigDecimal discountAmount, int quantity, DiscountType type,
                          LocalDateTime validFrom, LocalDateTime validTo, boolean active) {
     }
-    public record Issue(Long couponId, Long userId,Status status,  Instant timeStamp) implements Comparable<Issue> {
-        public enum Status{
-            PENDING, PROCESSING, COMPLETED, FAILED
-        }
+    public record Issue(Long userId,Long couponId, Instant issuedAt) implements Comparable<Issue> {
         @Override
         public int compareTo(Issue o) {
-            return this.timeStamp.compareTo(o.timeStamp);
+            return issuedAt.compareTo(o.issuedAt);
         }
     }
 

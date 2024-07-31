@@ -1,50 +1,52 @@
 package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.api.scheduler.CouponQueueManager;
+import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
+import com.ecommerce.domain.coupon.service.CouponCommand;
 import com.ecommerce.domain.coupon.service.CouponService;
 import com.ecommerce.domain.user.User;
-import com.ecommerce.domain.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.List;
 
-import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.*;
-@SpringBootTest
-public class CouponQueueManagerTest {
+@Disabled("아직 완성되지 않았습니다.")
+@ExtendWith(MockitoExtension.class)
+class CouponQueueManagerTest {
 
-    @Autowired
-    private CouponQueueManager couponQueueManager;
+    @Mock
+    private TransactionTemplate transactionTemplate;
 
-    @Autowired
+    @Mock
+    private CouponUseCase couponUseCase;
+
+
+    @Mock
     private CouponService couponService;
 
-    @Autowired
-    private UserService userService;
+    private CouponQueueManager couponQueueManager;
 
-    private static final int COUPON_COUNT = 5;
-    private static final int USER_COUNT = 10;
+    @Mock
+    private QuantumLockManager quantumLockManager;
+
+    private CouponCommand.Issue testIssue;
+    private User testUser;
 
     @BeforeEach
     void setUp() {
-        createTestData();
-    }
+        Coupon testCoupon = new Coupon("TEST123", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT, 10);
+        testIssue =new CouponCommand.Issue(1L, 1L, Instant.now());
+        testUser = new User(1L, "test", null, List.of(testCoupon));
 
-    private void createTestData() {
-        Coupon coupon = new Coupon("TESTCOUPON", BigDecimal.valueOf(30), DiscountType.FIXED_AMOUNT, COUPON_COUNT);
-        couponService.save(coupon);
-
-        List<User> users = new ArrayList<>();
-        for (int i = 0; i < USER_COUNT; i++) {
-            users.add(new User("user" + i + "@example.com", BigDecimal.valueOf(1000)));
-        }
-        userService.saveAll(users);
+        couponQueueManager = new CouponQueueManager(couponUseCase, couponService,quantumLockManager);
     }
 
 

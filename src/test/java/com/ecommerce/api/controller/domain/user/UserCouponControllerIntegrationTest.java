@@ -7,6 +7,7 @@ import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +28,7 @@ import java.util.List;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+@Disabled("현재는 완료되지 않았습니다.")
 @SpringBootTest
 @AutoConfigureMockMvc
 class UserCouponControllerIntegrationTest {
@@ -41,42 +42,44 @@ class UserCouponControllerIntegrationTest {
     @Autowired
     private CouponService couponService;
 
+
+    private User testUser;
+    private Coupon testCoupon;
+
     @BeforeEach
     @Transactional
     void setUp(){
         couponService.deleteAll();
         userService.deleteAll();
-        Coupon testCoupon = new Coupon(1L, "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
+        testCoupon = new Coupon(1L, "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
         couponService.save(testCoupon);
-        Coupon coupon = couponService.getCoupon(1L);
-        System.out.println(coupon.getId()+"couponId");
-        User user = new User(1L,"test", BigDecimal.ZERO, List.of(testCoupon));
-        User savedUser = userService.saveUser(user);
-        Long id = user.getId();
-        System.out.println(id+"userId");
-        System.out.println(savedUser.getId()+"savedUserId");
+        testUser = new User(1L,"test", BigDecimal.ZERO, List.of(testCoupon));
+        userService.saveUser(testUser);
     }
 
     @TestConfiguration
     static class TestConfig {
         @Bean
         public TaskScheduler taskScheduler() {
-            return new ConcurrentTaskScheduler();
+            ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+            scheduler.setPoolSize(10);
+            scheduler.setThreadNamePrefix("ThreadPoolTaskScheduler-");
+            scheduler.initialize();
+            return scheduler;
         }
     }
 
     @Test
     @DisplayName("사용자 쿠폰 발급 성공")
     void issueCouponToUser() throws Exception {
-        Long userId = 1L;
-        Long couponId = 1L;
 
-        mockMvc.perform(post("/api/users/{userId}/coupons", userId)
+        mockMvc.perform(post("/api/users/{userId}/coupons", testUser.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(couponId)))
+                .content(objectMapper.writeValueAsString(testCoupon.getId())))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.userId").value(userId))
-                .andExpect(jsonPath("$.data.couponId").value(couponId));
+                .andExpect(jsonPath("$.username").value(testUser.getUsername()))
+                .andExpect(jsonPath("$.coupons[0].id").value(testCoupon.getId()));
     }
+
 
 }

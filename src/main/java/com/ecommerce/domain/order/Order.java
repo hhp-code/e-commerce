@@ -2,6 +2,7 @@ package com.ecommerce.domain.order;
 
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
+import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -9,16 +10,11 @@ import lombok.Getter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
-@Table(name = "orders", indexes = {
-        @Index(name = "idx_order_date_items",
-                columnList = "orderDate, id"),
-        @Index(name = "idx_order_items",
-                columnList = "id, orderDate, regularPrice, salePrice, sellingPrice")
-})
+@Table(name = "orders")
 public class Order {
     @Getter
     @Id
@@ -51,9 +47,10 @@ public class Order {
     @JoinColumn(name = "coupon_id")
     private Coupon coupon;
 
+
     @Getter
-    @OneToMany(mappedBy = "order" ,cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderItem> orderItems;
+    @ElementCollection
+    private Map<Product, Integer> orderItems;
 
     @Getter
     private LocalDateTime deletedAt;
@@ -63,28 +60,29 @@ public class Order {
     public Order(User user) {
         this.orderDate = LocalDateTime.now();
         this.user = user;
-        this.orderItems = new ArrayList<>();
+        this.orderItems = new HashMap<>();
         this.isDeleted = false;
         this.orderStatus = OrderStatus.PREPARED;
     }
 
-    public Order(User user, List<OrderItem> orderItems) {
+    public Order(User user, Map<Product, Integer> orderItems) {
         this.orderDate = LocalDateTime.now();
         this.user = user;
-        this.orderItems = new ArrayList<>(orderItems);
+        this.orderItems = new HashMap<>(orderItems);
         this.isDeleted = false;
         this.orderStatus = OrderStatus.PREPARED;
         calculatePrices();
     }
-    public Order(long orderId, User user, List<OrderItem> orderItems) {
+    public Order(long orderId, User user, Map<Product,Integer> orderItems) {
         this.id = orderId;
         this.orderDate = LocalDateTime.now();
         this.user = user;
-        this.orderItems = new ArrayList<>(orderItems);
+        this.orderItems = new HashMap<>(orderItems);
         this.isDeleted = false;
         this.orderStatus = OrderStatus.PREPARED;
         calculatePrices();
     }
+
 
     public void applyCoupon(Coupon coupon) {
         if (coupon != null && coupon.isValid() && coupon.getQuantity() >= 0) {
@@ -104,20 +102,21 @@ public class Order {
         }
     }
 
-    private void calculatePrices() {
+    void calculatePrices() {
         this.regularPrice = calculateRegularPrice();
         this.sellingPrice = calculateSellingPrice();
         this.salePrice = calculateSalePrice();
     }
 
     private BigDecimal calculateRegularPrice() {
-        return orderItems.stream()
-                .map(this::calculateItemPrice)
+        return orderItems.entrySet().stream()
+                .map(item -> calculateItemPrice(item.getKey(), item.getValue()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private BigDecimal calculateItemPrice(OrderItem item) {
-        return item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+    private BigDecimal calculateItemPrice(Product product, Integer price) {
+        return product.getPrice().multiply(BigDecimal.valueOf(price));
+
     }
 
     private BigDecimal calculateSellingPrice() {
@@ -145,16 +144,17 @@ public class Order {
 
 
 
-    public void addOrderItem(OrderItem orderItem) {
+    public void addOrderItem(Product product, Integer quantity) {
         if (this.orderItems == null) {
-            this.orderItems = new ArrayList<>();
+            this.orderItems = new HashMap<>();
         }
-        this.orderItems.add(orderItem);
+        this.orderItems.put(product, quantity);
     }
 
 
-    public void finish() {
+    public Order finish() {
         this.orderStatus = OrderStatus.ORDERED;
+        return this;
     }
 
     public String getOrderStatus() {
@@ -177,12 +177,8 @@ public class Order {
         return orderStatus == OrderStatus.CANCELLED;
     }
 
-    public void deleteOrderItem(long orderItemId) {
-        OrderItem orderItem = orderItems.stream()
-                .filter(item -> item.getProduct().getId().equals(orderItemId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Order item not found"));
-        orderItems.remove(orderItem);
+    public void deleteOrderItem(Product product) {
+        this.orderItems.remove(product);
     }
 }
 

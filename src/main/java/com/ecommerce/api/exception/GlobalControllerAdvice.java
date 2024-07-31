@@ -1,5 +1,9 @@
 package com.ecommerce.api.exception;
 
+import com.ecommerce.api.exception.domain.CouponException;
+import com.ecommerce.api.exception.domain.OrderException;
+import com.ecommerce.api.exception.domain.ProductException;
+import com.ecommerce.api.exception.domain.UserException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,38 +16,45 @@ import java.time.LocalDateTime;
 @Slf4j
 @RestControllerAdvice
 public class GlobalControllerAdvice {
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex, WebRequest request) {
-        return createErrorResponse(ex, request, HttpStatus.NOT_FOUND);
+        return createErrorResponse(ex, request, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
         return createErrorResponse(ex, request, HttpStatus.BAD_REQUEST);
     }
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex, WebRequest request) {
-        return createErrorResponse(ex, request, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
 
+    @ExceptionHandler({OrderException.class, UserException.class, ProductException.class, CouponException.class})
+    public ResponseEntity<ErrorResponse> handleDomainExceptions(Exception ex, WebRequest request) {
+        return createErrorResponse(ex, request, HttpStatus.NOT_FOUND);
+    }
 
     private ResponseEntity<ErrorResponse> createErrorResponse(Exception ex, WebRequest request, HttpStatus status) {
         log.error("Exception occurred: ", ex);
+
+        String errorMessage = (ex instanceof RuntimeException) ? ex.getMessage() : "An unexpected error occurred";
+
         ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
                 status.value(),
                 status.getReasonPhrase(),
-                ex.getMessage(),
-                request.getDescription(false)
+                errorMessage,
+                request.getDescription(false),
+                ex.getClass().getSimpleName()
         );
+
         return new ResponseEntity<>(errorResponse, status);
     }
 
-    record ErrorResponse(
+    public record ErrorResponse(
             LocalDateTime timestamp,
             int status,
             String error,
             String message,
-            String path
+            String path,
+            String exceptionType
     ) {}
-
 }

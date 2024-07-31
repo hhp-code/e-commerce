@@ -1,13 +1,13 @@
 package com.ecommerce.domain.product;
 
-import com.ecommerce.domain.order.OrderItem;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
+@Slf4j
 @Entity
 public class Product {
     @Getter
@@ -19,16 +19,12 @@ public class Product {
     private String name;
     @Getter
     private BigDecimal price;
-    private Integer availableStock;
     @Getter
-    private Integer reservedStock;
+    private Integer stock;
     @Getter
     private LocalDateTime lastUpdated;
     private final boolean isDeleted;
     private LocalDateTime deletedAt;
-
-    @OneToMany(mappedBy = "product")
-    private List<OrderItem> orderItems;
 
 
     public Product() {
@@ -36,36 +32,42 @@ public class Product {
         this.isDeleted = false;
     }
 
-    public Product(String name, BigDecimal price, Integer availableStock) {
+    public Product(String name, BigDecimal price, Integer stock) {
         this();
         this.name = name;
         this.price = price;
-        this.availableStock = availableStock;
-        this.reservedStock = 0;
+        this.stock = stock;
+        this.lastUpdated = LocalDateTime.now();
     }
-    public Product(long id, String name, BigDecimal price, Integer availableStock) {
+    public Product(long id, String name, BigDecimal price, Integer stock) {
         this();
         this.id = id;
         this.name = name;
         this.price = price;
-        this.availableStock = availableStock;
-        this.reservedStock = 0;
-    }
-
-
-    public int getAvailableStock() {
-        return availableStock;
+        this.stock = stock;
+        this.lastUpdated = LocalDateTime.now();
     }
 
     public boolean isDeleted() {
         return isDeleted;
     }
 
-    public void decreaseReservedStock(Integer quantity) {
-        this.reservedStock -= quantity;
+
+    public boolean deductStock(int quantity) {
+        if(stock < quantity) {
+            return false;
+        }
+        stock -= quantity;
+        this.lastUpdated = LocalDateTime.now();
+        return true;
+    }
+    public boolean chargeStock(int quantity) {
+        if(quantity<=0 || stock < quantity) {
+            return false;
+        }
+        stock += quantity;
+        this.lastUpdated = LocalDateTime.now();
+        return true;
     }
 
-    public void decreaseAvailableStock(int orderedQuantity) {
-        this.availableStock -= orderedQuantity;
-    }
 }

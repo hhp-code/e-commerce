@@ -1,15 +1,14 @@
 package com.ecommerce.domain.order.service;
 
-import com.ecommerce.domain.order.OrderItem;
 import lombok.experimental.UtilityClass;
 
-import java.util.List;
+import java.util.Map;
 
 @UtilityClass
 public class OrderCommand {
-    public record Create(long id, List<OrderItem> items) {
+    public record Create(long userId, Map<Long, Integer> items) {
     }
-    public record Search(long id) {
+    public record Search(long orderId) {
     }
     public record Add(long userId, long productId, int quantity) {
     }

@@ -1,28 +1,35 @@
 package com.ecommerce.domain.product.service;
 
 
+import com.ecommerce.api.exception.domain.ProductException;
+import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.product.service.repository.ProductRepository;
 import com.ecommerce.domain.product.Product;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.List;
-
+import java.util.concurrent.atomic.AtomicInteger;
+@Slf4j
 @Component
 public class ProductService {
 
     private final ProductRepository productRepository;
 
-    public ProductService(ProductRepository productRepository) {
+    private final QuantumLockManager quantumLockManager;
+
+    public ProductService(ProductRepository productRepository, QuantumLockManager quantumLockManager) {
         this.productRepository = productRepository;
+        this.quantumLockManager = quantumLockManager;
     }
 
     public Product getProduct(Long productId) {
         return productRepository.getProduct(productId).orElseThrow(
-                () -> new RuntimeException("Product not found")
+                () -> new ProductException.ServiceException("상품을 찾을 수 없습니다.")
         );
     }
-
 
     @Transactional
     public List<Product> getPopularProducts() {
@@ -34,33 +41,43 @@ public class ProductService {
         return productRepository.getProducts();
     }
 
-    @Transactional
-    public void decreaseStock(Product product, int quantity) {
-        productUpdate(productRepository.decreaseAvailableStock(product.getId(), quantity),
-                "상품의 재고가 부족합니다. 상품 ID: ", product.getId());
-        productUpdate(productRepository.increaseReservedStock(product.getId(), quantity),
-                "상품의 예약 재고가 전환되지 않았습니다. 상품 ID: ", product.getId());
 
-    }
-
-
-    @Transactional
-    public void increaseStock(Product product, Integer quantity) {
-        long id = product.getId();
-        productUpdate(productRepository.decreaseReservedStock(id, quantity), "상품의 예약 재고가 부족합니다. 상품 ID: ", id);
-        productUpdate(productRepository.increaseAvailableStock(id, quantity), "상품의 재고가 전환되지 않았습니다. 상품 ID: ", id);
-
-    }
-
-    private void productUpdate(int productRepository, String x, long id) {
-        if (productRepository == 0) {
-            throw new RuntimeException(x + id);
+    public Product deductStock(Product product, Integer quantity) {
+        String lockKey = "product:" + product.getId();
+        Duration timeout = Duration.ofSeconds(5);
+        try {
+            return quantumLockManager.executeWithLock(lockKey, timeout, () -> {
+                Product myProduct = getProduct(product.getId());
+                myProduct.deductStock(quantity);
+                return productRepository.save(myProduct).orElseThrow(
+                        () -> new ProductException.ServiceException("재고 차감에 실패했습니다.")
+                );
+            });
+        } catch (Exception e) {
+            throw new ProductException.ServiceException("재고 차감 중 오류 발생");
         }
     }
 
+
+    public void chargeStock(Product product, Integer quantity) {
+        String lockKey = "product:" + product.getId();
+        Duration timeout = Duration.ofSeconds(5);
+        try {
+            quantumLockManager.executeWithLock(lockKey, timeout, () -> {
+                product.chargeStock(quantity);
+                return productRepository.save(product).orElseThrow(
+                        () -> new ProductException.ServiceException("재고 차감에 실패했습니다.")
+                );
+            });
+        } catch (Exception e) {
+            throw new ProductException.ServiceException("재고 차감 중 오류 발생");
+        }
+    }
+
+    @Transactional
     public Product saveAndGet(Product testProduct) {
         return productRepository.save(testProduct).orElseThrow(
-                () -> new RuntimeException("Product not found")
+                () -> new ProductException.ServiceException("상품 저장에 실패했습니다.")
         );
     }
 }

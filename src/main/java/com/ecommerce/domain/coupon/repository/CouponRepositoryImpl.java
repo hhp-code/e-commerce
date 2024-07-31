@@ -29,7 +29,7 @@ public class CouponRepositoryImpl implements CouponRepository {
     }
 
     @Override
-    public int getRemainingQuantity(Long couponId) {
+    public int getStock(Long couponId) {
         Coupon coupon = couponJPARepository.findById(couponId)
                 .orElseThrow(() -> new EntityNotFoundException("쿠폰을 찾을 수 없습니다: " + couponId));
         return coupon.getQuantity();

@@ -9,6 +9,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,11 +36,11 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public List<Order> getOrders(Long customerId) {
+    public List<Order> getOrders(Long orderId) {
         return queryFactory
                 .selectFrom(order)
                 .leftJoin(order.user).fetchJoin()
-                .where(userIdEq(customerId))
+                .where(order.id.in(orderId))
                 .fetch();
     }
 
@@ -62,6 +63,19 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Transactional
     public void deleteAll() {
         orderJPARepository.deleteAll();
+    }
+
+    @Override
+    public List<Order> getFinishedOrderWithDays(int durationDays) {
+        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime startDate = endDate.minusDays(durationDays);
+
+        return queryFactory
+                .selectFrom(order)
+                .leftJoin(order.user).fetchJoin()
+                .where(order.orderStatus.eq(OrderStatus.ORDERED)
+                        .and(order.orderDate.between(startDate, endDate)))
+                .fetch();
     }
 
     private BooleanExpression userIdEq(Long userId) {
