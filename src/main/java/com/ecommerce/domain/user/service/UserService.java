@@ -5,6 +5,7 @@ import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,13 +37,13 @@ public class UserService {
 
 
     @Transactional
-    @CacheEvict(value = "users", key = "#user.id")
+    @CachePut(value = "users", key = "#result.id")
     public User saveUser(User user) {
         return userRepository.save(user).orElseThrow(
                 () -> new RuntimeException("사용자 정보를 찾을 수 없습니다.")
         );
     }
-
+    @CacheEvict(value = {"users", "userCoupons"}, allEntries = true)
     public void saveAll(List<User> users) {
         userRepository.saveAll(users);
     }

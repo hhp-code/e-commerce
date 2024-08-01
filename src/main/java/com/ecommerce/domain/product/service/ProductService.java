@@ -7,6 +7,7 @@ import com.ecommerce.domain.product.service.repository.ProductRepository;
 import com.ecommerce.domain.product.Product;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,7 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "allProducts", unless = "#result.isEmpty()")
     public List<Product> getProducts() {
         return productRepository.getProducts();
     }
@@ -79,7 +81,8 @@ public class ProductService {
     }
 
     @Transactional
-    @CacheEvict(value = "products", key = "#product.id")
+    @CachePut(value = "products", key = "#product.id")
+    @CacheEvict(value = {"popularProducts", "allProducts"}, allEntries = true)
     public Product saveAndGet(Product product) {
         return productRepository.save(product).orElseThrow(
                 () -> new ProductException.ServiceException("상품 저장에 실패했습니다.")

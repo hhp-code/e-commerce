@@ -8,6 +8,8 @@ import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.order.service.repository.OrderRepository;
 import com.ecommerce.domain.user.service.UserService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,6 +75,8 @@ public class OrderService {
     }
 
     @Transactional
+    @CachePut(value = "orders", key = "#result.id")
+    @CacheEvict(value = "finishedOrders", allEntries = true)
     public Order saveAndGet(Order order) {
         return orderRepository.saveAndGet(order)
                 .orElseThrow(() -> new OrderException.ServiceException("주문 저장에 실패하였습니다."));
@@ -91,22 +95,10 @@ public class OrderService {
     }
 
     @Transactional
-    public Order cancelOrder(OrderCommand.Cancel request) {
-        Order order = getOrderByUserId(request.userId());
-        order.cancel();
-        return orderRepository.saveAndGet(order)
-                .orElseThrow(() -> new OrderException.ServiceException("주문 취소에 실패하였습니다."));
-    }
-
-    @Transactional
+    @Cacheable(value = "finishedOrders", key = "#durationDays", unless = "#result.isEmpty()")
     public List<Order> getFinishedOrderWithDays(int durationDays) {
         return orderRepository.getFinishedOrderWithDays(durationDays);
     }
 
 
-    public List<Order> createOrdersBatch(List<OrderCommand.Create> orderBatch) {
-        return orderBatch.stream()
-                .map(this::createOrder)
-                .collect(Collectors.toList());
-    }
 }
