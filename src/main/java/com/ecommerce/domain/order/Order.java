@@ -162,6 +162,9 @@ public class Order {
     }
 
     public BigDecimal getTotalAmount() {
+        if(this.sellingPrice == null) {
+            calculatePrices();
+        }
         return sellingPrice;
     }
 

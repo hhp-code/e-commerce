@@ -80,4 +80,13 @@ public class ProductService {
                 () -> new ProductException.ServiceException("상품 저장에 실패했습니다.")
         );
     }
+
+    @Transactional
+    public void saveAll(List<Product> products) {
+        productRepository.saveAll(products);
+    }
+
+    public List<Product> getAllProducts() {
+        return productRepository.getAll();
+    }
 }

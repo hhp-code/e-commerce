@@ -15,7 +15,7 @@ import java.util.UUID;
 public class QuantumLockManager {
 
     private final ConcurrentHashMap<String, QuantumLock> locks = new ConcurrentHashMap<>();
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1000000);
 
     public <T> T executeWithLock(String resourceId, Duration timeout, Supplier<T> action) throws TimeoutException {
         QuantumLock lock = locks.computeIfAbsent(resourceId, k -> new QuantumLock());

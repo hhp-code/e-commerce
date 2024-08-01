@@ -34,8 +34,8 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<Order> getOrders(OrderCommand.Search search) {
-        long id = search.orderId();
+    public List<Order> getOrders(OrderCommand.Search command) {
+        long id = command.orderId();
         List<Order> orders = orderRepository.getOrders(id);
         orders.size();
         return orders;
@@ -52,11 +52,20 @@ public class OrderService {
 
     private Map<Product, Integer> getProductIntegerMap(OrderCommand.Create command) {
         Map<Long, Integer> items = command.items();
-        for(Long productId : items.keySet()) {
-            if(productService.getProduct(productId).getStock() < items.get(productId)) {
-                throw new OrderException.ServiceException("상품의 재고가 부족합니다.");
+        for (Map.Entry<Long, Integer> entry : items.entrySet()) {
+            Long productId = entry.getKey();
+            Integer quantity = entry.getValue();
+
+            if (quantity <= 0) {
+                throw new OrderException.ServiceException("주문 수량은 0보다 커야 합니다. 상품 ID: " + productId);
+            }
+
+            Product product = productService.getProduct(productId);
+            if (product.getStock() < quantity) {
+                throw new OrderException.ServiceException("상품의 재고가 부족합니다. 상품 ID: " + productId);
             }
         }
+
         return command.items().entrySet().stream()
                 .collect(Collectors.toMap(entry -> productService.getProduct(entry.getKey()), Map.Entry::getValue));
     }
@@ -90,5 +99,12 @@ public class OrderService {
     @Transactional
     public List<Order> getFinishedOrderWithDays(int durationDays) {
         return orderRepository.getFinishedOrderWithDays(durationDays);
+    }
+
+
+    public List<Order> createOrdersBatch(List<OrderCommand.Create> orderBatch) {
+        return orderBatch.stream()
+                .map(this::createOrder)
+                .collect(Collectors.toList());
     }
 }

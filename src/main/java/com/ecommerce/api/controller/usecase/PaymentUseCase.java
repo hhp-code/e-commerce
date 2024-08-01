@@ -35,25 +35,31 @@ public class PaymentUseCase {
     }
 
     public Order payOrder(OrderCommand.Payment orderPay) {
-        String lockKey = "order:" + orderPay.orderId();
         Duration timeout = Duration.ofSeconds(5);
+        try{
+            return quantumLockManager.executeWithLock("order:" + orderPay.orderId(),timeout, () -> payOrderInternal(orderPay));
+        }
+        catch (TimeoutException e) {
+            throw new RuntimeException("주문 결제 중 락 획득 시간 초과");
+        } catch (Exception e) {
+            throw new RuntimeException("주문 결제 중 오류 발생" + e);
+        }
+
+
+    }
+
+    private Order payOrderInternal(OrderCommand.Payment orderPay) {
+        User user = userService.getUser(orderPay.userId());
+        Order order = orderService.getOrder(orderPay.orderId());
         try {
-            return quantumLockManager.executeWithLock(lockKey, timeout, () -> {
-                User user = userService.getUser(orderPay.userId());
-                Order order = orderService.getOrder(orderPay.orderId());
-                try {
-                    order.getOrderItems().forEach(productService::deductStock);
-                    userPointService.deductPoint(user.getId(), order.getTotalAmount());
-                    dummyPlatform.send(order);
-                    order.finish();
-                    return orderService.saveAndGet(order);
-                } catch (Exception  e) {
-                    cancelOrder(new OrderCommand.Cancel(user.getId(), order.getId()));
-                    throw e;
-                }
-            });
-        } catch (TimeoutException e) {
-            throw new RuntimeException("Lock acquisition timeout", e);
+            order.getOrderItems().forEach(productService::deductStock);
+            userPointService.deductPoint(user.getId(), order.getTotalAmount());
+            order.finish();
+            dummyPlatform.send(order);
+            return orderService.saveAndGet(order);
+        } catch (Exception e) {
+            cancelOrder(new OrderCommand.Cancel(user.getId(), order.getId()));
+            throw new RuntimeException("주문 결제 중 오류 발생", e);
         }
     }
 

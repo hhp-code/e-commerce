@@ -1,6 +1,8 @@
 package com.ecommerce.domain.user.service;
 
 import com.ecommerce.domain.coupon.Coupon;
+import com.ecommerce.domain.order.Order;
+import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -27,6 +29,8 @@ public class UserService {
         return userRepository.getById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + userId));
     }
+
+
 
 
     @Transactional

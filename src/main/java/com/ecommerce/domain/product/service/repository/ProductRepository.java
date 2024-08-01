@@ -15,4 +15,8 @@ public interface ProductRepository {
     Optional<Product> save(Product oldProduct);
 
     void deleteAll();
+
+    void saveAll(List<Product> products);
+
+    List<Product> getAll();
 }

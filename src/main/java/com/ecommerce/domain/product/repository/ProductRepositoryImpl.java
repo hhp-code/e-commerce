@@ -82,9 +82,16 @@ public class ProductRepositoryImpl implements ProductRepository {
                 .execute();
     }
 
+    @Override
+    public void saveAll(List<Product> products) {
+        productJPARepository.saveAll(products);
+    }
 
+    @Override
+    public List<Product> getAll() {
+        return productJPARepository.findAll();
 
-
+    }
 
 
 }
