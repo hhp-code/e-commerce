@@ -1,56 +1,73 @@
-# 이커머스 프로젝트
-## 0. 최신 브랜치
-for-review 브랜치에 최신 코드가 업데이트되어있으니, 참조해주시면 감사하겠습니다.
-## 1. 프로젝트 소개
-통상적인 이커머스 시스템에서 발생할수 있는 문제상황들을 상정하고 그에대한 아아키텍처적 고민과 함께, 이를 해결하기 위한 코드를 작성하는 프로젝트입니다.
-## 2. 프로젝트 구조
-```angular2html
-api
-    ├── controller
-        ├── domain
-            ├── coupon
-                ├── dto
-                CouponController
-            ├── order
-                ├── dto
-                OrderController
-            ├── product
-                ├── dto
-                Productcontroller
-            ├── user
-                ├── dto
-                UserCouponController
-                UserPointController
-                UserController
-        ├── usecase
-            coupon
-            order
-            product
-            user
-    ├── exception
-    ├── filter
-    ├── scheduler
-        CouponQueueManager
-config
-domain
-├── coupon
-    ├── repository
-    ├── service
-        ├── repository
-├── order
-    ├── repository
-    ├── service
-        ├── repository
-├── product
-    ├── repository
-    ├── service
-        ├── repository
-├── user
-    ├── repository
-    ├── service
-        ├── repository
+#### 과제용 뭐시기 캐싱전략
 
-```
-## 프로젝트 진행중 마주했던 어려움들.
-1. 풍부한 도메인 모델에 관하여(https://medium.com/@gangfunction/항플5기-be-java-서버-구축-1-3a869130309e)
-2. 작성중..  
+1. 캐싱은 조회에서 주로 발생합니다.
+2. 그래서 User, Product, Order 조회시 캐싱을 적용했습니다.
+3. 조회가아닌 업데이트 메서드에는 CacheEvict를 적용했습니다.
+4. 캐싱전략은 Cacheable을 사용했습니다.
+   제공된 파일들을 바탕으로 각 시나리오에서 발생하는 쿼리와 대량 트래픽 발생 시 지연이 발생할 수 있는 조회 쿼리를 분석해보겠습니다.
+
+#### 잠재적 지연쿼리 분석
+
+1. ProductRepositoryImpl.getPopularProducts():
+
+분석 결과:
+- 복잡도: 높음 (조인, 그룹화, 정렬, 서브쿼리 포함)
+- 예상 데이터 볼륨: 주문 테이블 100만 건, 상품 테이블 10만 건 가정
+- 실행 계획 분석: 주문 테이블 full scan, 상품 테이블과의 해시 조인, 그룹화 및 정렬 작업
+- 예상 성능 이슈: 데이터 증가에 따른 응답 시간 증가, 메모리 사용량 증가
+- 개선 방안:
+   1. 결과를 Redis에 캐싱하고 주기적으로 갱신 (예: 1시간마다)
+   2. 주문 테이블에 (orderDate, orderStatus) 복합 인덱스 추가
+   3. 인기 상품 집계 결과를 별도 테이블로 관리하고 배치 작업으로 갱신
+
+2. OrderRepositoryImpl.getFinishedOrderWithDays():
+
+분석 결과:
+- 복잡도: 중간 (날짜 범위 조회, 조인 포함)
+- 예상 데이터 볼륨: 주문 테이블 100만 건 가정
+- 실행 계획 분석: 주문 테이블 범위 스캔, 사용자 테이블과의 조인
+- 예상 성능 이슈: 조회 기간이 길어질수록 처리 시간 증가
+- 개선 방안:
+   1. (orderDate, orderStatus) 복합 인덱스 추가
+   2. 페이징 처리 도입
+   3. 주문 상태별 파티셔닝 고려
+
+3. UserRepositoryImpl.getAll():
+
+분석 결과:
+- 복잡도: 낮음 (단순 전체 조회)
+- 예상 데이터 볼륨: 사용자 테이블 100만 건 가정
+- 실행 계획 분석: 사용자 테이블 full scan
+- 예상 성능 이슈: 데이터 증가에 따른 응답 시간 및 메모리 사용량 선형 증가
+- 개선 방안:
+   1. 페이징 처리 필수 도입
+   2. 사용 목적에 따라 필요한 컬럼만 조회하도록 최적화
+   3. 읽기 전용 레플리카 활용 고려
+
+4. UserRepositoryImpl.getCouponByUser():
+
+분석 결과:
+- 복잡도: 중간 (조인 포함)
+- 예상 데이터 볼륨: 사용자당 평균 10개의 쿠폰 가정
+- 실행 계획 분석: 사용자 테이블과 쿠폰 테이블 조인, 인덱스 활용 가능
+- 예상 성능 이슈: 사용자의 쿠폰 수가 많아질 경우 성능 저하 가능성
+- 개선 방안:
+   1. (userId, couponId) 복합 인덱스 추가
+   2. 자주 조회되는 사용자-쿠폰 정보 캐싱
+   3. 쿠폰 정보를 별도 테이블로 분리하여 관리 고려
+
+5. OrderRepositoryImpl.getOrders():
+
+분석 결과:
+- 복잡도: 중간 (조인 포함, IN 절 사용)
+- 예상 데이터 볼륨: 주문 테이블 100만 건 가정
+- 실행 계획 분석: 주문 ID에 대한 인덱스 스캔, 사용자 테이블과의 조인
+- 예상 성능 이슈: 조회하는 주문 ID 수가 많아질 경우 성능 저하 가능성
+- 개선 방안:
+   1. 조회 가능한 주문 ID 수 제한 설정
+   2. 대량 조회 시 페이징 처리 도입
+   3. 주문 상세 정보 캐싱 고려
+
+이러한 분석을 바탕으로, 각 메소드에 대한 최적화 작업과 함께 전체적인 시스템 아키텍처 개선 (예: 캐싱 계층 도입, 읽기 전용 레플리카 활용 등)을 고려해볼 수 있습니다. 또한, 실제 운영 환경에서의 모니터링과 프로파일링을 통해 지속적인 성능 개선이 필요할 것입니다.
+
+

@@ -8,6 +8,7 @@ import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.order.service.repository.OrderRepository;
 import com.ecommerce.domain.user.service.UserService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,7 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "orders", key = "#orderId", unless = "#result == null")
     public Order getOrder(Long orderId) {
         return orderRepository.getById(orderId)
                 .orElseThrow(() -> new OrderException.ServiceException("주문이 존재하지 않습니다."));

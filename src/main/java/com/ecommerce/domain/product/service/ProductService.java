@@ -6,12 +6,14 @@ import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.product.service.repository.ProductRepository;
 import com.ecommerce.domain.product.Product;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+
 @Slf4j
 @Component
 public class ProductService {
@@ -25,6 +27,7 @@ public class ProductService {
         this.quantumLockManager = quantumLockManager;
     }
 
+    @Cacheable(value = "products", key = "#productId", unless = "#result == null")
     public Product getProduct(Long productId) {
         return productRepository.getProduct(productId).orElseThrow(
                 () -> new ProductException.ServiceException("상품을 찾을 수 없습니다.")
@@ -32,6 +35,7 @@ public class ProductService {
     }
 
     @Transactional
+    @Cacheable(value = "products", key = "'popularProducts'", unless = "#result.isEmpty()")
     public List<Product> getPopularProducts() {
         return productRepository.getPopularProducts();
     }
@@ -75,8 +79,9 @@ public class ProductService {
     }
 
     @Transactional
-    public Product saveAndGet(Product testProduct) {
-        return productRepository.save(testProduct).orElseThrow(
+    @CacheEvict(value = "products", key = "#product.id")
+    public Product saveAndGet(Product product) {
+        return productRepository.save(product).orElseThrow(
                 () -> new ProductException.ServiceException("상품 저장에 실패했습니다.")
         );
     }
@@ -86,7 +91,4 @@ public class ProductService {
         productRepository.saveAll(products);
     }
 
-    public List<Product> getAllProducts() {
-        return productRepository.getAll();
-    }
 }
