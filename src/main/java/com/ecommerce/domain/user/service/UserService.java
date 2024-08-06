@@ -48,11 +48,22 @@ public class UserService {
         userRepository.saveAll(users);
     }
 
-    public void deleteAll() {
-        userRepository.deleteAll();
-    }
+
 
     public List<User> getAllUsers() {
         return userRepository.getAll();
+    }
+
+    public User save(User user) {
+        return userRepository.save(user).orElseThrow(
+                () -> new RuntimeException("사용자 정보를 찾을 수 없습니다.")
+        );
+    }
+
+    @Transactional
+    public User getPoint(Long id) {
+        return userRepository.getUser(id).orElseThrow(
+                () -> new RuntimeException("사용자 정보를 찾을 수 없습니다.")
+        );
     }
 }

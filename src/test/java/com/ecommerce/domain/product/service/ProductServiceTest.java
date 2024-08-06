@@ -1,5 +1,6 @@
 package com.ecommerce.domain.product.service;
 
+import com.ecommerce.DatabaseCleanUp;
 import com.ecommerce.domain.product.service.repository.ProductRepository;
 import com.ecommerce.domain.product.Product;
 import org.junit.jupiter.api.AfterEach;
@@ -17,9 +18,17 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles({"test","cleanser"})
 @Transactional
 class ProductServiceTest {
+
+    @Autowired
+    private DatabaseCleanUp databaseCleanUp;
+
+    @AfterEach
+    void tearDown() {
+        databaseCleanUp.execute();
+    }
 
     @Autowired
     private ProductService productService;
@@ -55,9 +64,5 @@ class ProductServiceTest {
 
         assertFalse(products.isEmpty());
         assertTrue(products.stream().anyMatch(p -> p.getName().equals("Sample ProductRequest")));
-    }
-    @AfterEach
-    void tearDown() {
-        productRepository.deleteAll();
     }
 }

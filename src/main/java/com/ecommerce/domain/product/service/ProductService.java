@@ -72,11 +72,11 @@ public class ProductService {
             quantumLockManager.executeWithLock(lockKey, timeout, () -> {
                 product.chargeStock(quantity);
                 return productRepository.save(product).orElseThrow(
-                        () -> new ProductException.ServiceException("재고 차감에 실패했습니다.")
+                        () -> new ProductException.ServiceException("재고 증가에 실패했습니다.")
                 );
             });
         } catch (Exception e) {
-            throw new ProductException.ServiceException("재고 차감 중 오류 발생");
+            throw new ProductException.ServiceException("재고 증가 중 오류 발생");
         }
     }
 
@@ -94,4 +94,10 @@ public class ProductService {
         productRepository.saveAll(products);
     }
 
+    @Transactional
+    public Product saveProduct(Product testProduct) {
+        return productRepository.saveProduct(testProduct).orElseThrow(
+                () -> new ProductException.ServiceException("상품 저장에 실패했습니다.")
+        );
+    }
 }

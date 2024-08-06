@@ -49,8 +49,6 @@ class UserCouponControllerIntegrationTest {
     @BeforeEach
     @Transactional
     void setUp(){
-        couponService.deleteAll();
-        userService.deleteAll();
         testCoupon = new Coupon(1L, "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
         couponService.save(testCoupon);
         testUser = new User(1L,"test", BigDecimal.ZERO, List.of(testCoupon));

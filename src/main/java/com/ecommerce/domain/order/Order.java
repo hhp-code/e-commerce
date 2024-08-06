@@ -1,9 +1,15 @@
 package com.ecommerce.domain.order;
 
+import com.ecommerce.api.controller.usecase.UserPointUseCase;
+import com.ecommerce.api.exception.domain.OrderException;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
+import com.ecommerce.domain.order.service.OrderService;
+import com.ecommerce.domain.order.service.external.DummyPlatform;
 import com.ecommerce.domain.product.Product;
+import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
+import com.ecommerce.domain.user.service.UserService;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -172,8 +178,9 @@ public class Order {
         return orderStatus == OrderStatus.ORDERED;
     }
 
-    public void cancel() {
+    public Order cancel() {
         this.orderStatus = OrderStatus.CANCELLED;
+        return this;
     }
 
     public boolean isCanceled() {
@@ -182,6 +189,89 @@ public class Order {
 
     public void deleteOrderItem(Product product) {
         this.orderItems.remove(product);
+    }
+
+    public Order deductStock(ProductService productService) {
+        for (Map.Entry<Product, Integer> entry : orderItems.entrySet()) {
+            Product product = entry.getKey();
+            Integer quantity = entry.getValue();
+            productService.deductStock(product, quantity);
+        }
+        return this;
+    }
+
+    public Order deductPoint(UserPointUseCase userPointUseCase) {
+        userPointUseCase.deductPoint(user.getId(), getTotalAmount());
+        return this;
+    }
+
+    public Order send(DummyPlatform dummyPlatform) {
+        dummyPlatform.send(this);
+        return this;
+    }
+
+    public Order saveAndGet(OrderService orderService) {
+        return orderService.saveAndGet(this);
+    }
+
+    public Order chargeStock(ProductService productService) {
+        for (Map.Entry<Product, Integer> entry : orderItems.entrySet()) {
+            Product product = entry.getKey();
+            Integer quantity = entry.getValue();
+            productService.chargeStock(product, quantity);
+        }
+        return this;
+
+    }
+
+    public Order chargePoint(UserPointUseCase userPointService) {
+        userPointService.chargePoint(user.getId(), getTotalAmount());
+        return this;
+    }
+
+    public Order getProduct(ProductService productService) {
+        for (Map.Entry<Product, Integer> entry : orderItems.entrySet()) {
+            Product product = entry.getKey();
+            productService.getProduct(product.getId());
+        }
+        return this;
+    }
+    public Order addItem(ProductService productService, Long productId, int quantity) {
+        Product product = productService.getProduct(productId);
+        if (product.getStock() < quantity) {
+            throw new OrderException.ServiceException("상품의 재고가 부족합니다.");
+        }
+        this.addOrderItem(product, quantity);
+        return this;
+    }
+
+    public Order deleteItem(ProductService productService, long orderId) {
+        Product product = productService.getProduct(orderId);
+        this.deleteOrderItem(product);
+        return this;
+    }
+
+    public Order putUser(UserService userService, long userId) {
+        this.user = userService.getUser(userId);
+        return this;
+
+    }
+
+    public Order addItems(ProductService productService, Map<Long, Integer> items) {
+        items.forEach((productId, quantity) -> {
+            Product product = productService.getProduct(productId);
+            validateOrderItem(product, quantity);
+            this.addOrderItem(product, quantity);
+        });
+        return this;
+    }
+    private void validateOrderItem(Product product, int quantity) {
+        if (quantity <= 0) {
+            throw new OrderException("주문 수량은 0보다 커야 합니다.");
+        }
+        if (product.getStock() < quantity) {
+            throw new OrderException("상품의 재고가 부족합니다.");
+        }
     }
 }
 

@@ -39,7 +39,7 @@ public class OrderController {
     )
     public OrderDto.OrderResponse createOrder(@RequestBody OrderDto.OrderCreateRequest request) {
         request.validate();
-        return OrderMapper.toOrderResponse(orderService.createOrder(OrderMapper.toOrder(request)));
+        return OrderMapper.toOrderResponse(paymentUseCase.createOrder(OrderMapper.toOrder(request)));
     }
 
     @GetMapping("/orders/{orderId}")

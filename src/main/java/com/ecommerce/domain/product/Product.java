@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @Entity
+@Table(name = "products")
 public class Product {
     @Getter
     @Id

@@ -19,4 +19,6 @@ public interface ProductRepository {
     void saveAll(List<Product> products);
 
     List<Product> getAll();
+
+    Optional<Product> saveProduct(Product testProduct);
 }

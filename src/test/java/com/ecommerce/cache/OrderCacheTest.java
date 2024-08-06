@@ -1,5 +1,6 @@
 package com.ecommerce.cache;
 
+import com.ecommerce.api.controller.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.Product;
@@ -32,6 +33,8 @@ public class OrderCacheTest {
 
     @Autowired
     private ProductService productService;
+    @Autowired
+    private PaymentUseCase paymentUseCase;
 
     @BeforeEach
     void setUp() {
@@ -40,7 +43,7 @@ public class OrderCacheTest {
         Long productId = 1L;
         Map<Long, Integer> items = Map.of(productId, 1);
         OrderCommand.Create createOrderCommand = new OrderCommand.Create(1L, items);
-        orderService.createOrder(createOrderCommand);
+        paymentUseCase.createOrder(createOrderCommand);
     }
 
     @Test

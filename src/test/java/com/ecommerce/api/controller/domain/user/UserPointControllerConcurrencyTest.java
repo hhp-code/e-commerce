@@ -1,7 +1,7 @@
 package com.ecommerce.api.controller.domain.user;
 
+import com.ecommerce.api.controller.usecase.UserPointUseCase;
 import com.ecommerce.domain.user.User;
-import com.ecommerce.domain.user.service.UserPointService;
 import com.ecommerce.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +40,7 @@ class UserPointControllerConcurrencyTest {
 
 
     @Autowired
-    private UserPointService userPointService;
+    private UserPointUseCase userPointService;
 
     private User testUser;
 
@@ -82,7 +82,8 @@ class UserPointControllerConcurrencyTest {
         latch.await(10, TimeUnit.SECONDS);
 
         BigDecimal expectedBalance = amount.multiply(BigDecimal.valueOf(taskCount));
-        BigDecimal actualBalance = userPointService.getPoint(testUser.getId());
+        User point = userService.getPoint(testUser.getId());
+        BigDecimal actualBalance = point.getPoint();
 
         assertThat(actualBalance).isEqualByComparingTo(expectedBalance);
 

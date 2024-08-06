@@ -14,19 +14,11 @@ public interface UserRepository {
 
     Optional<Coupon> getCouponByUser(long userId, long couponId);
 
-    void deleteAll();
-
     Optional<BigDecimal> getAmountByUserId(Long userId);
-
-    Optional<User> saveChargeAmount(Long userId, BigDecimal amount);
-
-    Optional<User> getUserByRequest(Long userId);
-
-    Optional<BigDecimal> getAmountByUserIdWithLock(Long userId);
-
-    Optional<User> getByIdWithLock(Long userId);
 
     void saveAll(List<User> users);
 
     List<User> getAll();
+
+    Optional<User> getUser(Long userId);
 }

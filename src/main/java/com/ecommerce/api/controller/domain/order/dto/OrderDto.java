@@ -59,17 +59,17 @@ public class OrderDto {
         }
     }
 
-    public record OrderPayRequest (long userId, long orderId) {
+    public record OrderPayRequest (long orderId) {
         public void validate() {
             if (orderId <= 0) {
-                throw new OrderException.ControllerException("주문 ID가 잘못되었습니다.");
+                throw new OrderException.ControllerException("주문을 찾을 수 없습니다.");
             }
         }
     }
     public record OrderCancelRequest(long userId, long orderId) {
         public void validate() {
             if (orderId <= 0) {
-                throw new OrderException.ControllerException("주문 ID가 잘못되었습니다.");
+                throw new OrderException.ControllerException("주문을 찾을 수 없습니다.");
             }
         }
     }

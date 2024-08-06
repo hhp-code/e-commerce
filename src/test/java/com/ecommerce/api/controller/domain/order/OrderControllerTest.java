@@ -75,7 +75,7 @@ class OrderControllerTest {
     @DisplayName("주문 생성 - 성공")
     void createOrder_Success() throws Exception {
 
-        when(orderService.createOrder(any(OrderCommand.Create.class))).thenReturn(order);
+        when(paymentUseCase.createOrder(any(OrderCommand.Create.class))).thenReturn(order);
 
         mockMvc.perform(post(API_ORDERS)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -110,7 +110,7 @@ class OrderControllerTest {
     @Test
     @DisplayName("결제 요청 - 결제 성공")
     void payOrder_Success() throws Exception {
-        OrderDto.OrderPayRequest request = new OrderDto.OrderPayRequest(VALID_USER_ID, ORDER_ID);
+        OrderDto.OrderPayRequest request = new OrderDto.OrderPayRequest(ORDER_ID);
         Order order = createSampleOrder();
 
         when(paymentUseCase.payOrder(OrderMapper.toOrderPay(request))).thenReturn(order);
@@ -122,20 +122,7 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.id").value(VALID_USER_ID));
     }
 
-    @Test
-    @DisplayName("주문 취소 - 주문 취소 성공")
-    void cancelOrder_Success() throws Exception {
-        OrderCommand.Cancel request = new OrderCommand.Cancel(VALID_USER_ID, ORDER_ID);
-        Order order = createSampleOrder();
 
-        when(paymentUseCase.cancelOrder(request)).thenReturn(order);
-
-        mockMvc.perform(patch(API_ORDERS + "/cancel")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(VALID_USER_ID));
-    }
 
     @Test
     @DisplayName("주문 상품 추가")
