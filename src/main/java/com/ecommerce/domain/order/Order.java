@@ -3,7 +3,7 @@ package com.ecommerce.domain.order;
 import com.ecommerce.interfaces.exception.domain.OrderException;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
-import com.ecommerce.domain.order.service.OrderService;
+import com.ecommerce.domain.order.service.OrderCommandService;
 import com.ecommerce.domain.order.service.external.DummyPlatform;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
@@ -194,8 +194,8 @@ public class Order {
         return this;
     }
 
-    public Order saveAndGet(OrderService orderService) {
-        return orderService.saveAndGet(this);
+    public Order saveAndGet(OrderCommandService orderCommandService) {
+        return orderCommandService.saveAndGet(this);
     }
 
     public Order chargeStock() {

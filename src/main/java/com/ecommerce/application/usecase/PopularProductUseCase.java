@@ -1,7 +1,7 @@
 package com.ecommerce.application.usecase;
 
 import com.ecommerce.domain.order.Order;
-import com.ecommerce.domain.order.service.OrderService;
+import com.ecommerce.domain.order.service.OrderQueryService;
 import com.ecommerce.domain.product.Product;
 import org.springframework.stereotype.Component;
 
@@ -11,15 +11,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class PopularProductUseCase {
-    private final OrderService orderService;
+    private final OrderQueryService orderQueryService;
 
-    public PopularProductUseCase(OrderService orderService) {
-        this.orderService = orderService;
+    public PopularProductUseCase(OrderQueryService orderQueryService) {
+        this.orderQueryService = orderQueryService;
     }
 
     public List<Product> getPopularProducts() {
         int durationDays = 3;
-        List<Order> finishedOrderWithDays = orderService.getFinishedOrderWithDays(durationDays);
+        List<Order> finishedOrderWithDays = orderQueryService.getFinishedOrderWithDays(durationDays);
         Map<Product, Long> sellingMap = new ConcurrentHashMap<>();
         for(Order order: finishedOrderWithDays){
             order.getOrderItems().forEach((product, quantity) -> {

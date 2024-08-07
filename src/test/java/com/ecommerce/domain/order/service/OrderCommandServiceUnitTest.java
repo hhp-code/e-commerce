@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class OrderServiceUnitTest {
+class OrderCommandServiceUnitTest {
 
     private static final Long VALID_USER_ID = 1L;
     private static final Long INVALID_USER_ID = 999L;
@@ -31,9 +31,11 @@ class OrderServiceUnitTest {
     private OrderRepository orderRepository;
 
     @InjectMocks
-    private OrderService orderService;
+    private OrderCommandService orderCommandService;
 
     PaymentUseCase paymentUseCase;
+    @InjectMocks
+    private OrderQueryService orderQueryService;
 
 
     @Test
@@ -42,7 +44,7 @@ class OrderServiceUnitTest {
         Order mockOrder = createMockOrder();
         when(orderRepository.getById(VALID_USER_ID)).thenReturn(Optional.of(mockOrder));
 
-        Order result = orderService.getOrder(VALID_USER_ID);
+        Order result = orderQueryService.getOrder(VALID_USER_ID);
 
         assertNotNull(result);
         verify(orderRepository).getById(VALID_USER_ID);
@@ -53,7 +55,7 @@ class OrderServiceUnitTest {
     void getOrder_NonExistentOrder_ShouldThrowException() {
         when(orderRepository.getById(INVALID_USER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> orderService.getOrder(INVALID_USER_ID));
+        assertThrows(RuntimeException.class, () -> orderQueryService.getOrder(INVALID_USER_ID));
         verify(orderRepository).getById(INVALID_USER_ID);
     }
 
@@ -65,7 +67,7 @@ class OrderServiceUnitTest {
         List<Order> mockOrders = Arrays.asList(createMockOrder(), createMockOrder());
         when(orderRepository.getOrders(searchCommand.userId())).thenReturn(mockOrders);
 
-        List<OrderInfo.Detail> result = orderService.getOrders(searchCommand);
+        List<Order> result = orderQueryService.getOrders(searchCommand);
 
         assertNotNull(result);
         assertEquals(2, result.size());

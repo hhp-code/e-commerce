@@ -2,7 +2,8 @@ package com.ecommerce.cache;
 
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.service.OrderCommand;
-import com.ecommerce.domain.order.service.OrderService;
+import com.ecommerce.domain.order.service.OrderCommandService;
+import com.ecommerce.domain.order.service.OrderQueryService;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
@@ -23,7 +24,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @AutoConfigureTestDatabase
 public class OrderCacheTest {
     @Autowired
-    private OrderService orderService;
+    private OrderCommandService orderCommandService;
 
     @Autowired
     private CacheManager cacheManager;
@@ -35,6 +36,8 @@ public class OrderCacheTest {
     private ProductService productService;
     @Autowired
     private PaymentUseCase paymentUseCase;
+    @Autowired
+    private OrderQueryService orderQueryService;
 
     @BeforeEach
     void setUp() {
@@ -52,8 +55,8 @@ public class OrderCacheTest {
         Long userId = 1L;
 
         //when
-        orderService.getOrder(1L);
-        orderService.getOrder(1L);
+        orderQueryService.getOrder(1L);
+        orderQueryService.getOrder(1L);
 
         //then
         assertThat(cacheManager.getCache("orders").get(userId)).isNotNull();

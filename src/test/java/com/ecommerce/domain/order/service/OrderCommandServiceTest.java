@@ -25,9 +25,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("cleanser")
 @Transactional
-class OrderServiceTest {
+class OrderCommandServiceTest {
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
+    @Autowired
+    private OrderQueryService orderQueryService;
 
     @AfterEach
     void tearDown() {
@@ -38,7 +40,7 @@ class OrderServiceTest {
 
 
     @Autowired
-    private OrderService orderService;
+    private OrderCommandService orderCommandService;
 
     @Autowired
     private UserService userService;
@@ -59,14 +61,14 @@ class OrderServiceTest {
         testProduct = productService.saveAndGet(product);
         Map<Product,Integer> orderItem = Map.of(testProduct, 1);
         Order order = new Order(testUser, orderItem);
-        testOrder = orderService.saveAndGet(order);
+        testOrder = orderCommandService.saveAndGet(order);
     }
 
     @Test
     @DisplayName("주문 ID로 주문을 조회한다")
     void getOrder_ShouldReturnOrder_WhenOrderExists() {
 
-        Order result = orderService.getOrder(testOrder.getId());
+        Order result = orderQueryService.getOrder(testOrder.getId());
 
         assertNotNull(result);
         assertEquals(testOrder.getId(), result.getId());
@@ -77,7 +79,7 @@ class OrderServiceTest {
     void getOrders_ShouldReturnOrderList_WhenSearchConditionProvided() {
         OrderQuery.GetUserOrders searchCommand = new OrderQuery.GetUserOrders(testUser.getId());
 
-        List<OrderInfo.Detail> result = orderService.getOrders(searchCommand);
+        List<Order> result = orderQueryService.getOrders(searchCommand);
 
         assertNotNull(result);
         assertEquals(1, result.size());

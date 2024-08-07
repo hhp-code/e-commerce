@@ -5,7 +5,7 @@ import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.application.usecase.PopularProductUseCase;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
-import com.ecommerce.domain.order.service.OrderService;
+import com.ecommerce.domain.order.service.OrderCommandService;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
@@ -48,7 +48,7 @@ class PopularProductUseCaseTest {
     private ProductService productService;
 
     @Autowired
-    private OrderService orderService;
+    private OrderCommandService orderCommandService;
 
     @Autowired
     private PaymentUseCase paymentUseCase;

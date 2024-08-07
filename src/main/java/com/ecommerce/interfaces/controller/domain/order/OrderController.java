@@ -1,10 +1,10 @@
 package com.ecommerce.interfaces.controller.domain.order;
 
 import com.ecommerce.application.OrderFacade;
+import com.ecommerce.domain.order.service.OrderCommandService;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderMapper;
 import com.ecommerce.application.usecase.CartUseCase;
-import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.application.usecase.PaymentUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,13 +18,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api")
 public class OrderController {
-    private final OrderService orderService;
+    private final OrderCommandService orderCommandService;
     private final OrderFacade orderFacade;
     private final CartUseCase cartUseCase;
     private final PaymentUseCase paymentUseCase;
 
-    public OrderController(OrderService orderService, OrderFacade orderFacade, CartUseCase cartUseCase, PaymentUseCase paymentUseCase) {
-        this.orderService = orderService;
+    public OrderController(OrderCommandService orderCommandService, OrderFacade orderFacade, CartUseCase cartUseCase, PaymentUseCase paymentUseCase) {
+        this.orderCommandService = orderCommandService;
         this.orderFacade = orderFacade;
         this.cartUseCase = cartUseCase;
         this.paymentUseCase = paymentUseCase;
@@ -119,7 +119,7 @@ public class OrderController {
     )
     public OrderDto.OrderListResponse listOrders(@RequestBody OrderDto.OrderListRequest request){
         request.validate();
-        return OrderMapper.toOrderListResponse(orderService.getOrders(OrderMapper.toGetUserOrders(request)));
+        return OrderMapper.toOrderListResponse(orderFacade.getOrders(OrderMapper.toGetUserOrders(request)));
     }
 
     @PostMapping("/orders/payments")

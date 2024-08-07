@@ -20,14 +20,14 @@ public class OrderCommand {
     public record Search(long orderId) {
     }
     public record Add(long orderId, long productId, int quantity) {
-        public Order execute(OrderService orderService, ProductService productService) {
-            return orderService.getOrder(orderId)
+        public Order execute(OrderQueryService orderQueryService, ProductService productService) {
+            return orderQueryService.getOrder(orderId)
                     .addItem(productService, productId, quantity);
         }
     }
     public record Payment( long orderId) {
-        public Order execute(OrderService orderService, DummyPlatform dummyPlatform) {
-            return orderService.getOrder(orderId)
+        public Order execute(OrderQueryService orderQueryService, DummyPlatform dummyPlatform) {
+            return orderCommandService.getOrder(orderId)
                     .deductStock()
                     .deductPoint()
                     .finish()
@@ -35,17 +35,17 @@ public class OrderCommand {
         }
     }
     public record Cancel(long orderId) {
-        public Order execute(OrderService orderService, DummyPlatform dummyPlatform) {
-            return orderService.getOrder(orderId)
-                    .deductStock()
-                    .deductPoint()
+        public Order execute(OrderQueryService orderQueryService, DummyPlatform dummyPlatform) {
+            return orderQueryService.getOrder(orderId)
+                    .chargeStock()
+                    .chargePoint()
                     .cancel()
                     .send(dummyPlatform);
         }
     }
     public record Delete(long orderId, long productId) {
-        public Order execute(OrderService orderService, ProductService productService) {
-            return orderService.getOrder(orderId)
+        public Order execute(OrderQueryService orderQueryService, ProductService productService) {
+            return orderQueryService.getOrder(orderId)
                     .deleteItem(productService, productId);
         }
     }

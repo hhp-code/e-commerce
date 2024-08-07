@@ -4,7 +4,7 @@ import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderInfo;
-import com.ecommerce.domain.order.service.OrderService;
+import com.ecommerce.domain.order.service.OrderCommandService;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.order.service.external.DummyPlatform;
 import com.ecommerce.domain.user.service.UserService;
@@ -22,14 +22,14 @@ public class PaymentUseCase {
     private static final Duration ORDER_LOCK_TIMEOUT = Duration.ofSeconds(5);
 
 
-    private final OrderService orderService;
+    private final OrderCommandService orderCommandService;
     private final ProductService productService;
     private final DummyPlatform dummyPlatform;
     private final UserService userService;
     private final QuantumLockManager quantumLockManager;
 
-    public PaymentUseCase(OrderService orderService, ProductService productService, DummyPlatform dummyPlatformUseCase, UserService userService, QuantumLockManager quantumLockManager) {
-        this.orderService = orderService;
+    public PaymentUseCase(OrderCommandService orderCommandService, ProductService productService, DummyPlatform dummyPlatformUseCase, UserService userService, QuantumLockManager quantumLockManager) {
+        this.orderCommandService = orderCommandService;
         this.productService = productService;
         this.dummyPlatform = dummyPlatformUseCase;
         this.userService = userService;
@@ -42,7 +42,7 @@ public class PaymentUseCase {
                     ORDER_LOCK_PREFIX + command.orderId(),
                     ORDER_LOCK_TIMEOUT,
                     () -> {
-                        Order execute = command.execute(orderService, dummyPlatform);
+                        Order execute = command.execute(orderCommandService, dummyPlatform);
                         return OrderInfo.Detail.from(execute);
                     });
         } catch (TimeoutException e) {
@@ -67,7 +67,7 @@ public class PaymentUseCase {
             return quantumLockManager.executeWithLock(
                     ORDER_LOCK_PREFIX + command.orderId(), ORDER_LOCK_TIMEOUT,
                     () -> {
-                        Order execute = command.execute(orderService, dummyPlatform);
+                        Order execute = command.execute(orderCommandService, dummyPlatform);
                         return OrderInfo.Detail.from(execute);
                     });
         } catch (TimeoutException e) {
