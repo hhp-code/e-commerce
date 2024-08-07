@@ -1,7 +1,7 @@
 package com.ecommerce.api.controller.domain.order;
 
 import com.ecommerce.DatabaseCleanUp;
-import com.ecommerce.api.controller.domain.order.dto.OrderDto;
+import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.Product;
@@ -19,7 +19,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 

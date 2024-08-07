@@ -1,8 +1,7 @@
 package com.ecommerce.api.controller.domain.order;
 
 import com.ecommerce.DatabaseCleanUp;
-import com.ecommerce.api.controller.domain.order.dto.OrderDto;
-import com.ecommerce.domain.order.service.OrderService;
+import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;

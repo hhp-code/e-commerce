@@ -1,8 +1,8 @@
 package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.DatabaseCleanUp;
-import com.ecommerce.api.usecase.PaymentUseCase;
-import com.ecommerce.api.usecase.UserPointUseCase;
+import com.ecommerce.application.usecase.PaymentUseCase;
+import com.ecommerce.application.usecase.UserPointUseCase;
 import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.OrderStatus;

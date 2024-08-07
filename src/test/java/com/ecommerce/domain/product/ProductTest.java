@@ -1,6 +1,5 @@
 package com.ecommerce.domain.product;
 
-import com.ecommerce.api.exception.domain.ProductException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,7 +8,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 class ProductTest {
 

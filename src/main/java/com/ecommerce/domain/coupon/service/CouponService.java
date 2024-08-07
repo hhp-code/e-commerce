@@ -1,6 +1,6 @@
 package com.ecommerce.domain.coupon.service;
 
-import com.ecommerce.api.exception.domain.CouponException;
+import com.ecommerce.interfaces.exception.domain.CouponException;
 import com.ecommerce.domain.coupon.service.repository.CouponRepository;
 import com.ecommerce.domain.coupon.Coupon;
 import org.springframework.stereotype.Component;

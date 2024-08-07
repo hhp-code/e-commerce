@@ -1,8 +1,8 @@
 package com.ecommerce.domain.user.service;
 
 import com.ecommerce.DatabaseCleanUp;
-import com.ecommerce.api.usecase.UserPointUseCase;
-import com.ecommerce.api.exception.domain.UserException;
+import com.ecommerce.application.usecase.UserPointUseCase;
+import com.ecommerce.interfaces.exception.domain.UserException;
 import com.ecommerce.domain.user.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

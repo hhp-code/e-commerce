@@ -1,6 +1,6 @@
 package com.ecommerce.domain.order;
 
-import com.ecommerce.api.exception.domain.OrderException;
+import com.ecommerce.interfaces.exception.domain.OrderException;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
 import com.ecommerce.domain.order.service.OrderService;

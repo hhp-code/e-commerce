@@ -1,6 +1,6 @@
 package com.ecommerce.cache;
 
-import com.ecommerce.api.usecase.PaymentUseCase;
+import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.Product;

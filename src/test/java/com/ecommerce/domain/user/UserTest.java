@@ -1,6 +1,6 @@
 package com.ecommerce.domain.user;
 
-import com.ecommerce.api.exception.domain.UserException;
+import com.ecommerce.interfaces.exception.domain.UserException;
 import com.ecommerce.domain.coupon.Coupon;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,8 +1,9 @@
 package com.ecommerce.api.controller.domain.user;
 
-import com.ecommerce.api.usecase.UserPointUseCase;
+import com.ecommerce.application.usecase.UserPointUseCase;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
+import com.ecommerce.interfaces.controller.domain.user.UserPointController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

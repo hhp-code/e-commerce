@@ -1,8 +1,9 @@
 package com.ecommerce.api.controller.domain.product;
 
-import com.ecommerce.api.usecase.PopularProductUseCase;
+import com.ecommerce.application.usecase.PopularProductUseCase;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
+import com.ecommerce.interfaces.controller.domain.product.ProductController;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,12 +1,13 @@
 package com.ecommerce.api.controller.domain.order;
 
-import com.ecommerce.api.controller.domain.order.dto.OrderDto;
-import com.ecommerce.api.controller.domain.order.dto.OrderMapper;
-import com.ecommerce.api.usecase.CartUseCase;
+import com.ecommerce.interfaces.controller.domain.order.OrderController;
+import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
+import com.ecommerce.interfaces.controller.domain.order.dto.OrderMapper;
+import com.ecommerce.application.usecase.CartUseCase;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
-import com.ecommerce.api.usecase.PaymentUseCase;
+import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.user.User;
 import com.fasterxml.jackson.databind.ObjectMapper;

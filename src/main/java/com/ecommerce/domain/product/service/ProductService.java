@@ -1,7 +1,7 @@
 package com.ecommerce.domain.product.service;
 
 
-import com.ecommerce.api.exception.domain.ProductException;
+import com.ecommerce.interfaces.exception.domain.ProductException;
 import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.product.service.repository.ProductRepository;
 import com.ecommerce.domain.product.Product;

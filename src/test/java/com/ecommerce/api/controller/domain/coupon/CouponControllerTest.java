@@ -1,6 +1,7 @@
 package com.ecommerce.api.controller.domain.coupon;
 
-import com.ecommerce.api.controller.domain.coupon.dto.CouponDto;
+import com.ecommerce.interfaces.controller.domain.coupon.CouponController;
+import com.ecommerce.interfaces.controller.domain.coupon.dto.CouponDto;
 import com.ecommerce.domain.coupon.service.CouponCommand;
 import com.ecommerce.domain.coupon.service.CouponService;
 import com.ecommerce.domain.coupon.Coupon;

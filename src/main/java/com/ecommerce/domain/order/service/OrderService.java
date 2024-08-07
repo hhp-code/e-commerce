@@ -1,6 +1,6 @@
 package com.ecommerce.domain.order.service;
 
-import com.ecommerce.api.exception.domain.OrderException;
+import com.ecommerce.interfaces.exception.domain.OrderException;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.OrderStatus;
 import com.ecommerce.domain.order.service.repository.OrderRepository;
