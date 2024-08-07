@@ -4,7 +4,7 @@ import com.ecommerce.api.controller.domain.coupon.dto.CouponDto;
 import com.ecommerce.api.controller.domain.coupon.dto.CouponMapper;
 import com.ecommerce.api.controller.domain.user.dto.UserDto;
 import com.ecommerce.api.controller.domain.user.dto.UserMapper;
-import com.ecommerce.api.controller.usecase.CouponUseCase;
+import com.ecommerce.api.usecase.CouponUseCase;
 import com.ecommerce.api.scheduler.CouponQueueManager;
 import com.ecommerce.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;

@@ -1,6 +1,6 @@
 package com.ecommerce.api.controller.domain.user;
 
-import com.ecommerce.api.controller.usecase.UserPointUseCase;
+import com.ecommerce.api.usecase.UserPointUseCase;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -2,7 +2,7 @@ package com.ecommerce.api.controller.domain.product;
 
 import com.ecommerce.api.controller.domain.product.dto.ProductDto;
 import com.ecommerce.api.controller.domain.product.dto.ProductMapper;
-import com.ecommerce.api.controller.usecase.PopularProductUseCase;
+import com.ecommerce.api.usecase.PopularProductUseCase;
 import com.ecommerce.domain.product.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

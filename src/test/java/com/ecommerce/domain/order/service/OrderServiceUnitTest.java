@@ -1,6 +1,6 @@
 package com.ecommerce.domain.order.service;
 
-import com.ecommerce.api.controller.usecase.PaymentUseCase;
+import com.ecommerce.api.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.service.repository.OrderRepository;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.product.Product;

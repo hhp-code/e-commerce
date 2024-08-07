@@ -1,6 +1,6 @@
 package com.ecommerce.api.controller.domain.user;
 
-import com.ecommerce.api.controller.usecase.CouponUseCase;
+import com.ecommerce.api.usecase.CouponUseCase;
 import com.ecommerce.api.scheduler.CouponQueueManager;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;

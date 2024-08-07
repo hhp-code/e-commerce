@@ -2,9 +2,9 @@ package com.ecommerce.api.controller.domain.order;
 
 import com.ecommerce.api.controller.domain.order.dto.OrderDto;
 import com.ecommerce.api.controller.domain.order.dto.OrderMapper;
-import com.ecommerce.api.controller.usecase.CartUseCase;
+import com.ecommerce.api.usecase.CartUseCase;
 import com.ecommerce.domain.order.service.OrderService;
-import com.ecommerce.api.controller.usecase.PaymentUseCase;
+import com.ecommerce.api.usecase.PaymentUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

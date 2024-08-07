@@ -1,6 +1,8 @@
 package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.api.usecase.PaymentUseCase;
+import com.ecommerce.api.usecase.UserPointUseCase;
 import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.OrderStatus;
@@ -82,7 +84,7 @@ class PaymentUseCaseConcurrencyTest {
 
         when(dummyPlatform.send(any(Order.class))).thenReturn(true);
 
-        paymentUseCase = new PaymentUseCase(orderService, productService, dummyPlatform, userService, quantumLockManager,userPointUseCase);
+        paymentUseCase = new PaymentUseCase(orderService, productService, dummyPlatform, userService, quantumLockManager);
         for(Order order : testOrders) {
             OrderCommand.Create orderCreate = new OrderCommand.Create(order.getId(), Map.of(testProduct.getId(), 1));
             paymentUseCase.createOrder(orderCreate);

@@ -2,7 +2,7 @@ package com.ecommerce.api.controller.domain.user;
 
 import com.ecommerce.api.controller.domain.user.dto.UserDto;
 import com.ecommerce.api.controller.domain.user.dto.UserBalanceMapper;
-import com.ecommerce.api.controller.usecase.UserPointUseCase;
+import com.ecommerce.api.usecase.UserPointUseCase;
 import com.ecommerce.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

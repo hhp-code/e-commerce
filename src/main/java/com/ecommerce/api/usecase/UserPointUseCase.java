@@ -1,4 +1,4 @@
-package com.ecommerce.api.controller.usecase;
+package com.ecommerce.api.usecase;
 
 import com.ecommerce.api.exception.domain.UserException;
 import com.ecommerce.config.QuantumLockManager;

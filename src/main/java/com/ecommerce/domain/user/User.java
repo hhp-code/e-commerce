@@ -3,7 +3,6 @@ package com.ecommerce.domain.user;
 import com.ecommerce.api.exception.domain.UserException;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.order.Order;
-import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.user.service.UserService;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -12,7 +11,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Entity
 @Table(name = "users")

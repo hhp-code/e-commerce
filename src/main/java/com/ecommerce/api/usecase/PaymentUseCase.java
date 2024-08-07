@@ -1,4 +1,4 @@
-package com.ecommerce.api.controller.usecase;
+package com.ecommerce.api.usecase;
 
 import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.order.Order;
@@ -26,15 +26,13 @@ public class PaymentUseCase {
     private final DummyPlatform dummyPlatform;
     private final UserService userService;
     private final QuantumLockManager quantumLockManager;
-    private final UserPointUseCase userPointUseCase;
 
-    public PaymentUseCase(OrderService orderService, ProductService productService, DummyPlatform dummyPlatformUseCase, UserService userService, QuantumLockManager quantumLockManager, UserPointUseCase userPointUseCase) {
+    public PaymentUseCase(OrderService orderService, ProductService productService, DummyPlatform dummyPlatformUseCase, UserService userService, QuantumLockManager quantumLockManager) {
         this.orderService = orderService;
         this.productService = productService;
         this.dummyPlatform = dummyPlatformUseCase;
         this.userService = userService;
         this.quantumLockManager = quantumLockManager;
-        this.userPointUseCase = userPointUseCase;
     }
 
     public Order payOrder(OrderCommand.Payment orderPay) {
@@ -60,7 +58,7 @@ public class PaymentUseCase {
     }
 
     private Order createOrderInternal(OrderCommand.Create command) {
-        return new Order().putUser(userService, command.userId())
+        return new Order().putUser(userService,command.userId())
                 .addItems(productService, command.items())
                 .saveAndGet(orderService);
     }
@@ -68,8 +66,8 @@ public class PaymentUseCase {
     private Order payOrderInternal(OrderCommand.Payment orderPay) {
         try {
             return orderService.getOrder(orderPay.orderId())
-                    .deductStock(productService)
-                    .deductPoint(userPointUseCase)
+                    .deductStock()
+                    .deductPoint()
                     .finish()
                     .send(dummyPlatform)
                     .saveAndGet(orderService);
@@ -82,8 +80,8 @@ public class PaymentUseCase {
 
     public Order cancelOrder(OrderCommand.Cancel orderCancel) {
         return orderService.getOrder(orderCancel.orderId())
-                .chargeStock(productService)
-                .chargePoint(userPointUseCase)
+                .chargeStock()
+                .chargePoint()
                 .cancel()
                 .send(dummyPlatform)
                 .saveAndGet(orderService);

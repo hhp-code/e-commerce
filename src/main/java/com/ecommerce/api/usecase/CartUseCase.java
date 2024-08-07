@@ -1,4 +1,4 @@
-package com.ecommerce.api.controller.usecase;
+package com.ecommerce.api.usecase;
 
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;

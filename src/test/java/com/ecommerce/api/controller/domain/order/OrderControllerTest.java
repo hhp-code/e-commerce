@@ -2,11 +2,11 @@ package com.ecommerce.api.controller.domain.order;
 
 import com.ecommerce.api.controller.domain.order.dto.OrderDto;
 import com.ecommerce.api.controller.domain.order.dto.OrderMapper;
-import com.ecommerce.api.controller.usecase.CartUseCase;
+import com.ecommerce.api.usecase.CartUseCase;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
-import com.ecommerce.api.controller.usecase.PaymentUseCase;
+import com.ecommerce.api.usecase.PaymentUseCase;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.user.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,7 +63,7 @@ class OrderControllerTest {
     private final Map<Product, Integer> items = Map.of(product, 1);
     private final Map<Long, Integer> create = Map.of(PRODUCT_ID, 1);
     private final OrderCommand.Create request = new OrderCommand.Create(VALID_USER_ID, create);
-    private final Order order = new Order(ORDER_ID, new User(VALID_USER_ID, "test", PRODUCT_PRICE), items);
+    private final Order order = new Order( new User(VALID_USER_ID, "test", PRODUCT_PRICE), items);
 
     @BeforeEach
     void setup() {
@@ -158,7 +158,7 @@ class OrderControllerTest {
         User user = new User(VALID_USER_ID, "test", PRODUCT_PRICE);
         Map<Product, Integer> items = new HashMap<>();
         items.put(product, 1);
-        Order order = new Order(ORDER_ID, user, items);
+        Order order = new Order(user, items);
         user.addOrder(order);
         return order;
     }

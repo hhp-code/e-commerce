@@ -1,6 +1,6 @@
 package com.ecommerce.domain.user.service;
 
-import com.ecommerce.api.controller.usecase.UserPointUseCase;
+import com.ecommerce.api.usecase.UserPointUseCase;
 import com.ecommerce.api.exception.domain.UserException;
 import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.user.User;

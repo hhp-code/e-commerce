@@ -1,6 +1,8 @@
 package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.api.usecase.CartUseCase;
+import com.ecommerce.api.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.product.Product;
