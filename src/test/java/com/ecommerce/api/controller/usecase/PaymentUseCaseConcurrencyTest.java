@@ -1,5 +1,8 @@
 package com.ecommerce.api.controller.usecase;
 
+import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.api.usecase.PaymentUseCase;
+import com.ecommerce.api.usecase.UserPointUseCase;
 import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.OrderStatus;
@@ -9,13 +12,14 @@ import com.ecommerce.domain.order.service.external.DummyPlatform;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
-import com.ecommerce.domain.user.service.UserPointService;
 import com.ecommerce.domain.user.service.UserService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -35,7 +39,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
+@ActiveProfiles("cleanser")
+@Transactional
 class PaymentUseCaseConcurrencyTest {
+    @Autowired
+    private DatabaseCleanUp databaseCleanUp;
+    @Autowired
+    private UserPointUseCase userPointUseCase;
+
+    @AfterEach
+    void tearDown() {
+        databaseCleanUp.execute();
+    }
+
     @Autowired
     private UserService userService;
     @Autowired
@@ -44,8 +60,6 @@ class PaymentUseCaseConcurrencyTest {
     private ProductService productService;
     @Mock
     private DummyPlatform dummyPlatform;
-    @Autowired
-    private UserPointService userPointService;
     @Autowired
     private PaymentUseCase paymentUseCase;
     @Autowired
@@ -56,9 +70,8 @@ class PaymentUseCaseConcurrencyTest {
     private List<Order> testOrders;
 
     @BeforeEach
-    @Transactional
     void setUp() {
-        testProduct = productService.saveAndGet(new Product("test", BigDecimal.TEN, 10));
+        testProduct = productService.saveAndGet(new Product("test", BigDecimal.valueOf(1), 10));
 
         testUsers = new ArrayList<>();
         testOrders = new ArrayList<>();
@@ -71,7 +84,11 @@ class PaymentUseCaseConcurrencyTest {
 
         when(dummyPlatform.send(any(Order.class))).thenReturn(true);
 
-        paymentUseCase = new PaymentUseCase(orderService, productService, dummyPlatform, userPointService, userService, quantumLockManager);
+        paymentUseCase = new PaymentUseCase(orderService, productService, dummyPlatform, userService, quantumLockManager);
+        for(Order order : testOrders) {
+            OrderCommand.Create orderCreate = new OrderCommand.Create(order.getId(), Map.of(testProduct.getId(), 1));
+            paymentUseCase.createOrder(orderCreate);
+        }
     }
 
     @Test
@@ -90,7 +107,7 @@ class PaymentUseCaseConcurrencyTest {
                     readyLatch.countDown(); // 스레드가 준비되었음을 알림
                     startLatch.await(); // 모든 스레드가 시작 신호를 기다림
 
-                    OrderCommand.Payment orderPay = new OrderCommand.Payment(testUsers.get(index).getId(), testOrders.get(index).getId());
+                    OrderCommand.Payment orderPay = new OrderCommand.Payment(testOrders.get(index).getId());
                     paymentUseCase.payOrder(orderPay);
                     productService.getProduct(testProduct.getId());
                     successfulPayments.incrementAndGet();

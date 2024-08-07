@@ -1,15 +1,19 @@
 package com.ecommerce.domain.order.service;
 
+import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.api.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -19,8 +23,16 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@ActiveProfiles("cleanser")
 @Transactional
 class OrderServiceTest {
+    @Autowired
+    private DatabaseCleanUp databaseCleanUp;
+
+    @AfterEach
+    void tearDown() {
+        databaseCleanUp.execute();
+    }
 
     private static final Long ORDER_ID = 1L;
 
@@ -36,6 +48,9 @@ class OrderServiceTest {
     private Order testOrder;
     private User testUser;
     private Product testProduct;
+    @Autowired
+    private PaymentUseCase paymentUseCase;
+
     @BeforeEach
     void setup() {
         User user = new User("testUser", BigDecimal.valueOf(1000));
@@ -74,7 +89,7 @@ class OrderServiceTest {
     void createOrder_ShouldCreateNewOrder_WhenValidCommandProvided() {
         OrderCommand.Create createCommand = new OrderCommand.Create(testUser.getId(), Map.of(testProduct.getId(), 1));
 
-        Order result = orderService.createOrder(createCommand);
+        Order result = paymentUseCase.createOrder(createCommand);
 
         assertNotNull(result);
         assertEquals(1, result.getOrderItems().size());

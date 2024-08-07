@@ -1,5 +1,7 @@
 package com.ecommerce.domain.user.service;
 
+import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.api.usecase.UserPointUseCase;
 import com.ecommerce.api.exception.domain.UserException;
 import com.ecommerce.domain.user.User;
 import org.junit.jupiter.api.AfterEach;
@@ -8,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -16,11 +19,19 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@ActiveProfiles("cleanser")
 @Transactional
 class UserPointServiceTest {
+    @Autowired
+    private DatabaseCleanUp databaseCleanUp;
+
+    @AfterEach
+    void tearDown() {
+        databaseCleanUp.execute();
+    }
 
     @Autowired
-    private UserPointService userPointService;
+    private UserPointUseCase userPointUseCase;
 
     @Autowired
     private UserService userService;
@@ -39,7 +50,8 @@ class UserPointServiceTest {
     @DisplayName("잔액 조회 성공 시나리오")
     void getPointSuccess() {
         // given &when
-        BigDecimal balance = userPointService.getPoint(userId);
+        User point = userService.getPoint(userId);
+        BigDecimal balance = point.getPoint();
 
         // then
         assertThat(balance).isEqualByComparingTo(new BigDecimal("1000.00"));
@@ -51,7 +63,7 @@ class UserPointServiceTest {
         // given
         long userId = 999L;
         // when & then
-        assertThrows(UserException.ServiceException.class, () -> userPointService.getPoint(userId));
+        assertThrows(UserException.ServiceException.class, () -> userService.getPoint(userId));
     }
 
     @Test
@@ -63,7 +75,8 @@ class UserPointServiceTest {
         BigDecimal expectedBalance = initialBalance.add(chargeAmount);
 
         // when
-        BigDecimal newBalance = userPointService.chargePoint(userId,chargeAmount);
+        User user = userPointUseCase.chargePoint(userId, chargeAmount);
+        BigDecimal newBalance =  user.getPoint();
 
         // then
         assertThat(newBalance).isEqualByComparingTo(expectedBalance);
@@ -79,7 +92,7 @@ class UserPointServiceTest {
 
         // when & then
         assertThrows(UserException.ServiceException.class,
-                () -> userPointService.chargePoint(userId, chargeAmount));
+                () -> userPointUseCase.chargePoint(userId, chargeAmount));
     }
 
     @Test
@@ -90,8 +103,10 @@ class UserPointServiceTest {
         BigDecimal secondCharge = BigDecimal.valueOf(1000);
 
         // when
-        BigDecimal balanceAfterFirstCharge = userPointService.chargePoint(userId, firstCharge);
-        BigDecimal finalBalance = userPointService.chargePoint(userId, secondCharge);
+        User user = userPointUseCase.chargePoint(userId, firstCharge);
+        BigDecimal balanceAfterFirstCharge = user.getPoint();
+        User user1 = userPointUseCase.chargePoint(userId, secondCharge);
+        BigDecimal finalBalance = user1.getPoint();
 
         // then
         assertThat(balanceAfterFirstCharge).isEqualByComparingTo(BigDecimal.valueOf(2000));

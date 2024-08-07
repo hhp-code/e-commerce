@@ -10,11 +10,11 @@ public class OrderCommand {
     }
     public record Search(long orderId) {
     }
-    public record Add(long userId, long productId, int quantity) {
+    public record Add(long orderId, long productId, int quantity) {
     }
-    public record Payment(long userId, long orderId) {
+    public record Payment( long orderId) {
     }
-    public record Cancel(long userId, long orderId) {
+    public record Cancel(long orderId) {
     }
     public record Delete(long orderId, long productId) {
     }

@@ -1,12 +1,16 @@
 package com.ecommerce.domain.product.service;
 
+import com.ecommerce.DatabaseCleanUp;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.user.service.UserService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -16,10 +20,20 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
+@ActiveProfiles("cleanser")
+@Transactional
 class ProductServiceConcurrencyTest {
 
     @Autowired
     ProductService productService;
+
+    @Autowired
+    private DatabaseCleanUp databaseCleanUp;
+
+    @AfterEach
+    void tearDown() {
+        databaseCleanUp.execute();
+    }
 
     @Autowired
     UserService userService;

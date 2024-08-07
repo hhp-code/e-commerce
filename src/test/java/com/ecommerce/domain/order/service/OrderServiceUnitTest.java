@@ -1,5 +1,6 @@
 package com.ecommerce.domain.order.service;
 
+import com.ecommerce.api.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.service.repository.OrderRepository;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.product.Product;
@@ -31,6 +32,8 @@ class OrderServiceUnitTest {
 
     @InjectMocks
     private OrderService orderService;
+
+    PaymentUseCase paymentUseCase;
 
 
     @Test
@@ -76,7 +79,7 @@ class OrderServiceUnitTest {
     void createOrder_Failure_ShouldThrowException() {
         OrderCommand.Create createCommand = new OrderCommand.Create(VALID_USER_ID.intValue(), Map.of());
 
-        assertThrows(RuntimeException.class, () -> orderService.createOrder(createCommand));
+        assertThrows(RuntimeException.class, () -> paymentUseCase.createOrder(createCommand));
     }
 
     private Order createMockOrder() {

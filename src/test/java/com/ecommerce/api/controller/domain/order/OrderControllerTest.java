@@ -2,11 +2,11 @@ package com.ecommerce.api.controller.domain.order;
 
 import com.ecommerce.api.controller.domain.order.dto.OrderDto;
 import com.ecommerce.api.controller.domain.order.dto.OrderMapper;
-import com.ecommerce.api.controller.usecase.CartUseCase;
+import com.ecommerce.api.usecase.CartUseCase;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
-import com.ecommerce.api.controller.usecase.PaymentUseCase;
+import com.ecommerce.api.usecase.PaymentUseCase;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.user.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,7 +63,7 @@ class OrderControllerTest {
     private final Map<Product, Integer> items = Map.of(product, 1);
     private final Map<Long, Integer> create = Map.of(PRODUCT_ID, 1);
     private final OrderCommand.Create request = new OrderCommand.Create(VALID_USER_ID, create);
-    private final Order order = new Order(ORDER_ID, new User(VALID_USER_ID, "test", PRODUCT_PRICE), items);
+    private final Order order = new Order( new User(VALID_USER_ID, "test", PRODUCT_PRICE), items);
 
     @BeforeEach
     void setup() {
@@ -75,7 +75,7 @@ class OrderControllerTest {
     @DisplayName("주문 생성 - 성공")
     void createOrder_Success() throws Exception {
 
-        when(orderService.createOrder(any(OrderCommand.Create.class))).thenReturn(order);
+        when(paymentUseCase.createOrder(any(OrderCommand.Create.class))).thenReturn(order);
 
         mockMvc.perform(post(API_ORDERS)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -110,7 +110,7 @@ class OrderControllerTest {
     @Test
     @DisplayName("결제 요청 - 결제 성공")
     void payOrder_Success() throws Exception {
-        OrderDto.OrderPayRequest request = new OrderDto.OrderPayRequest(VALID_USER_ID, ORDER_ID);
+        OrderDto.OrderPayRequest request = new OrderDto.OrderPayRequest(ORDER_ID);
         Order order = createSampleOrder();
 
         when(paymentUseCase.payOrder(OrderMapper.toOrderPay(request))).thenReturn(order);
@@ -122,20 +122,7 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.id").value(VALID_USER_ID));
     }
 
-    @Test
-    @DisplayName("주문 취소 - 주문 취소 성공")
-    void cancelOrder_Success() throws Exception {
-        OrderCommand.Cancel request = new OrderCommand.Cancel(VALID_USER_ID, ORDER_ID);
-        Order order = createSampleOrder();
 
-        when(paymentUseCase.cancelOrder(request)).thenReturn(order);
-
-        mockMvc.perform(patch(API_ORDERS + "/cancel")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(VALID_USER_ID));
-    }
 
     @Test
     @DisplayName("주문 상품 추가")
@@ -171,7 +158,7 @@ class OrderControllerTest {
         User user = new User(VALID_USER_ID, "test", PRODUCT_PRICE);
         Map<Product, Integer> items = new HashMap<>();
         items.put(product, 1);
-        Order order = new Order(ORDER_ID, user, items);
+        Order order = new Order(user, items);
         user.addOrder(order);
         return order;
     }

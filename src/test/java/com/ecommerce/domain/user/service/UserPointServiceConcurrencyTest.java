@@ -1,10 +1,14 @@
 package com.ecommerce.domain.user.service;
 
+import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.api.usecase.UserPointUseCase;
 import com.ecommerce.domain.user.User;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -15,9 +19,20 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
+@ActiveProfiles("cleanser")
 class UserPointServiceConcurrencyTest {
     @Autowired
-    UserPointService userPointService;
+    private DatabaseCleanUp databaseCleanUp;
+
+    @AfterEach
+    void tearDown() {
+        databaseCleanUp.execute();
+    }
+
+
+
+    @Autowired
+    UserPointUseCase userPointService;
     @Autowired
     private UserService userService;
 

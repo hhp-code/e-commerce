@@ -17,7 +17,8 @@ class UserTest {
         User user = new User("testUser", BigDecimal.ZERO);
         BigDecimal chargeAmount = BigDecimal.valueOf(100);
 
-        BigDecimal newBalance = user.chargePoint(chargeAmount);
+        User user1 = user.chargePoint(chargeAmount);
+        BigDecimal newBalance = user1.getPoint();
 
         assertEquals(chargeAmount, newBalance);
         assertEquals(chargeAmount, user.getPoint());
@@ -36,7 +37,8 @@ class UserTest {
         User user = new User("testUser", BigDecimal.valueOf(100));
         BigDecimal decreaseAmount = BigDecimal.valueOf(50);
 
-        BigDecimal newBalance = user.deductPoint(decreaseAmount);
+        User user1 = user.deductPoint(decreaseAmount);
+        BigDecimal newBalance = user1.getPoint();
 
         assertEquals(BigDecimal.valueOf(50), newBalance);
         assertEquals(BigDecimal.valueOf(50), user.getPoint());

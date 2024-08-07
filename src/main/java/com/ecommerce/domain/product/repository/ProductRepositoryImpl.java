@@ -93,5 +93,10 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     }
 
+    @Override
+    public Optional<Product> saveProduct(Product testProduct) {
+        return Optional.of(productJPARepository.save(testProduct));
+    }
+
 
 }

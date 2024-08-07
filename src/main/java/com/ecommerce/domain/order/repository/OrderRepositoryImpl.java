@@ -7,7 +7,6 @@ import com.ecommerce.domain.order.service.repository.OrderRepository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -57,12 +56,6 @@ public class OrderRepositoryImpl implements OrderRepository {
                 .where(order.user.id.eq(id)
                         .and(order.orderStatus.eq(orderStatus)))
                 .fetchOne());
-    }
-
-    @Override
-    @Transactional
-    public void deleteAll() {
-        orderJPARepository.deleteAll();
     }
 
     @Override

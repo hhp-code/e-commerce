@@ -1,72 +1,72 @@
 package com.ecommerce.api.controller.usecase;
 
+import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.api.usecase.CartUseCase;
+import com.ecommerce.api.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
-import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import com.ecommerce.domain.user.service.UserService;
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-@ExtendWith(MockitoExtension.class)
+
+@SpringBootTest
+@ActiveProfiles("cleanser")
+@Transactional
 class CartUseCaseTest {
-    private static final Long USER_ID = 1L;
-    private static final Long ORDER_ID = 2L;
-    private static final Long PRODUCT_ID = 3L;
-    @Mock
-    private OrderService orderService;
 
+    @Autowired
+    private DatabaseCleanUp databaseCleanUp;
 
-    @Mock
+    @Autowired
     private ProductService productService;
 
-    @InjectMocks
+    @Autowired
     private CartUseCase cartUseCase;
-    @Nested
-    @DisplayName("장바구니 아이템 추가 테스트")
-    class AddOrderItemToOrderTests {
-        @Test
-        @DisplayName("기존 주문에 장바구니 아이템을 추가한다")
-        void addCartItemToOrder_ShouldAddItemToExistingOrder_WhenValidCommandProvided() {
-            //given
-            Product mockProduct = createMockProduct();
-            Order mockOrder = createMockOrder();
-            OrderCommand.Add addCommand = new OrderCommand.Add(USER_ID, PRODUCT_ID, 1);
+    @Autowired
+    private UserService userService;
 
-            when(orderService.getOrCreateOrder(addCommand)).thenReturn(mockOrder);
-            when(productService.getProduct(PRODUCT_ID)).thenReturn(mockProduct);
-            when(orderService.saveAndGet(any(Order.class))).thenReturn(mockOrder);
+    @Autowired
+    private PaymentUseCase paymentUseCase;
 
-            //when
-            Order result = cartUseCase.addItemToOrder(addCommand);
+    private User testUser;
+    private Product testProduct;
 
-            //then
-            assertNotNull(result);
-            assertEquals(mockOrder, result);
-        }
-    }
-    private User createMockUser() {
-        return new User(USER_ID, "testUser", BigDecimal.valueOf(1000));
+    @BeforeEach
+    void setUp(){
+        testUser = userService.saveUser(new User("testUser", BigDecimal.valueOf(1000)));
+        testProduct = productService.saveProduct(new Product("testProduct", BigDecimal.valueOf(1000), 100));
+
     }
 
-    private Product createMockProduct() {
-        return new Product(1L,"test", BigDecimal.TWO, 1000);
+    @Test
+    @DisplayName("기존 주문에 장바구니 아이템을 추가한다")
+    void addCartItemToOrder_ShouldAddItemToExistingOrder_WhenValidCommandProvided() {
+        //given
+        OrderCommand.Add addCommand = new OrderCommand.Add(testUser.getId(), testProduct.getId(), 1);
+        OrderCommand.Create createCommand = new OrderCommand.Create(testUser.getId(), Map.of(testProduct.getId(), 1));
+        paymentUseCase.createOrder(createCommand);
+
+        //when
+        Order result = cartUseCase.addItemToOrder(addCommand);
+
+        //then
+        assertNotNull(result);
+        assertEquals(1, result.getOrderItems().size());
     }
 
-
-    private Order createMockOrder() {
-        return new Order(ORDER_ID, createMockUser(), Map.of(createMockProduct(), 1));
+    @AfterEach
+    void tearDown() {
+        databaseCleanUp.execute();
     }
 }

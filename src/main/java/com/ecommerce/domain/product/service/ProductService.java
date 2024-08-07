@@ -6,12 +6,15 @@ import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.product.service.repository.ProductRepository;
 import com.ecommerce.domain.product.Product;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+
 @Slf4j
 @Component
 public class ProductService {
@@ -25,6 +28,7 @@ public class ProductService {
         this.quantumLockManager = quantumLockManager;
     }
 
+    @Cacheable(value = "products", key = "#productId", unless = "#result == null")
     public Product getProduct(Long productId) {
         return productRepository.getProduct(productId).orElseThrow(
                 () -> new ProductException.ServiceException("상품을 찾을 수 없습니다.")
@@ -32,11 +36,13 @@ public class ProductService {
     }
 
     @Transactional
+    @Cacheable(value = "products", key = "'popularProducts'", unless = "#result.isEmpty()")
     public List<Product> getPopularProducts() {
         return productRepository.getPopularProducts();
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "allProducts", unless = "#result.isEmpty()")
     public List<Product> getProducts() {
         return productRepository.getProducts();
     }
@@ -66,17 +72,19 @@ public class ProductService {
             quantumLockManager.executeWithLock(lockKey, timeout, () -> {
                 product.chargeStock(quantity);
                 return productRepository.save(product).orElseThrow(
-                        () -> new ProductException.ServiceException("재고 차감에 실패했습니다.")
+                        () -> new ProductException.ServiceException("재고 증가에 실패했습니다.")
                 );
             });
         } catch (Exception e) {
-            throw new ProductException.ServiceException("재고 차감 중 오류 발생");
+            throw new ProductException.ServiceException("재고 증가 중 오류 발생");
         }
     }
 
     @Transactional
-    public Product saveAndGet(Product testProduct) {
-        return productRepository.save(testProduct).orElseThrow(
+    @CachePut(value = "products", key = "#product.id")
+    @CacheEvict(value = {"popularProducts", "allProducts"}, allEntries = true)
+    public Product saveAndGet(Product product) {
+        return productRepository.save(product).orElseThrow(
                 () -> new ProductException.ServiceException("상품 저장에 실패했습니다.")
         );
     }
@@ -86,7 +94,10 @@ public class ProductService {
         productRepository.saveAll(products);
     }
 
-    public List<Product> getAllProducts() {
-        return productRepository.getAll();
+    @Transactional
+    public Product saveProduct(Product testProduct) {
+        return productRepository.saveProduct(testProduct).orElseThrow(
+                () -> new ProductException.ServiceException("상품 저장에 실패했습니다.")
+        );
     }
 }

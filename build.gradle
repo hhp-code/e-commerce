@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.3.1'
     id 'io.spring.dependency-management' version '1.1.5'
+    id 'me.champeau.jmh' version '0.7.2'  // JMH 플러그인 추가
 }
 
 group = 'com'
@@ -41,6 +42,13 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // JMH 의존성 추가
+    jmh 'org.openjdk.jmh:jmh-core:1.37'
+    jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
+
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'com.github.ben-manes.caffeine:caffeine'
 }
 
 def querydslDir = "src/main/generated"
@@ -59,4 +67,11 @@ clean {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+jmh {
+    iterations = 5 // 반복 횟수
+    benchmarkMode = ['avgt'] // 평균 시간 측정 모드
+    timeUnit = 'ms' // 밀리초 단위로 결과 표시
+    warmupIterations = 3 // 웜업 반복 횟수
+    fork = 2 // 각 벤치마크마다 2개의 JVM 프로세스 생성
 }

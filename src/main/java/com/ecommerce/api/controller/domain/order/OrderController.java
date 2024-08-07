@@ -2,9 +2,9 @@ package com.ecommerce.api.controller.domain.order;
 
 import com.ecommerce.api.controller.domain.order.dto.OrderDto;
 import com.ecommerce.api.controller.domain.order.dto.OrderMapper;
-import com.ecommerce.api.controller.usecase.CartUseCase;
+import com.ecommerce.api.usecase.CartUseCase;
 import com.ecommerce.domain.order.service.OrderService;
-import com.ecommerce.api.controller.usecase.PaymentUseCase;
+import com.ecommerce.api.usecase.PaymentUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -39,7 +39,7 @@ public class OrderController {
     )
     public OrderDto.OrderResponse createOrder(@RequestBody OrderDto.OrderCreateRequest request) {
         request.validate();
-        return OrderMapper.toOrderResponse(orderService.createOrder(OrderMapper.toOrder(request)));
+        return OrderMapper.toOrderResponse(paymentUseCase.createOrder(OrderMapper.toOrder(request)));
     }
 
     @GetMapping("/orders/{orderId}")

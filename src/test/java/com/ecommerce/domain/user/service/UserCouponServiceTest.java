@@ -1,17 +1,17 @@
 package com.ecommerce.domain.user.service;
 
+import com.ecommerce.DatabaseCleanUp;
 import com.ecommerce.api.exception.domain.UserException;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
 import com.ecommerce.domain.user.User;
-import com.ecommerce.domain.user.repository.UserRepositoryImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -21,12 +21,20 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@ActiveProfiles("cleanser")
 @Transactional
 public class UserCouponServiceTest {
     @Autowired
     private UserCouponService userCouponService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private DatabaseCleanUp databaseCleanUp;
+
+    @AfterEach
+    void tearDown() {
+        databaseCleanUp.execute();
+    }
 
 
     @BeforeEach
@@ -54,9 +62,5 @@ public class UserCouponServiceTest {
         assertThrows(UserException.ServiceException.class, () -> userCouponService.getUserCoupon(userId, couponId));
     }
 
-    @AfterEach
-    void tearDown() {
-        userService.deleteAll();
-    }
 
 }

@@ -1,13 +1,12 @@
 package com.ecommerce.api.controller.domain.user;
 
+import com.ecommerce.api.usecase.UserPointUseCase;
 import com.ecommerce.domain.user.User;
-import com.ecommerce.domain.user.service.UserPointService;
 import com.ecommerce.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -31,12 +30,15 @@ class UserPointControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private UserPointService userPointService;
+    private UserPointUseCase userPointUseCase;
+
+    @MockBean
+    private UserService userService;
 
     @BeforeEach
     void setUp() {
-        when(userPointService.chargePoint(any(), any())).thenReturn(BigDecimal.valueOf(1000));
-        when(userPointService.getPoint(any())).thenReturn(BigDecimal.ZERO);
+        when(userPointUseCase.chargePoint(any(), any())).thenReturn(new User("test", BigDecimal.valueOf(1000)));
+        when(userService.getPoint(any())).thenReturn(new User("test", BigDecimal.valueOf(0)));
 
     }
 

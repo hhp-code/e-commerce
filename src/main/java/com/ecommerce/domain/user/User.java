@@ -3,6 +3,7 @@ package com.ecommerce.domain.user;
 import com.ecommerce.api.exception.domain.UserException;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.order.Order;
+import com.ecommerce.domain.user.service.UserService;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "commerce_user")
+@Table(name = "users")
 public class User {
     @Getter
     @Id
@@ -80,15 +81,15 @@ public class User {
         orders.add(order);
     }
 
-    public BigDecimal chargePoint(BigDecimal amount) {
+    public User chargePoint(BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new UserException("충전 금액은 0보다 커야 합니다.");
         }
         this.point = this.point.add(amount);
-        return this.point;
+        return this;
     }
 
-    public BigDecimal deductPoint(BigDecimal amount) {
+    public User deductPoint(BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new UserException("차감 금액은 0보다 커야 합니다.") {
             };
@@ -97,7 +98,11 @@ public class User {
             throw new UserException("잔액이 부족합니다.");
         }
         this.point = this.point.subtract(amount);
-        return this.point;
+        return this;
     }
 
+
+    public User saveAndGet(UserService userService) {
+        return userService.save(this);
+    }
 }

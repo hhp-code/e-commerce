@@ -53,10 +53,10 @@ public class OrderMapper {
     }
 
     public static OrderCommand.Payment toOrderPay(OrderDto.OrderPayRequest request) {
-        return new OrderCommand.Payment(request.userId(),request.orderId());
+        return new OrderCommand.Payment(request.orderId());
     }
     public static OrderCommand.Cancel toOrderCancel(OrderDto.OrderCancelRequest request) {
-        return new OrderCommand.Cancel(request.userId(),request.orderId());
+        return new OrderCommand.Cancel(request.userId());
     }
 
     public static OrderCommand.Delete toOrderDeleteItem(Long orderId, OrderDto.OrderDeleteItemRequest request) {

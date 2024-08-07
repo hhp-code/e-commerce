@@ -1,5 +1,6 @@
 package com.ecommerce.api.controller.domain.order;
 
+import com.ecommerce.DatabaseCleanUp;
 import com.ecommerce.api.controller.domain.order.dto.OrderDto;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderService;
@@ -8,6 +9,7 @@ import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -32,8 +35,19 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
+@ActiveProfiles("cleanser")
+@Transactional
 @AutoConfigureMockMvc
 public class OrderControllerConcurrencyTest {
+    @Autowired
+    private DatabaseCleanUp databaseCleanUp;
+
+    @AfterEach
+    void tearDown() {
+        databaseCleanUp.execute();
+    }
+
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -50,7 +64,6 @@ public class OrderControllerConcurrencyTest {
     private ProductService productService;
 
     private Product testProduct;
-    private List<User> testUsers;
 
     List<OrderDto.OrderPayRequest> orderPayRequest = new ArrayList<>();
     @BeforeEach
@@ -61,12 +74,12 @@ public class OrderControllerConcurrencyTest {
             userService.saveUser(new User("TestUser" + i, BigDecimal.valueOf(10)));
         }
 
-        testUsers = userService.getAllUsers();
+        List<User> testUsers = userService.getAllUsers();
         for(User user : testUsers) {
             Map<Product, Integer> items = Map.of(testProduct, 1);
             Order order = new Order(user, items);
             orderService.saveAndGet(order);
-            orderPayRequest.add(new OrderDto.OrderPayRequest(order.getId(), user.getId()));
+            orderPayRequest.add(new OrderDto.OrderPayRequest(user.getId()));
         }
 
 
@@ -81,7 +94,7 @@ public class OrderControllerConcurrencyTest {
         for (OrderDto.OrderPayRequest order : orderPayRequest) {
             executorService.execute(() -> {
                 try{
-                    MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/api/orders/payments")
+                    mockMvc.perform(MockMvcRequestBuilders.post("/api/orders/payments")
                                     .contentType(MediaType.APPLICATION_JSON)
                                     .content(objectMapper.writeValueAsString(order)))
                             .andReturn();
