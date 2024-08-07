@@ -5,6 +5,7 @@ import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderInfo;
 import com.ecommerce.domain.order.service.OrderCommandService;
+import com.ecommerce.domain.order.service.OrderQueryService;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.order.service.external.DummyPlatform;
 import com.ecommerce.domain.user.service.UserService;
@@ -27,13 +28,15 @@ public class PaymentUseCase {
     private final DummyPlatform dummyPlatform;
     private final UserService userService;
     private final QuantumLockManager quantumLockManager;
+    private final OrderQueryService orderQueryService;
 
-    public PaymentUseCase(OrderCommandService orderCommandService, ProductService productService, DummyPlatform dummyPlatformUseCase, UserService userService, QuantumLockManager quantumLockManager) {
+    public PaymentUseCase(OrderCommandService orderCommandService, ProductService productService, DummyPlatform dummyPlatformUseCase, UserService userService, QuantumLockManager quantumLockManager, OrderQueryService orderQueryService) {
         this.orderCommandService = orderCommandService;
         this.productService = productService;
         this.dummyPlatform = dummyPlatformUseCase;
         this.userService = userService;
         this.quantumLockManager = quantumLockManager;
+        this.orderQueryService = orderQueryService;
     }
 
     public OrderInfo.Detail payOrder(OrderCommand.Payment command) {
@@ -42,8 +45,9 @@ public class PaymentUseCase {
                     ORDER_LOCK_PREFIX + command.orderId(),
                     ORDER_LOCK_TIMEOUT,
                     () -> {
-                        Order execute = command.execute(orderCommandService, dummyPlatform);
-                        return OrderInfo.Detail.from(execute);
+                        Order execute = command.execute(orderQueryService, dummyPlatform);
+                        Order order = orderCommandService.saveOrder(execute);
+                        return OrderInfo.Detail.from(order);
                     });
         } catch (TimeoutException e) {
             throw new RuntimeException("주문 결제 중 락 획득 시간 초과");
@@ -55,7 +59,8 @@ public class PaymentUseCase {
                     ORDER_LOCK_PREFIX + command.userId(), ORDER_LOCK_TIMEOUT,
                     () -> {
                         Order execute = command.execute(userService, productService);
-                        return OrderInfo.Summary.from(execute);
+                        Order order = orderCommandService.saveOrder(execute);
+                        return OrderInfo.Summary.from(order);
                     });
         } catch (TimeoutException e) {
             throw new RuntimeException("주문 생성 중 락 획득 시간 초과");
@@ -67,8 +72,9 @@ public class PaymentUseCase {
             return quantumLockManager.executeWithLock(
                     ORDER_LOCK_PREFIX + command.orderId(), ORDER_LOCK_TIMEOUT,
                     () -> {
-                        Order execute = command.execute(orderCommandService, dummyPlatform);
-                        return OrderInfo.Detail.from(execute);
+                        Order execute = command.execute(orderQueryService, dummyPlatform);
+                        Order order = orderCommandService.saveOrder(execute);
+                        return OrderInfo.Detail.from(order);
                     });
         } catch (TimeoutException e) {
             throw new RuntimeException("주문 취소 중 락 획득 시간 초과");

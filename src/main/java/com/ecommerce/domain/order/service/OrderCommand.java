@@ -27,7 +27,7 @@ public class OrderCommand {
     }
     public record Payment( long orderId) {
         public Order execute(OrderQueryService orderQueryService, DummyPlatform dummyPlatform) {
-            return orderCommandService.getOrder(orderId)
+            return orderQueryService.getOrder(orderId)
                     .deductStock()
                     .deductPoint()
                     .finish()

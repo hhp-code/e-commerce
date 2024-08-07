@@ -61,7 +61,7 @@ class OrderCommandServiceTest {
         testProduct = productService.saveAndGet(product);
         Map<Product,Integer> orderItem = Map.of(testProduct, 1);
         Order order = new Order(testUser, orderItem);
-        testOrder = orderCommandService.saveAndGet(order);
+        testOrder = orderCommandService.saveOrder(order);
     }
 
     @Test

@@ -82,12 +82,13 @@ class PaymentUseCaseConcurrencyTest {
             User user = userService.saveUser(new User("testUser" + i, BigDecimal.valueOf(20)));
             testUsers.add(user);
             Map<Product, Integer> orderItem = Map.of(testProduct, 1);
-            testOrders.add(orderCommandService.saveAndGet(new Order(user, orderItem)));
+            testOrders.add(orderCommandService.saveOrder(new Order(user, orderItem)));
         }
 
         when(dummyPlatform.send(any(Order.class))).thenReturn(true);
 
-        paymentUseCase = new PaymentUseCase(orderCommandService, productService, dummyPlatform, userService, quantumLockManager);
+        paymentUseCase = new PaymentUseCase(orderCommandService,
+                productService, dummyPlatform, userService, quantumLockManager, orderQueryService);
         for(Order order : testOrders) {
             OrderCommand.Create orderCreate = new OrderCommand.Create(order.getId(), Map.of(testProduct.getId(), 1));
             paymentUseCase.createOrder(orderCreate);

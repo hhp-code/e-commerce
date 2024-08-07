@@ -195,7 +195,7 @@ public class Order {
     }
 
     public Order saveAndGet(OrderCommandService orderCommandService) {
-        return orderCommandService.saveAndGet(this);
+        return orderCommandService.saveOrder(this);
     }
 
     public Order chargeStock() {

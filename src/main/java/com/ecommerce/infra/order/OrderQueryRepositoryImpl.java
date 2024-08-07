@@ -3,24 +3,17 @@ package com.ecommerce.infra.order;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.OrderStatus;
 import com.ecommerce.domain.order.QOrder;
-import com.ecommerce.domain.order.service.repository.OrderRepository;
-import com.querydsl.core.types.dsl.BooleanExpression;
+import com.ecommerce.domain.order.service.repository.OrderQueryRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
-public class OrderRepositoryImpl implements OrderRepository {
-
-    private final OrderJPARepository orderJPARepository;
+public class OrderQueryRepositoryImpl implements OrderQueryRepository {
     private final JPAQueryFactory queryFactory;
     private final QOrder order = QOrder.order;
-
-    public OrderRepositoryImpl(OrderJPARepository orderJPARepository, JPAQueryFactory queryFactory) {
-        this.orderJPARepository = orderJPARepository;
+    public OrderQueryRepositoryImpl(JPAQueryFactory queryFactory) {
         this.queryFactory = queryFactory;
     }
 
@@ -43,20 +36,6 @@ public class OrderRepositoryImpl implements OrderRepository {
                 .fetch();
     }
 
-    @Override
-    public Optional<Order> saveAndGet(Order order) {
-        return Optional.of(orderJPARepository.save(order));
-    }
-
-    @Override
-    public Optional<Order> findByUserIdAndStatus(Long id, OrderStatus orderStatus) {
-        return Optional.ofNullable(queryFactory
-                .selectFrom(order)
-                .leftJoin(order.user).fetchJoin()
-                .where(order.user.id.eq(id)
-                        .and(order.orderStatus.eq(orderStatus)))
-                .fetchOne());
-    }
 
     @Override
     public List<Order> getFinishedOrderWithDays(int durationDays) {
@@ -69,9 +48,5 @@ public class OrderRepositoryImpl implements OrderRepository {
                 .where(order.orderStatus.eq(OrderStatus.ORDERED)
                         .and(order.orderDate.between(startDate, endDate)))
                 .fetch();
-    }
-
-    private BooleanExpression userIdEq(Long userId) {
-        return userId != null ? order.user.id.eq(userId) : null;
     }
 }
