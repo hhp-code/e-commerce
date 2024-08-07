@@ -3,6 +3,7 @@ package com.ecommerce.application.usecase;
 import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
+import com.ecommerce.domain.order.service.OrderInfo;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.order.service.external.DummyPlatform;
@@ -35,55 +36,42 @@ public class PaymentUseCase {
         this.quantumLockManager = quantumLockManager;
     }
 
-    public Order payOrder(OrderCommand.Payment orderPay) {
+    public OrderInfo.Detail payOrder(OrderCommand.Payment command) {
         try {
             return quantumLockManager.executeWithLock(
-                    ORDER_LOCK_PREFIX + orderPay.orderId(),
+                    ORDER_LOCK_PREFIX + command.orderId(),
                     ORDER_LOCK_TIMEOUT,
-                    () -> payOrderInternal(orderPay));
+                    () -> {
+                        Order execute = command.execute(orderService, dummyPlatform);
+                        return OrderInfo.Detail.from(execute);
+                    });
         } catch (TimeoutException e) {
             throw new RuntimeException("주문 결제 중 락 획득 시간 초과");
         }
-
-
     }
-    public Order createOrder(OrderCommand.Create command) {
+    public OrderInfo.Summary createOrder(OrderCommand.Create command) {
         try{
             return quantumLockManager.executeWithLock(
                     ORDER_LOCK_PREFIX + command.userId(), ORDER_LOCK_TIMEOUT,
-                    () -> createOrderInternal(command));
+                    () -> {
+                        Order execute = command.execute(userService, productService);
+                        return OrderInfo.Summary.from(execute);
+                    });
         } catch (TimeoutException e) {
             throw new RuntimeException("주문 생성 중 락 획득 시간 초과");
         }
     }
 
-    private Order createOrderInternal(OrderCommand.Create command) {
-        return new Order().putUser(userService,command.userId())
-                .addItems(productService, command.items())
-                .saveAndGet(orderService);
-    }
-
-    private Order payOrderInternal(OrderCommand.Payment orderPay) {
-        try {
-            return orderService.getOrder(orderPay.orderId())
-                    .deductStock()
-                    .deductPoint()
-                    .finish()
-                    .send(dummyPlatform)
-                    .saveAndGet(orderService);
-        } catch (Exception e) {
-            cancelOrder(new OrderCommand.Cancel(orderPay.orderId()));
-            throw new RuntimeException("주문 결제 중 오류 발생", e);
+    public OrderInfo.Detail cancelOrder(OrderCommand.Cancel command) {
+        try{
+            return quantumLockManager.executeWithLock(
+                    ORDER_LOCK_PREFIX + command.orderId(), ORDER_LOCK_TIMEOUT,
+                    () -> {
+                        Order execute = command.execute(orderService, dummyPlatform);
+                        return OrderInfo.Detail.from(execute);
+                    });
+        } catch (TimeoutException e) {
+            throw new RuntimeException("주문 취소 중 락 획득 시간 초과");
         }
-    }
-
-
-    public Order cancelOrder(OrderCommand.Cancel orderCancel) {
-        return orderService.getOrder(orderCancel.orderId())
-                .chargeStock()
-                .chargePoint()
-                .cancel()
-                .send(dummyPlatform)
-                .saveAndGet(orderService);
     }
 }

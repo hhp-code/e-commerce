@@ -5,6 +5,8 @@ import com.ecommerce.domain.coupon.service.CouponCommand;
 import com.ecommerce.domain.coupon.service.CouponService;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.order.Order;
+import com.ecommerce.domain.order.service.OrderInfo;
+import com.ecommerce.domain.order.service.OrderQuery;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.user.service.UserCouponService;
@@ -34,10 +36,12 @@ public class CouponUseCase {
     public User useCoupon(Long userId, Long couponId) {
         User user = userService.getUser(userId);
         Coupon userCoupon = userCouponService.getUserCoupon(userId, couponId);
-        Order order = orderService.getOrderByUserId(userId);
-        order.applyCoupon(userCoupon);
-        orderService.saveAndGet(order);
-        return userCouponService.updateUserCoupon(user,userCoupon);
+        OrderQuery.GetOrder getOrderQuery = new OrderQuery.GetOrder(userId);
+        OrderInfo.Detail order = orderService.getOrder(getOrderQuery);
+//        order.applyCoupon(userCoupon);
+//        orderService.saveAndGet(order);
+//        return userCouponService.updateUserCoupon(user,userCoupon);
+        return null;
     }
 
     @Transactional

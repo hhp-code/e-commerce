@@ -97,12 +97,12 @@ class OrderControllerIntegrationTest {
                 .content(objectMapper.writeValueAsString(orderCreateRequest)));
         MvcResult authorization = perform.andReturn();
         String contentAsString = authorization.getResponse().getContentAsString();
-        OrderDto.OrderResponse orderResponse = objectMapper.readValue(contentAsString, OrderDto.OrderResponse.class);
+        OrderDto.OrderDetailResponse orderDetailResponse = objectMapper.readValue(contentAsString, OrderDto.OrderDetailResponse.class);
 
-        mockMvc.perform(get("/api/orders/{orderId}", orderResponse.id())
+        mockMvc.perform(get("/api/orders/{orderId}", orderDetailResponse.id())
                         .contentType("application/json"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(orderResponse.id()))
+                .andExpect(jsonPath("$.id").value(orderDetailResponse.id()))
                 .andExpect(jsonPath("$.status").value("PREPARED"));
     }
 

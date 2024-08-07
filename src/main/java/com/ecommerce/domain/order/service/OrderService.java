@@ -2,7 +2,6 @@ package com.ecommerce.domain.order.service;
 
 import com.ecommerce.interfaces.exception.domain.OrderException;
 import com.ecommerce.domain.order.Order;
-import com.ecommerce.domain.order.OrderStatus;
 import com.ecommerce.domain.order.service.repository.OrderRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -10,6 +9,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -28,15 +28,15 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<Order> getOrders(OrderCommand.Search command) {
-        long id = command.orderId();
-        List<Order> orders = orderRepository.getOrders(id);
+    public List<OrderInfo.Detail> getOrders(OrderQuery.GetUserOrders query) {
+        List<Order> orders = orderRepository.getOrders(query.userId());
         orders.size();
-        return orders;
+        List<OrderInfo.Detail> orderDetails = new ArrayList<>();
+        for (Order order : orders) {
+            orderDetails.add(OrderInfo.Detail.from(order));
+        }
+        return orderDetails;
     }
-
-
-
 
 
     @Transactional
@@ -47,11 +47,6 @@ public class OrderService {
                 .orElseThrow(() -> new OrderException.ServiceException("주문 저장에 실패하였습니다."));
     }
 
-    @Transactional
-    public Order getOrderByUserId(Long userId) {
-        return orderRepository.findByUserIdAndStatus(userId, OrderStatus.PREPARED)
-                .orElseThrow(() -> new OrderException.ServiceException("주문이 존재하지 않습니다."));
-    }
 
     @Transactional
     @Cacheable(value = "finishedOrders", key = "#durationDays", unless = "#result.isEmpty()")

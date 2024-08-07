@@ -29,18 +29,20 @@ public class OrderDto {
         }
     }
 
-    public record OrderResponse(Long id,
-                                LocalDateTime orderDate,
-                                BigDecimal regularPrice,
-                                BigDecimal salePrice,
-                                BigDecimal sellingPrice,
-                                String status,
-                                Boolean isDeleted,
-                                LocalDateTime deletedAt,
-                                Map<Long,Integer> items) {
+    public record OrderDetailResponse(Long id,
+                                      Long userId,
+                                      String status,
+                                      BigDecimal totalAmount,
+                                      LocalDateTime orderDate,
+                                      Map<Long,Integer> items) {
+    }
+    public record OrderSummaryResponse(Long id,
+                                       Long userId,
+                                       String status,
+                                       BigDecimal totalAmount) {
     }
 
-    public record OrderListResponse(List<OrderResponse> orders) {
+    public record OrderListResponse(List<OrderDetailResponse> orders) {
     }
 
 

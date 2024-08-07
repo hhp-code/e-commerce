@@ -1,5 +1,6 @@
 package com.ecommerce.api.controller.domain.order;
 
+import com.ecommerce.domain.order.service.OrderInfo;
 import com.ecommerce.interfaces.controller.domain.order.OrderController;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderMapper;
@@ -76,7 +77,9 @@ class OrderControllerTest {
     @DisplayName("주문 생성 - 성공")
     void createOrder_Success() throws Exception {
 
-        when(paymentUseCase.createOrder(any(OrderCommand.Create.class))).thenReturn(order);
+        OrderInfo.Summary orderInfo = OrderInfo.Summary.from(order);
+        when(paymentUseCase.createOrder(any(OrderCommand.Create.class))).thenReturn(orderInfo);
+
 
         mockMvc.perform(post(API_ORDERS)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -113,8 +116,8 @@ class OrderControllerTest {
     void payOrder_Success() throws Exception {
         OrderDto.OrderPayRequest request = new OrderDto.OrderPayRequest(ORDER_ID);
         Order order = createSampleOrder();
-
-        when(paymentUseCase.payOrder(OrderMapper.toOrderPay(request))).thenReturn(order);
+        OrderInfo.Detail orderInfo = OrderInfo.Detail.from(order);
+        when(paymentUseCase.payOrder(OrderMapper.toOrderPay(request))).thenReturn(orderInfo);
 
         mockMvc.perform(post(API_ORDERS_PAYMENTS)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -130,8 +133,9 @@ class OrderControllerTest {
     void addCartItemToOrder_Success() throws Exception {
         OrderCommand.Add request = new OrderCommand.Add(VALID_USER_ID, ORDER_ID, 1);
         Order order = createSampleOrder();
+        OrderInfo.Detail orderInfo = OrderInfo.Detail.from(order);
 
-        when(cartUseCase.addItemToOrder(request)).thenReturn(order);
+        when(cartUseCase.addItemToOrder(request)).thenReturn(orderInfo);
 
         mockMvc.perform(patch(API_ORDERS +"/{orderId}"+"/items",order.getId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -145,8 +149,9 @@ class OrderControllerTest {
     void deleteCartItemToOrder_Success() throws Exception {
         OrderCommand.Delete request = new OrderCommand.Delete(ORDER_ID,PRODUCT_ID);
         Order order = createSampleOrder();
+        OrderInfo.Detail orderInfo = OrderInfo.Detail.from(order);
 
-        when(cartUseCase.deleteItemFromOrder(request)).thenReturn(order);
+        when(cartUseCase.deleteItemFromOrder(request)).thenReturn(orderInfo);
 
         mockMvc.perform(delete(API_ORDERS +"/{orderID}"+ "/items",order.getId())
                         .contentType(MediaType.APPLICATION_JSON)

@@ -75,9 +75,9 @@ class OrderServiceTest {
     @Test
     @DisplayName("주문 검색 조건으로 주문 목록을 조회한다")
     void getOrders_ShouldReturnOrderList_WhenSearchConditionProvided() {
-        OrderCommand.Search searchCommand = new OrderCommand.Search(testOrder.getId());
+        OrderQuery.GetUserOrders searchCommand = new OrderQuery.GetUserOrders(testUser.getId());
 
-        List<Order> result = orderService.getOrders(searchCommand);
+        List<OrderInfo.Detail> result = orderService.getOrders(searchCommand);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -89,10 +89,10 @@ class OrderServiceTest {
     void createOrder_ShouldCreateNewOrder_WhenValidCommandProvided() {
         OrderCommand.Create createCommand = new OrderCommand.Create(testUser.getId(), Map.of(testProduct.getId(), 1));
 
-        Order result = paymentUseCase.createOrder(createCommand);
+        OrderInfo.Summary result = paymentUseCase.createOrder(createCommand);
 
         assertNotNull(result);
-        assertEquals(1, result.getOrderItems().size());
+        assertEquals("PREPARED", result.status());
     }
 
 

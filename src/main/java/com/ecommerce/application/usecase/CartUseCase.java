@@ -2,6 +2,7 @@ package com.ecommerce.application.usecase;
 
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
+import com.ecommerce.domain.order.service.OrderInfo;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.service.ProductService;
 import org.springframework.stereotype.Component;
@@ -16,15 +17,13 @@ public class CartUseCase {
         this.productService = productService;
     }
 
-    public Order addItemToOrder(OrderCommand.Add command) {
-        return orderService.getOrder(command.orderId())
-                .addItem(productService, command.productId(), command.quantity())
-                .saveAndGet(orderService);
+    public OrderInfo.Detail addItemToOrder(OrderCommand.Add command) {
+        Order execute = command.execute(orderService, productService);
+        return OrderInfo.Detail.from(orderService.saveAndGet(execute));
     }
 
-    public Order deleteItemFromOrder(OrderCommand.Delete orderDeleteItem) {
-        return  orderService.getOrder(orderDeleteItem.orderId())
-                .deleteItem(productService, orderDeleteItem.productId())
-                .saveAndGet(orderService);
+    public OrderInfo.Detail deleteItemFromOrder(OrderCommand.Delete command) {
+        Order execute = command.execute(orderService, productService);
+        return OrderInfo.Detail.from(orderService.saveAndGet(execute));
     }
 }

@@ -2,50 +2,30 @@ package com.ecommerce.interfaces.controller.domain.order.dto;
 
 
 import com.ecommerce.domain.order.service.OrderCommand;
-import com.ecommerce.domain.order.Order;
-import com.ecommerce.domain.product.Product;
+import com.ecommerce.domain.order.service.OrderInfo;
+import com.ecommerce.domain.order.service.OrderQuery;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class OrderMapper {
-    public static OrderDto.OrderListResponse toOrderListResponse(List<Order> orders) {
-        return new OrderDto.OrderListResponse(orders.stream().map(OrderMapper::convertToOrderResponse).collect(Collectors.toList()));
+    public static OrderDto.OrderListResponse toOrderListResponse(List<OrderInfo.Detail> info) {
+        return new OrderDto.OrderListResponse(info.stream().map(OrderMapper::toOrderDetailResponse).collect(Collectors.toList()));
     }
 
-    private static OrderDto.OrderResponse convertToOrderResponse(Order order) {
-        return convertOrderResponse(order);
-    }
 
     public static OrderCommand.Create toOrder(OrderDto.OrderCreateRequest request) {
-
         return new OrderCommand.Create(request.customerId(),request.items());
     }
 
 
-    public static OrderDto.OrderResponse toOrderResponse(Order order) {
-        return convertOrderResponse(order);
-
+    public static OrderDto.OrderDetailResponse toOrderDetailResponse(OrderInfo.Detail info) {
+        return new OrderDto.OrderDetailResponse(info.orderId(),
+                        info.userId(), info.status(), info.totalAmount(), info.orderDate(),
+                info.items().stream().collect(Collectors.toMap(OrderInfo.OrderItemInfo::productId, OrderInfo.OrderItemInfo::quantity)));
     }
-
-    private static OrderDto.OrderResponse convertOrderResponse(Order order) {
-        Map<Product, Integer> orderItems = order.getOrderItems();
-        Map<Long,Integer> items = orderItems.entrySet().stream()
-                .collect(Collectors.toMap(entry -> entry.getKey().getId(), Map.Entry::getValue));
-        return new OrderDto.OrderResponse(order.getId(),
-                order.getOrderDate(),
-                order.getRegularPrice(),
-                order.getSalePrice(),
-                order.getSellingPrice(),
-                order.getOrderStatus(),
-                order.isDeleted(),
-                order.getDeletedAt(),
-                items);
-    }
-
-    public static OrderCommand.Search toSearch(OrderDto.OrderListRequest request) {
-        return new OrderCommand.Search(request.customerId());
+    public static OrderDto.OrderSummaryResponse toOrderSummaryResponse(OrderInfo.Summary info) {
+        return new OrderDto.OrderSummaryResponse(info.orderId(),info.userId(),info.status(),info.totalAmount());
     }
 
     public static OrderCommand.Add toOrderAddItem(Long orderId, OrderDto.OrderAddItemRequest request) {
@@ -61,5 +41,13 @@ public class OrderMapper {
 
     public static OrderCommand.Delete toOrderDeleteItem(Long orderId, OrderDto.OrderDeleteItemRequest request) {
         return new OrderCommand.Delete(orderId,request.productId());
+    }
+
+    public static OrderQuery.GetUserOrders toGetUserOrders(OrderDto.OrderListRequest request) {
+        return new OrderQuery.GetUserOrders(request.customerId());
+    }
+
+    public static OrderQuery.GetOrder toGetOrder(Long orderId) {
+        return new OrderQuery.GetOrder(orderId);
     }
 }

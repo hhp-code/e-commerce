@@ -61,15 +61,15 @@ class OrderServiceUnitTest {
     @Test
     @DisplayName("검색 조건에 맞는 주문 목록 반환")
     void getOrders_WithSearchCondition_ShouldReturnOrderList() {
-        OrderCommand.Search searchCommand = new OrderCommand.Search(VALID_USER_ID);
+        OrderQuery.GetUserOrders searchCommand = new OrderQuery.GetUserOrders(VALID_USER_ID);
         List<Order> mockOrders = Arrays.asList(createMockOrder(), createMockOrder());
-        when(orderRepository.getOrders(searchCommand.orderId())).thenReturn(mockOrders);
+        when(orderRepository.getOrders(searchCommand.userId())).thenReturn(mockOrders);
 
-        List<Order> result = orderService.getOrders(searchCommand);
+        List<OrderInfo.Detail> result = orderService.getOrders(searchCommand);
 
         assertNotNull(result);
         assertEquals(2, result.size());
-        verify(orderRepository).getOrders(searchCommand.orderId());
+        verify(orderRepository).getOrders(VALID_USER_ID);
     }
 
 
