@@ -80,7 +80,7 @@ class OrderControllerTest {
     void createOrder_Success() throws Exception {
 
         OrderInfo.Summary orderInfo = OrderInfo.Summary.from(order);
-        when(paymentUseCase.createOrder(any(OrderCommand.Create.class))).thenReturn(orderInfo);
+        when(paymentUseCase.orderCommandService.createOrder(any(OrderCommand.Create.class), paymentUseCase)).thenReturn(orderInfo);
 
 
         mockMvc.perform(post(API_ORDERS)

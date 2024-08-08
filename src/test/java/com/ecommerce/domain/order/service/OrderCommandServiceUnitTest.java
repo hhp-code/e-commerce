@@ -85,7 +85,7 @@ class OrderCommandServiceUnitTest {
     void createOrder_Failure_ShouldThrowException() {
         OrderCommand.Create createCommand = new OrderCommand.Create(VALID_USER_ID.intValue(), Map.of());
 
-        assertThrows(RuntimeException.class, () -> paymentUseCase.createOrder(createCommand));
+        assertThrows(RuntimeException.class, () -> paymentUseCase.orderCommandService.createOrder(createCommand, paymentUseCase));
     }
 
     private Order createMockOrder() {

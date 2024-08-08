@@ -1,4 +1,4 @@
-package com.ecommerce.application.usecase;
+package com.ecommerce.application;
 
 import com.ecommerce.interfaces.exception.domain.UserException;
 import com.ecommerce.config.QuantumLockManager;
@@ -11,13 +11,13 @@ import java.time.Duration;
 import java.util.concurrent.TimeoutException;
 
 @Component
-public class UserPointUseCase {
+public class UserFacade {
 
     private final QuantumLockManager quantumLockManager;
     private final UserService userService;
 
 
-    public UserPointUseCase(QuantumLockManager quantumLockManager, UserService userService) {
+    public UserFacade(QuantumLockManager quantumLockManager, UserService userService) {
         this.quantumLockManager = quantumLockManager;
         this.userService = userService;
     }

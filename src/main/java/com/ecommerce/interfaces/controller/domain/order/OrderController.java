@@ -1,7 +1,6 @@
 package com.ecommerce.interfaces.controller.domain.order;
 
 import com.ecommerce.application.OrderFacade;
-import com.ecommerce.domain.order.service.OrderCommandService;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderMapper;
 import com.ecommerce.application.usecase.CartUseCase;
@@ -18,13 +17,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api")
 public class OrderController {
-    private final OrderCommandService orderCommandService;
     private final OrderFacade orderFacade;
     private final CartUseCase cartUseCase;
     private final PaymentUseCase paymentUseCase;
 
-    public OrderController(OrderCommandService orderCommandService, OrderFacade orderFacade, CartUseCase cartUseCase, PaymentUseCase paymentUseCase) {
-        this.orderCommandService = orderCommandService;
+    public OrderController(OrderFacade orderFacade, CartUseCase cartUseCase, PaymentUseCase paymentUseCase) {
         this.orderFacade = orderFacade;
         this.cartUseCase = cartUseCase;
         this.paymentUseCase = paymentUseCase;
@@ -42,7 +39,7 @@ public class OrderController {
     )
     public OrderDto.OrderSummaryResponse createOrder(@RequestBody OrderDto.OrderCreateRequest request) {
         request.validate();
-        return OrderMapper.toOrderSummaryResponse(paymentUseCase.createOrder(OrderMapper.toOrder(request)));
+        return OrderMapper.toOrderSummaryResponse(orderFacade.createOrder(OrderMapper.toOrder(request)));
     }
 
     @GetMapping("/orders/{orderId}")

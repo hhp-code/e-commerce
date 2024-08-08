@@ -1,7 +1,6 @@
 package com.ecommerce.domain.order.service;
 
 import com.ecommerce.domain.order.Order;
-import com.ecommerce.domain.order.service.external.DummyPlatform;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.service.UserService;
 import lombok.experimental.UtilityClass;
@@ -17,35 +16,32 @@ public class OrderCommand {
                     .addItems(productService, items);
         }
     }
-    public record Search(long orderId) {
-    }
+
     public record Add(long orderId, long productId, int quantity) {
-        public Order execute(OrderQueryService orderQueryService, ProductService productService) {
-            return orderQueryService.getOrder(orderId)
+        public Order execute(Order order, ProductService productService) {
+            return order
                     .addItem(productService, productId, quantity);
         }
     }
     public record Payment( long orderId) {
-        public Order execute(OrderQueryService orderQueryService, DummyPlatform dummyPlatform) {
-            return orderQueryService.getOrder(orderId)
+        public Order execute(Order order) {
+            return order
                     .deductStock()
                     .deductPoint()
-                    .finish()
-                    .send(dummyPlatform);
+                    .finish();
         }
     }
     public record Cancel(long orderId) {
-        public Order execute(OrderQueryService orderQueryService, DummyPlatform dummyPlatform) {
-            return orderQueryService.getOrder(orderId)
+        public Order execute(Order order) {
+            return order
                     .chargeStock()
                     .chargePoint()
-                    .cancel()
-                    .send(dummyPlatform);
+                    .cancel();
         }
     }
     public record Delete(long orderId, long productId) {
-        public Order execute(OrderQueryService orderQueryService, ProductService productService) {
-            return orderQueryService.getOrder(orderId)
+        public Order execute(Order order, ProductService productService) {
+            return order
                     .deleteItem(productService, productId);
         }
     }

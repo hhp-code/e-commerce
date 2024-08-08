@@ -21,12 +21,14 @@ public class CartUseCase {
     }
 
     public OrderInfo.Detail addItemToOrder(OrderCommand.Add command) {
-        Order execute = command.execute(orderQueryService, productService);
+        Order queryOrder = orderQueryService.getOrder(command.orderId());
+        Order execute = command.execute(queryOrder, productService);
         return OrderInfo.Detail.from(orderCommandService.saveOrder(execute));
     }
 
     public OrderInfo.Detail deleteItemFromOrder(OrderCommand.Delete command) {
-        Order execute = command.execute(orderQueryService, productService);
+        Order queryOrder = orderQueryService.getOrder(command.orderId());
+        Order execute = command.execute(queryOrder, productService);
         return OrderInfo.Detail.from(orderCommandService.saveOrder(execute));
     }
 }

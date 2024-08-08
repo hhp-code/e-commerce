@@ -1,14 +1,13 @@
 package com.ecommerce.application.usecase;
 
+import com.ecommerce.domain.order.event.PayAfterEvent;
+import com.ecommerce.infra.event.PaymentEventPublisher;
 import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderInfo;
 import com.ecommerce.domain.order.service.OrderCommandService;
 import com.ecommerce.domain.order.service.OrderQueryService;
-import com.ecommerce.domain.product.service.ProductService;
-import com.ecommerce.domain.order.service.external.DummyPlatform;
-import com.ecommerce.domain.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -23,20 +22,16 @@ public class PaymentUseCase {
     private static final Duration ORDER_LOCK_TIMEOUT = Duration.ofSeconds(5);
 
 
-    private final OrderCommandService orderCommandService;
-    private final ProductService productService;
-    private final DummyPlatform dummyPlatform;
-    private final UserService userService;
+    public final OrderCommandService orderCommandService;
     private final QuantumLockManager quantumLockManager;
     private final OrderQueryService orderQueryService;
+    private final PaymentEventPublisher eventPublisher;
 
-    public PaymentUseCase(OrderCommandService orderCommandService, ProductService productService, DummyPlatform dummyPlatformUseCase, UserService userService, QuantumLockManager quantumLockManager, OrderQueryService orderQueryService) {
+    public PaymentUseCase(OrderCommandService orderCommandService, QuantumLockManager quantumLockManager, OrderQueryService orderQueryService, PaymentEventPublisher eventPublisher) {
         this.orderCommandService = orderCommandService;
-        this.productService = productService;
-        this.dummyPlatform = dummyPlatformUseCase;
-        this.userService = userService;
         this.quantumLockManager = quantumLockManager;
         this.orderQueryService = orderQueryService;
+        this.eventPublisher = eventPublisher;
     }
 
     public OrderInfo.Detail payOrder(OrderCommand.Payment command) {
@@ -45,36 +40,26 @@ public class PaymentUseCase {
                     ORDER_LOCK_PREFIX + command.orderId(),
                     ORDER_LOCK_TIMEOUT,
                     () -> {
-                        Order execute = command.execute(orderQueryService, dummyPlatform);
-                        Order order = orderCommandService.saveOrder(execute);
-                        return OrderInfo.Detail.from(order);
+                        Order queryOrder = orderQueryService.getOrder(command.orderId());
+                        Order execute = command.execute(queryOrder);
+                        Order commandOrder = orderCommandService.saveOrder(execute);
+                        eventPublisher.publish(new PayAfterEvent(commandOrder.getId()));
+                        return OrderInfo.Detail.from(commandOrder);
                     });
         } catch (TimeoutException e) {
             throw new RuntimeException("주문 결제 중 락 획득 시간 초과");
         }
     }
-    public OrderInfo.Summary createOrder(OrderCommand.Create command) {
-        try{
-            return quantumLockManager.executeWithLock(
-                    ORDER_LOCK_PREFIX + command.userId(), ORDER_LOCK_TIMEOUT,
-                    () -> {
-                        Order execute = command.execute(userService, productService);
-                        Order order = orderCommandService.saveOrder(execute);
-                        return OrderInfo.Summary.from(order);
-                    });
-        } catch (TimeoutException e) {
-            throw new RuntimeException("주문 생성 중 락 획득 시간 초과");
-        }
-    }
 
     public OrderInfo.Detail cancelOrder(OrderCommand.Cancel command) {
-        try{
+        try {
             return quantumLockManager.executeWithLock(
                     ORDER_LOCK_PREFIX + command.orderId(), ORDER_LOCK_TIMEOUT,
                     () -> {
-                        Order execute = command.execute(orderQueryService, dummyPlatform);
-                        Order order = orderCommandService.saveOrder(execute);
-                        return OrderInfo.Detail.from(order);
+                        Order queryOrder = orderQueryService.getOrder(command.orderId());
+                        Order execute = command.execute(queryOrder);
+                        Order commandOrder = orderCommandService.saveOrder(execute);
+                        return OrderInfo.Detail.from(commandOrder);
                     });
         } catch (TimeoutException e) {
             throw new RuntimeException("주문 취소 중 락 획득 시간 초과");

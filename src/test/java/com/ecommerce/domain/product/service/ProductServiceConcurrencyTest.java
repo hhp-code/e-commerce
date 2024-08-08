@@ -1,6 +1,7 @@
 package com.ecommerce.domain.product.service;
 
 import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.application.ProductFacade;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.user.service.UserService;
 import org.junit.jupiter.api.AfterEach;
@@ -29,6 +30,8 @@ class ProductServiceConcurrencyTest {
 
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
+    @Autowired
+    private ProductFacade productFacade;
 
     @AfterEach
     void tearDown() {
@@ -56,7 +59,7 @@ class ProductServiceConcurrencyTest {
 
         List<CompletableFuture<Void>> futures = IntStream.range(0, taskCount)
                 .mapToObj(i -> CompletableFuture.runAsync(() ->
-                        productService.deductStock(testProduct, deductAmount)))
+                        productFacade.deductStock(testProduct, deductAmount)))
                 .toList();
 
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
@@ -72,7 +75,7 @@ class ProductServiceConcurrencyTest {
 
         List<CompletableFuture<Void>> futures = IntStream.range(0, taskCount)
                 .mapToObj(i -> CompletableFuture.runAsync(() ->
-                        productService.chargeStock(testProduct, quantity)))
+                        productFacade.chargeStock(testProduct, quantity)))
                 .toList();
 
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();

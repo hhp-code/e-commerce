@@ -2,14 +2,14 @@ package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.DatabaseCleanUp;
 import com.ecommerce.application.usecase.PaymentUseCase;
-import com.ecommerce.application.usecase.UserPointUseCase;
+import com.ecommerce.application.UserFacade;
 import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.OrderStatus;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderCommandService;
 import com.ecommerce.domain.order.service.OrderQueryService;
-import com.ecommerce.domain.order.service.external.DummyPlatform;
+import com.ecommerce.application.external.DummyPlatform;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
@@ -46,7 +46,7 @@ class PaymentUseCaseConcurrencyTest {
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
     @Autowired
-    private UserPointUseCase userPointUseCase;
+    private UserFacade userFacade;
     @Autowired
     private OrderQueryService orderQueryService;
 
@@ -88,10 +88,10 @@ class PaymentUseCaseConcurrencyTest {
         when(dummyPlatform.send(any(Order.class))).thenReturn(true);
 
         paymentUseCase = new PaymentUseCase(orderCommandService,
-                productService, dummyPlatform, userService, quantumLockManager, orderQueryService);
+                quantumLockManager, orderQueryService);
         for(Order order : testOrders) {
             OrderCommand.Create orderCreate = new OrderCommand.Create(order.getId(), Map.of(testProduct.getId(), 1));
-            paymentUseCase.createOrder(orderCreate);
+            paymentUseCase.orderCommandService.createOrder(orderCreate, paymentUseCase);
         }
     }
 

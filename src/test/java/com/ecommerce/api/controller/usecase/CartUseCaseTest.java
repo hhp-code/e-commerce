@@ -3,7 +3,6 @@ package com.ecommerce.api.controller.usecase;
 import com.ecommerce.DatabaseCleanUp;
 import com.ecommerce.application.usecase.CartUseCase;
 import com.ecommerce.application.usecase.PaymentUseCase;
-import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderInfo;
 import com.ecommerce.domain.product.Product;
@@ -56,7 +55,7 @@ class CartUseCaseTest {
         //given
         OrderCommand.Add addCommand = new OrderCommand.Add(testUser.getId(), testProduct.getId(), 1);
         OrderCommand.Create createCommand = new OrderCommand.Create(testUser.getId(), Map.of(testProduct.getId(), 1));
-        paymentUseCase.createOrder(createCommand);
+        paymentUseCase.orderCommandService.createOrder(createCommand, paymentUseCase);
 
         //when
         OrderInfo.Detail result = cartUseCase.addItemToOrder(addCommand);

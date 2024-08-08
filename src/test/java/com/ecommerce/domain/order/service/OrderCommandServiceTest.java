@@ -91,7 +91,7 @@ class OrderCommandServiceTest {
     void createOrder_ShouldCreateNewOrder_WhenValidCommandProvided() {
         OrderCommand.Create createCommand = new OrderCommand.Create(testUser.getId(), Map.of(testProduct.getId(), 1));
 
-        OrderInfo.Summary result = paymentUseCase.createOrder(createCommand);
+        OrderInfo.Summary result = paymentUseCase.orderCommandService.createOrder(createCommand, paymentUseCase);
 
         assertNotNull(result);
         assertEquals("PREPARED", result.status());

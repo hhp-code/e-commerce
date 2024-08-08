@@ -46,7 +46,7 @@ public class OrderCacheTest {
         Long productId = 1L;
         Map<Long, Integer> items = Map.of(productId, 1);
         OrderCommand.Create createOrderCommand = new OrderCommand.Create(1L, items);
-        paymentUseCase.createOrder(createOrderCommand);
+        paymentUseCase.orderCommandService.createOrder(createOrderCommand, paymentUseCase);
     }
 
     @Test

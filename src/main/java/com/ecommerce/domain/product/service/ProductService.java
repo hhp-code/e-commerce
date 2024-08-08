@@ -2,17 +2,16 @@ package com.ecommerce.domain.product.service;
 
 
 import com.ecommerce.interfaces.exception.domain.ProductException;
-import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.product.service.repository.ProductRepository;
 import com.ecommerce.domain.product.Product;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.util.List;
 
 @Slf4j
@@ -21,11 +20,8 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
-    private final QuantumLockManager quantumLockManager;
-
-    public ProductService(ProductRepository productRepository, QuantumLockManager quantumLockManager) {
+    public ProductService(ProductRepository productRepository) {
         this.productRepository = productRepository;
-        this.quantumLockManager = quantumLockManager;
     }
 
     @Cacheable(value = "products", key = "#productId", unless = "#result == null")
@@ -48,41 +44,11 @@ public class ProductService {
     }
 
 
-    public Product deductStock(Product product, Integer quantity) {
-        String lockKey = "product:" + product.getId();
-        Duration timeout = Duration.ofSeconds(5);
-        try {
-            return quantumLockManager.executeWithLock(lockKey, timeout, () -> {
-                Product myProduct = getProduct(product.getId());
-                myProduct.deductStock(quantity);
-                return productRepository.save(myProduct).orElseThrow(
-                        () -> new ProductException.ServiceException("재고 차감에 실패했습니다.")
-                );
-            });
-        } catch (Exception e) {
-            throw new ProductException.ServiceException("재고 차감 중 오류 발생");
-        }
-    }
-
-
-    public void chargeStock(Product product, Integer quantity) {
-        String lockKey = "product:" + product.getId();
-        Duration timeout = Duration.ofSeconds(5);
-        try {
-            quantumLockManager.executeWithLock(lockKey, timeout, () -> {
-                product.chargeStock(quantity);
-                return productRepository.save(product).orElseThrow(
-                        () -> new ProductException.ServiceException("재고 증가에 실패했습니다.")
-                );
-            });
-        } catch (Exception e) {
-            throw new ProductException.ServiceException("재고 증가 중 오류 발생");
-        }
-    }
-
     @Transactional
-    @CachePut(value = "products", key = "#product.id")
-    @CacheEvict(value = {"popularProducts", "allProducts"}, allEntries = true)
+    @Caching(
+            put = {@CachePut(value = "products", key = "#product.id")},
+            evict = {@CacheEvict(value = {"popularProducts", "allProducts"}, allEntries = true)}
+    )
     public Product saveAndGet(Product product) {
         return productRepository.save(product).orElseThrow(
                 () -> new ProductException.ServiceException("상품 저장에 실패했습니다.")
