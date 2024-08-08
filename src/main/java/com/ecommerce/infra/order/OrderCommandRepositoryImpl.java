@@ -2,9 +2,10 @@ package com.ecommerce.infra.order;
 
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.repository.OrderCommandRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
-
+@Repository
 public class OrderCommandRepositoryImpl implements OrderCommandRepository {
     private final OrderJPARepository orderJPARepository;
 

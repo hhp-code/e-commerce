@@ -3,6 +3,7 @@ package com.ecommerce.domain.user.service;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.repository.UserRepository;
+import com.ecommerce.interfaces.exception.domain.UserException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -56,14 +57,14 @@ public class UserService {
 
     public User save(User user) {
         return userRepository.save(user).orElseThrow(
-                () -> new RuntimeException("사용자 정보를 찾을 수 없습니다.")
+                () -> new UserException("사용자 정보를 찾을 수 없습니다.")
         );
     }
 
     @Transactional
     public User getPoint(Long id) {
         return userRepository.getUser(id).orElseThrow(
-                () -> new RuntimeException("사용자 정보를 찾을 수 없습니다.")
+                () -> new UserException("사용자 정보를 찾을 수 없습니다.")
         );
     }
 }

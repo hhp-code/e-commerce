@@ -5,11 +5,12 @@ import com.ecommerce.domain.order.OrderStatus;
 import com.ecommerce.domain.order.QOrder;
 import com.ecommerce.domain.order.service.repository.OrderQueryRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
+@Repository
 public class OrderQueryRepositoryImpl implements OrderQueryRepository {
     private final JPAQueryFactory queryFactory;
     private final QOrder order = QOrder.order;

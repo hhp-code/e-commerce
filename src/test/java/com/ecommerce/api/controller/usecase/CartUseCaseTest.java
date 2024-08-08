@@ -5,6 +5,7 @@ import com.ecommerce.application.usecase.CartUseCase;
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
+import com.ecommerce.domain.order.service.OrderInfo;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
@@ -58,11 +59,11 @@ class CartUseCaseTest {
         paymentUseCase.createOrder(createCommand);
 
         //when
-        Order result = cartUseCase.addItemToOrder(addCommand);
+        OrderInfo.Detail result = cartUseCase.addItemToOrder(addCommand);
 
         //then
         assertNotNull(result);
-        assertEquals(1, result.getOrderItems().size());
+        assertEquals(1, result.items().size());
     }
 
     @AfterEach

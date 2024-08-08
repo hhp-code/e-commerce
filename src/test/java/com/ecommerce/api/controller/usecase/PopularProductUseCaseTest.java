@@ -6,6 +6,7 @@ import com.ecommerce.application.usecase.PopularProductUseCase;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderCommandService;
+import com.ecommerce.domain.order.service.OrderInfo;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
@@ -94,8 +95,9 @@ class PopularProductUseCaseTest {
                 orderItems.put((long)random.nextInt(productCount) + 1, random.nextInt(10)+1);
             }
             OrderCommand.Create command = new OrderCommand.Create(user.getId(), orderItems);
-            Order order = paymentUseCase.createOrder(command);
-            OrderCommand.Payment payment = new OrderCommand.Payment(order.getId());
+            OrderInfo.Summary order1 = paymentUseCase.createOrder(command);
+            long orderId = order1.orderId();
+            OrderCommand.Payment payment = new OrderCommand.Payment(orderId);
             futures.add(CompletableFuture.runAsync(() -> paymentUseCase.payOrder(payment)));
 //            paymentUseCase.payOrder(payment);
         }
