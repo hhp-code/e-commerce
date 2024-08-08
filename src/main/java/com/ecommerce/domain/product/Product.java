@@ -9,7 +9,9 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @Entity
-@Table(name = "products")
+@Table(name = "products", indexes = {
+        @Index(name = "idx_name", columnList = "name"),
+})
 public class Product {
     @Getter
     @Id
@@ -24,7 +26,7 @@ public class Product {
     private Integer stock;
     @Getter
     private LocalDateTime lastUpdated;
-    private final boolean isDeleted;
+    private boolean isDeleted;
     private LocalDateTime deletedAt;
 
 

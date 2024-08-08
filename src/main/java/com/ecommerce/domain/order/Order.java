@@ -19,7 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "orders", indexes = {
+        @Index(name = "idx_order_status", columnList = "order_status")
+})
 public class Order {
     @Getter
     @Id
