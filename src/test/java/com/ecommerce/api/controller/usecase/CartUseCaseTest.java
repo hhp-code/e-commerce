@@ -3,7 +3,7 @@ package com.ecommerce.api.controller.usecase;
 import com.ecommerce.DatabaseCleanUp;
 import com.ecommerce.application.usecase.CartUseCase;
 import com.ecommerce.application.usecase.PaymentUseCase;
-import com.ecommerce.domain.order.service.OrderCommand;
+import com.ecommerce.domain.order.command.OrderCommand;
 import com.ecommerce.domain.order.service.OrderInfo;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;

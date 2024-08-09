@@ -1,81 +1,60 @@
 package com.ecommerce.domain.order;
 
+import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 import com.ecommerce.interfaces.exception.domain.OrderException;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
-import com.ecommerce.domain.order.service.OrderCommandService;
-import com.ecommerce.application.external.DummyPlatform;
 import com.ecommerce.domain.product.Product;
-import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
-import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-@Entity
-@Table(name = "orders", indexes = {
-        @Index(name = "idx_order_status", columnList = "order_status")
-})
-public class Order {
+public class OrderWrite {
     @Getter
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Getter
     private LocalDateTime orderDate;
     @Getter
     private BigDecimal regularPrice;
-    @Getter
     private BigDecimal salePrice;
     @Getter
     private BigDecimal sellingPrice;
 
 
-    @Getter
     private boolean isDeleted;
 
-    @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
 
     @Getter
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "coupon_id")
     private Coupon coupon;
 
-
     @Getter
-    @ElementCollection
-    private Map<Product, Integer> orderItems;
+    private List<OrderItemWrite> orderItems;
 
-    @Getter
     private LocalDateTime deletedAt;
 
-    public Order() {
+    public OrderWrite() {
     }
-    public Order(User user) {
+    public OrderWrite(User user) {
         this.orderDate = LocalDateTime.now();
         this.user = user;
-        this.orderItems = new HashMap<>();
+        this.orderItems = new ArrayList<>();
         this.isDeleted = false;
         this.orderStatus = OrderStatus.PREPARED;
     }
 
-    public Order(User user, Map<Product, Integer> orderItems) {
+    public OrderWrite(User user, List<OrderItemWrite> orderItems) {
         this.orderDate = LocalDateTime.now();
         this.user = user;
-        this.orderItems = new HashMap<>(orderItems);
+        this.orderItems = new ArrayList<>(orderItems);
         this.isDeleted = false;
         this.orderStatus = OrderStatus.PREPARED;
         calculatePrices();
@@ -106,8 +85,8 @@ public class Order {
     }
 
     private BigDecimal calculateRegularPrice() {
-        return orderItems.entrySet().stream()
-                .map(item -> calculateItemPrice(item.getKey(), item.getValue()))
+        return orderItems.stream()
+                .map(orderItem -> calculateItemPrice(orderItem.product(), orderItem.quantity()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
@@ -136,15 +115,15 @@ public class Order {
     }
 
 
-    public void addOrderItem(Product product, Integer quantity) {
+    public void addOrderItem(OrderItemWrite orderItemWrite) {
         if (this.orderItems == null) {
-            this.orderItems = new HashMap<>();
+            this.orderItems = new ArrayList<>();
         }
-        this.orderItems.put(product, quantity);
+        this.orderItems.add(orderItemWrite);
     }
 
 
-    public Order finish() {
+    public OrderWrite finish() {
         this.orderStatus = OrderStatus.ORDERED;
         return this;
     }
@@ -160,90 +139,74 @@ public class Order {
         return sellingPrice;
     }
 
-    public boolean isFinished() {
-        return orderStatus == OrderStatus.ORDERED;
-    }
-
-    public Order cancel() {
+    public OrderWrite cancel() {
         this.orderStatus = OrderStatus.CANCELLED;
         return this;
     }
 
-    public boolean isCanceled() {
-        return orderStatus == OrderStatus.CANCELLED;
+    public void deleteOrderItem(OrderItemWrite orderItemWrite) {
+        this.orderItems.remove(orderItemWrite);
     }
 
-    public void deleteOrderItem(Product product) {
-        this.orderItems.remove(product);
-    }
-
-    public Order deductStock() {
-        for (Map.Entry<Product, Integer> entry : orderItems.entrySet()) {
-            Product product = entry.getKey();
-            Integer quantity = entry.getValue();
-            product.deductStock( quantity);
+    public OrderWrite deductStock() {
+        for(OrderItemWrite orderItemWrite : orderItems){
+            orderItemWrite.product().deductStock(orderItemWrite.quantity());
         }
         return this;
     }
 
-    public Order deductPoint() {
+    public OrderWrite deductPoint() {
         this.user.deductPoint( getTotalAmount());
         return this;
     }
 
-    public Order send(DummyPlatform dummyPlatform) {
-        dummyPlatform.send(this);
-        return this;
-    }
 
-    public Order saveAndGet(OrderCommandService orderCommandService) {
-        return orderCommandService.saveOrder(this);
-    }
 
-    public Order chargeStock() {
-        for (Map.Entry<Product, Integer> entry : this.orderItems.entrySet()) {
-            Product product = entry.getKey();
-            Integer quantity = entry.getValue();
-            product.chargeStock(quantity);
+    public OrderWrite chargeStock() {
+        for(OrderItemWrite orderItemWrite : orderItems){
+            orderItemWrite.product().chargeStock(orderItemWrite.quantity());
         }
         return this;
 
     }
 
-    public Order chargePoint() {
+    public OrderWrite chargePoint() {
         this.user.chargePoint(getTotalAmount());
         return this;
     }
 
 
-    public Order addItem(ProductService productService, Long productId, int quantity) {
-        Product product = productService.getProduct(productId);
-        if (product.getStock() < quantity) {
-            throw new OrderException.ServiceException("상품의 재고가 부족합니다.");
+    public OrderWrite addItem(OrderItemWrite orderItemWrite) {
+        Product product = orderItemWrite.product();
+        validateOrderItem(product, orderItemWrite.quantity());
+        this.addOrderItem(orderItemWrite);
+        return this;
+    }
+
+    public OrderWrite deleteItem(long productId) {
+        for(OrderItemWrite orderItemWrite : orderItems){
+            if(orderItemWrite.product().getId().equals(productId)){
+                this.deleteOrderItem(orderItemWrite);
+                return this;
+            }
         }
-        this.addOrderItem(product, quantity);
         return this;
     }
 
-    public Order deleteItem(ProductService productService, long orderId) {
-        Product product = productService.getProduct(orderId);
-        this.deleteOrderItem(product);
-        return this;
-    }
-
-    public Order putUser(UserService userService, long userId) {
+    public OrderWrite putUser(UserService userService, long userId) {
         this.user = userService.getUser(userId);
         return this;
     }
 
-    public Order addItems(ProductService productService, Map<Long, Integer> items) {
-        items.forEach((productId, quantity) -> {
-            Product product = productService.getProduct(productId);
-            validateOrderItem(product, quantity);
-            this.addOrderItem(product, quantity);
-        });
+    public OrderWrite addItems(List<OrderItemWrite> orderItemWrites) {
+        for(OrderItemWrite orderItemWrite : orderItemWrites){
+            Product product = orderItemWrite.product();
+            validateOrderItem(product, orderItemWrite.quantity());
+            this.addOrderItem(orderItemWrite);
+        }
         return this;
     }
+
     private void validateOrderItem(Product product, int quantity) {
         if (quantity <= 0) {
             throw new OrderException("주문 수량은 0보다 커야 합니다.");
@@ -252,5 +215,15 @@ public class Order {
             throw new OrderException("상품의 재고가 부족합니다.");
         }
     }
+
+    public Long getUserId() {
+        return user.getId();
+    }
+
+    public List<OrderItemWrite> getItems() {
+        return orderItems;
+    }
+
+
 }
 

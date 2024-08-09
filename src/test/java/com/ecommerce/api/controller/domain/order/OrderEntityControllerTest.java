@@ -1,14 +1,14 @@
 package com.ecommerce.api.controller.domain.order;
 
+import com.ecommerce.infra.order.entity.OrderEntity;
 import com.ecommerce.domain.order.service.OrderInfo;
-import com.ecommerce.domain.order.service.OrderQueryService;
+import com.ecommerce.domain.order.query.OrderQueryService;
 import com.ecommerce.interfaces.controller.domain.order.OrderController;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderMapper;
 import com.ecommerce.application.usecase.CartUseCase;
-import com.ecommerce.domain.order.Order;
-import com.ecommerce.domain.order.service.OrderCommand;
-import com.ecommerce.domain.order.service.OrderCommandService;
+import com.ecommerce.domain.order.command.OrderCommand;
+import com.ecommerce.domain.order.command.OrderCommandService;
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.user.User;
@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(OrderController.class)
-class OrderControllerTest {
+class OrderEntityControllerTest {
 
     private static final String API_ORDERS = "/api/orders";
     private static final String API_ORDERS_PAYMENTS = "/api/orders/payments";
@@ -66,7 +66,7 @@ class OrderControllerTest {
     private final Map<Product, Integer> items = Map.of(product, 1);
     private final Map<Long, Integer> create = Map.of(PRODUCT_ID, 1);
     private final OrderCommand.Create request = new OrderCommand.Create(VALID_USER_ID, create);
-    private final Order order = new Order( new User(VALID_USER_ID, "test", PRODUCT_PRICE), items);
+    private final OrderEntity orderEntity = new OrderEntity( new User(VALID_USER_ID, "test", PRODUCT_PRICE), items);
     private OrderQueryService orderQueryService;
 
     @BeforeEach
@@ -79,7 +79,7 @@ class OrderControllerTest {
     @DisplayName("주문 생성 - 성공")
     void createOrder_Success() throws Exception {
 
-        OrderInfo.Summary orderInfo = OrderInfo.Summary.from(order);
+        OrderInfo.Summary orderInfo = OrderInfo.Summary.from(orderEntity);
         when(paymentUseCase.orderCommandService.createOrder(any(OrderCommand.Create.class), paymentUseCase)).thenReturn(orderInfo);
 
 
@@ -117,8 +117,8 @@ class OrderControllerTest {
     @DisplayName("결제 요청 - 결제 성공")
     void payOrder_Success() throws Exception {
         OrderDto.OrderPayRequest request = new OrderDto.OrderPayRequest(ORDER_ID);
-        Order order = createSampleOrder();
-        OrderInfo.Detail orderInfo = OrderInfo.Detail.from(order);
+        OrderEntity orderEntity = createSampleOrder();
+        OrderInfo.Detail orderInfo = OrderInfo.Detail.from(orderEntity);
         when(paymentUseCase.payOrder(OrderMapper.toOrderPay(request))).thenReturn(orderInfo);
 
         mockMvc.perform(post(API_ORDERS_PAYMENTS)
@@ -134,12 +134,12 @@ class OrderControllerTest {
     @DisplayName("주문 상품 추가")
     void addCartItemToOrder_Success() throws Exception {
         OrderCommand.Add request = new OrderCommand.Add(VALID_USER_ID, ORDER_ID, 1);
-        Order order = createSampleOrder();
-        OrderInfo.Detail orderInfo = OrderInfo.Detail.from(order);
+        OrderEntity orderEntity = createSampleOrder();
+        OrderInfo.Detail orderInfo = OrderInfo.Detail.from(orderEntity);
 
         when(cartUseCase.addItemToOrder(request)).thenReturn(orderInfo);
 
-        mockMvc.perform(patch(API_ORDERS +"/{orderId}"+"/items",order.getId())
+        mockMvc.perform(patch(API_ORDERS +"/{orderId}"+"/items", orderEntity.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -150,24 +150,24 @@ class OrderControllerTest {
     @DisplayName("주문 상품 삭제")
     void deleteCartItemToOrder_Success() throws Exception {
         OrderCommand.Delete request = new OrderCommand.Delete(ORDER_ID,PRODUCT_ID);
-        Order order = createSampleOrder();
-        OrderInfo.Detail orderInfo = OrderInfo.Detail.from(order);
+        OrderEntity orderEntity = createSampleOrder();
+        OrderInfo.Detail orderInfo = OrderInfo.Detail.from(orderEntity);
 
         when(cartUseCase.deleteItemFromOrder(request)).thenReturn(orderInfo);
 
-        mockMvc.perform(delete(API_ORDERS +"/{orderID}"+ "/items",order.getId())
+        mockMvc.perform(delete(API_ORDERS +"/{orderID}"+ "/items", orderEntity.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(VALID_USER_ID));
     }
 
-    private Order createSampleOrder() {
+    private OrderEntity createSampleOrder() {
         User user = new User(VALID_USER_ID, "test", PRODUCT_PRICE);
         Map<Product, Integer> items = new HashMap<>();
         items.put(product, 1);
-        Order order = new Order(user, items);
-        user.addOrder(order);
-        return order;
+        OrderEntity orderEntity = new OrderEntity(user, items);
+        user.addOrder(orderEntity);
+        return orderEntity;
     }
 }

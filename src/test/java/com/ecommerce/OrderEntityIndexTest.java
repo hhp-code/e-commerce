@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         "spring.datasource.username=admin",
         "spring.datasource.password=admin"
 })
-public class OrderIndexTest {
+public class OrderEntityIndexTest {
 
     @Autowired
     private DataSource dataSource;

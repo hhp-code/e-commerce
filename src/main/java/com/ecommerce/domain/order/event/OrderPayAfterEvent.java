@@ -5,13 +5,13 @@ import com.ecommerce.domain.event.DomainEvent;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record PayAfterEvent(
+public record OrderPayAfterEvent(
         UUID eventId,
         LocalDateTime occurredOn,
         Long orderId
 ) implements DomainEvent {
 
-    public PayAfterEvent(Long orderId) {
+    public OrderPayAfterEvent(Long orderId) {
         this(UUID.randomUUID(), LocalDateTime.now(), orderId);
     }
 

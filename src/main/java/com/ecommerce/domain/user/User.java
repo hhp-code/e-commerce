@@ -1,8 +1,8 @@
 package com.ecommerce.domain.user;
 
+import com.ecommerce.infra.order.entity.OrderEntity;
 import com.ecommerce.interfaces.exception.domain.UserException;
 import com.ecommerce.domain.coupon.Coupon;
-import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.user.service.UserService;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -36,7 +36,7 @@ public class User {
     public List<Coupon> coupons;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Order> orders = new ArrayList<>();
+    private List<OrderEntity> orderEntities = new ArrayList<>();
 
 
     public User() {
@@ -48,7 +48,7 @@ public class User {
         this.point = initialBalance;
         this.isDeleted = false;
         this.coupons = new ArrayList<>();
-        this.orders = new ArrayList<>();
+        this.orderEntities = new ArrayList<>();
     }
     public User(long userId, String username, BigDecimal initialBalance) {
         this.id = userId;
@@ -56,7 +56,7 @@ public class User {
         this.point = initialBalance;
         this.isDeleted = false;
         this.coupons = new ArrayList<>();
-        this.orders = new ArrayList<>();
+        this.orderEntities = new ArrayList<>();
     }
     public User(long userId, String username, BigDecimal initialBalance, List<Coupon> coupons) {
         this.id = userId;
@@ -64,7 +64,7 @@ public class User {
         this.point = initialBalance;
         this.isDeleted = false;
         this.coupons = coupons;
-        this.orders = new ArrayList<>();
+        this.orderEntities = new ArrayList<>();
     }
 
 
@@ -79,8 +79,8 @@ public class User {
                 .orElseThrow(() -> new UserException("사용자에게 발급된 쿠폰을 찾을 수 없습니다."));
     }
 
-    public void addOrder(Order order) {
-        orders.add(order);
+    public void addOrder(OrderEntity orderEntity) {
+        orderEntities.add(orderEntity);
     }
 
     public User chargePoint(BigDecimal amount) {

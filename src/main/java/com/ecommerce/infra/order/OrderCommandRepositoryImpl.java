@@ -1,7 +1,7 @@
 package com.ecommerce.infra.order;
 
-import com.ecommerce.domain.order.Order;
-import com.ecommerce.domain.order.service.repository.OrderCommandRepository;
+import com.ecommerce.infra.order.entity.OrderEntity;
+import com.ecommerce.domain.order.command.OrderCommandRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -15,7 +15,7 @@ public class OrderCommandRepositoryImpl implements OrderCommandRepository {
     }
 
     @Override
-    public Optional<Order> saveAndGet(Order order) {
-        return Optional.of(orderJPARepository.save(order));
+    public Optional<OrderEntity> saveAndGet(OrderEntity orderEntity) {
+        return Optional.of(orderJPARepository.save(orderEntity));
     }
 }
