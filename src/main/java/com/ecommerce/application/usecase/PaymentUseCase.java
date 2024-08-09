@@ -1,5 +1,6 @@
 package com.ecommerce.application.usecase;
 
+import com.ecommerce.domain.event.DomainEventPublisher;
 import com.ecommerce.domain.order.event.PayAfterEvent;
 import com.ecommerce.infra.event.PaymentEventPublisher;
 import com.ecommerce.config.QuantumLockManager;
@@ -25,9 +26,9 @@ public class PaymentUseCase {
     public final OrderCommandService orderCommandService;
     private final QuantumLockManager quantumLockManager;
     private final OrderQueryService orderQueryService;
-    private final PaymentEventPublisher eventPublisher;
+    private final DomainEventPublisher eventPublisher;
 
-    public PaymentUseCase(OrderCommandService orderCommandService, QuantumLockManager quantumLockManager, OrderQueryService orderQueryService, PaymentEventPublisher eventPublisher) {
+    public PaymentUseCase(OrderCommandService orderCommandService, QuantumLockManager quantumLockManager, OrderQueryService orderQueryService, DomainEventPublisher eventPublisher) {
         this.orderCommandService = orderCommandService;
         this.quantumLockManager = quantumLockManager;
         this.orderQueryService = orderQueryService;
@@ -48,6 +49,9 @@ public class PaymentUseCase {
                     });
         } catch (TimeoutException e) {
             throw new RuntimeException("주문 결제 중 락 획득 시간 초과");
+        } catch (Exception e) {
+            cancelOrder(new OrderCommand.Cancel(command.orderId()));
+            throw e;
         }
     }
 
@@ -59,6 +63,7 @@ public class PaymentUseCase {
                         Order queryOrder = orderQueryService.getOrder(command.orderId());
                         Order execute = command.execute(queryOrder);
                         Order commandOrder = orderCommandService.saveOrder(execute);
+                        eventPublisher.publish(new PayAfterEvent(commandOrder.getId()));
                         return OrderInfo.Detail.from(commandOrder);
                     });
         } catch (TimeoutException e) {
