@@ -1,9 +1,9 @@
 package com.ecommerce.cache;
 
 import com.ecommerce.application.usecase.PaymentUseCase;
-import com.ecommerce.domain.order.service.OrderCommand;
-import com.ecommerce.domain.order.service.OrderCommandService;
-import com.ecommerce.domain.order.service.OrderQueryService;
+import com.ecommerce.domain.order.command.OrderCommand;
+import com.ecommerce.domain.order.command.OrderCommandService;
+import com.ecommerce.domain.order.query.OrderQueryService;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
@@ -22,7 +22,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
-public class OrderCacheTest {
+public class OrderEntityCacheTest {
     @Autowired
     private OrderCommandService orderCommandService;
 

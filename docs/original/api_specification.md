@@ -297,7 +297,7 @@ https://api.ecommerce-example.com
 
 #### 2.4.1 주문 생성
 
-- **Endpoint**: POST /orders
+- **Endpoint**: POST /orderEntities
 - **Authorization**: Bearer Token 필요
 - **Request Body**:
 ```json
@@ -336,7 +336,7 @@ https://api.ecommerce-example.com
 
 #### 2.4.2 주문 상세 조회
 
-- **Endpoint**: GET /orders/{id}
+- **Endpoint**: GET /orderEntities/{id}
 - **Authorization**: Bearer Token 필요
 - **Response**:
 ```json

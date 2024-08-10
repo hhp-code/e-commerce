@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("cleanser")
 @Transactional
-class OrderControllerIntegrationTest {
+class OrderEntityControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 

@@ -1,9 +1,13 @@
 package com.ecommerce.domain.order.service;
 
 import com.ecommerce.application.usecase.PaymentUseCase;
-import com.ecommerce.domain.order.service.repository.OrderCommandRepository;
-import com.ecommerce.domain.order.service.repository.OrderQueryRepository;
-import com.ecommerce.domain.order.Order;
+import com.ecommerce.domain.order.command.OrderCommand;
+import com.ecommerce.domain.order.command.OrderCommandService;
+import com.ecommerce.domain.order.query.OrderQuery;
+import com.ecommerce.domain.order.query.OrderQueryService;
+import com.ecommerce.infra.order.entity.OrderEntity;
+import com.ecommerce.domain.order.command.OrderCommandRepository;
+import com.ecommerce.domain.order.query.OrderQueryRepository;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.user.User;
 import org.junit.jupiter.api.DisplayName;
@@ -23,7 +27,7 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class OrderCommandServiceUnitTest {
+class OrderEntityCommandServiceUnitTest {
 
     private static final Long VALID_USER_ID = 1L;
     private static final Long INVALID_USER_ID = 999L;
@@ -45,10 +49,10 @@ class OrderCommandServiceUnitTest {
     @Test
     @DisplayName("존재하는 주문 조회 시 성공")
     void getOrder_ExistingOrder_ShouldSucceed() {
-        Order mockOrder = createMockOrder();
-        when(orderQueryRepository.getById(VALID_USER_ID)).thenReturn(Optional.of(mockOrder));
+        OrderEntity mockOrderEntity = createMockOrder();
+        when(orderQueryRepository.getById(VALID_USER_ID)).thenReturn(Optional.of(mockOrderEntity));
 
-        Order result = orderQueryService.getOrder(VALID_USER_ID);
+        OrderEntity result = orderQueryService.getOrder(VALID_USER_ID);
 
         assertNotNull(result);
         verify(orderQueryRepository).getById(VALID_USER_ID);
@@ -68,10 +72,10 @@ class OrderCommandServiceUnitTest {
     @DisplayName("검색 조건에 맞는 주문 목록 반환")
     void getOrders_WithSearchCondition_ShouldReturnOrderList() {
         OrderQuery.GetUserOrders searchCommand = new OrderQuery.GetUserOrders(VALID_USER_ID);
-        List<Order> mockOrders = Arrays.asList(createMockOrder(), createMockOrder());
-        when(orderQueryRepository.getOrders(searchCommand.userId())).thenReturn(mockOrders);
+        List<OrderEntity> mockOrderEntities = Arrays.asList(createMockOrder(), createMockOrder());
+        when(orderQueryRepository.getOrders(searchCommand.userId())).thenReturn(mockOrderEntities);
 
-        List<Order> result = orderQueryService.getOrders(searchCommand);
+        List<OrderEntity> result = orderQueryService.getOrders(searchCommand);
 
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -88,8 +92,8 @@ class OrderCommandServiceUnitTest {
         assertThrows(RuntimeException.class, () -> paymentUseCase.orderCommandService.createOrder(createCommand, paymentUseCase));
     }
 
-    private Order createMockOrder() {
+    private OrderEntity createMockOrder() {
         User user = new User(VALID_USER_ID, "test", BigDecimal.ONE);
-        return new Order(user, Map.of(new Product("product", BigDecimal.ONE, 1000), 1));
+        return new OrderEntity(user, Map.of(new Product("product", BigDecimal.ONE, 1000), 1));
     }
 }

@@ -4,10 +4,9 @@ import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.coupon.service.CouponCommand;
 import com.ecommerce.domain.coupon.service.CouponService;
 import com.ecommerce.domain.coupon.Coupon;
-import com.ecommerce.domain.order.Order;
-import com.ecommerce.domain.order.service.OrderCommandService;
-import com.ecommerce.domain.order.service.OrderQuery;
-import com.ecommerce.domain.order.service.OrderQueryService;
+import com.ecommerce.domain.order.OrderWrite;
+import com.ecommerce.domain.order.command.OrderCommandService;
+import com.ecommerce.domain.order.query.OrderQuery;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserCouponService;
 import com.ecommerce.domain.user.service.UserService;
@@ -22,15 +21,13 @@ public class CouponUseCase {
     private final UserService userService;
     private final UserCouponService userCouponService;
     private final QuantumLockManager quantumLockManager;
-    private final OrderQueryService orderQueryService;
     private final OrderCommandService orderCommandService;
 
-    public CouponUseCase(CouponService couponService, UserService userService, UserCouponService userCouponService, QuantumLockManager quantumLockManager, OrderQueryService orderQueryService, OrderCommandService orderCommandService) {
+    public CouponUseCase(CouponService couponService, UserService userService, UserCouponService userCouponService, QuantumLockManager quantumLockManager, OrderCommandService orderCommandService) {
         this.couponService = couponService;
         this.userService = userService;
         this.userCouponService = userCouponService;
         this.quantumLockManager = quantumLockManager;
-        this.orderQueryService = orderQueryService;
         this.orderCommandService = orderCommandService;
     }
 
@@ -38,9 +35,9 @@ public class CouponUseCase {
         User user = userService.getUser(userId);
         Coupon userCoupon = userCouponService.getUserCoupon(userId, couponId);
         OrderQuery.GetOrder getOrderQuery = new OrderQuery.GetOrder(userId);
-        Order order = orderQueryService.getOrder(getOrderQuery.orderId());
-        order.applyCoupon(userCoupon);
-        orderCommandService.saveOrder(order);
+        OrderWrite orderEntity = orderCommandService.getOrder(getOrderQuery.orderId());
+        orderEntity.applyCoupon(userCoupon);
+        orderCommandService.saveOrder(orderEntity);
         return userCouponService.updateUserCoupon(user,userCoupon);
     }
 
@@ -61,8 +58,6 @@ public class CouponUseCase {
         catch (Exception e){
             throw new RuntimeException("Coupon issue failed", e);
         }
-
-
     }
 
 }

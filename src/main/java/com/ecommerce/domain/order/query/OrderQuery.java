@@ -1,4 +1,4 @@
-package com.ecommerce.domain.order.service;
+package com.ecommerce.domain.order.query;
 
 import lombok.experimental.UtilityClass;
 

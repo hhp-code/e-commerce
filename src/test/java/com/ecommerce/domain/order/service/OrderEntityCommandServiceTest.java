@@ -2,7 +2,12 @@ package com.ecommerce.domain.order.service;
 
 import com.ecommerce.DatabaseCleanUp;
 import com.ecommerce.application.usecase.PaymentUseCase;
-import com.ecommerce.domain.order.Order;
+import com.ecommerce.domain.order.OrderRead;
+import com.ecommerce.domain.order.command.OrderCommand;
+import com.ecommerce.domain.order.command.OrderCommandService;
+import com.ecommerce.domain.order.query.OrderQuery;
+import com.ecommerce.domain.order.query.OrderQueryService;
+import com.ecommerce.infra.order.entity.OrderEntity;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
@@ -25,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("cleanser")
 @Transactional
-class OrderCommandServiceTest {
+class OrderEntityCommandServiceTest {
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
     @Autowired
@@ -47,7 +52,7 @@ class OrderCommandServiceTest {
     @Autowired
     private ProductService productService;
 
-    private Order testOrder;
+    private OrderEntity testOrderEntity;
     private User testUser;
     private Product testProduct;
     @Autowired
@@ -60,18 +65,18 @@ class OrderCommandServiceTest {
         testUser = userService.saveUser(user);
         testProduct = productService.saveAndGet(product);
         Map<Product,Integer> orderItem = Map.of(testProduct, 1);
-        Order order = new Order(testUser, orderItem);
-        testOrder = orderCommandService.saveOrder(order);
+        OrderEntity orderEntity = new OrderEntity(testUser, orderItem);
+        testOrderEntity = orderCommandService.saveOrder(orderEntity);
     }
 
     @Test
     @DisplayName("주문 ID로 주문을 조회한다")
     void getOrder_ShouldReturnOrder_WhenOrderExists() {
 
-        Order result = orderQueryService.getOrder(testOrder.getId());
+        OrderEntity result = orderQueryService.getOrder(testOrderEntity.getId());
 
         assertNotNull(result);
-        assertEquals(testOrder.getId(), result.getId());
+        assertEquals(testOrderEntity.getId(), result.getId());
     }
 
     @Test
@@ -79,7 +84,7 @@ class OrderCommandServiceTest {
     void getOrders_ShouldReturnOrderList_WhenSearchConditionProvided() {
         OrderQuery.GetUserOrders searchCommand = new OrderQuery.GetUserOrders(testUser.getId());
 
-        List<Order> result = orderQueryService.getOrders(searchCommand);
+        List<OrderRead> result = orderQueryService.getOrders(searchCommand);
 
         assertNotNull(result);
         assertEquals(1, result.size());
