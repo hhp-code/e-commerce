@@ -1,6 +1,7 @@
 package com.ecommerce.domain.order.service;
 
-import com.ecommerce.domain.order.Order;
+import com.ecommerce.domain.order.OrderRead;
+import com.ecommerce.domain.order.OrderWrite;
 import lombok.experimental.UtilityClass;
 
 import java.math.BigDecimal;
@@ -11,26 +12,46 @@ import java.util.stream.Collectors;
 @UtilityClass
 public class OrderInfo {
     public record Summary(long orderId, long userId, String status, BigDecimal totalAmount) {
-        public static Summary from(Order order) {
+        public static Summary from(OrderRead orderEntity) {
             return new Summary(
-                    order.getId(),
-                    order.getUser().getId(),
-                    order.getOrderStatus(),
-                    order.getTotalAmount()
+                    orderEntity.getId(),
+                    orderEntity.getUserId(),
+                    orderEntity.getOrderStatus(),
+                    orderEntity.getTotalAmount()
+            );
+        }
+        public static Summary from(OrderWrite orderEntity) {
+            return new Summary(
+                    orderEntity.getId(),
+                    orderEntity.getUserId(),
+                    orderEntity.getOrderStatus(),
+                    orderEntity.getTotalAmount()
             );
         }
     }
     public record Detail(long orderId, long userId, LocalDateTime orderDate, String status, BigDecimal totalAmount,
                          List<OrderItemInfo> items) {
-        public static Detail from(Order order) {
+        public static Detail from(OrderRead orderEntity) {
             return new Detail(
-                    order.getId(),
-                    order.getUser().getId(),
-                    order.getOrderDate(),
-                    order.getOrderStatus(),
-                    order.getTotalAmount(),
-                    order.getOrderItems().entrySet().stream()
-                            .map(entry -> new OrderItemInfo(entry.getKey().getId(), entry.getValue()))
+                    orderEntity.getId(),
+                    orderEntity.getUserId(),
+                    orderEntity.getOrderDate(),
+                    orderEntity.getOrderStatus(),
+                    orderEntity.getTotalAmount(),
+                    orderEntity.getItems().stream()
+                            .map(item -> new OrderItemInfo(item.productId(), item.quantity()))
+                            .collect(Collectors.toList())
+            );
+        }
+        public static Detail from(OrderWrite orderEntity) {
+            return new Detail(
+                    orderEntity.getId(),
+                    orderEntity.getUserId(),
+                    orderEntity.getOrderDate(),
+                    orderEntity.getOrderStatus(),
+                    orderEntity.getTotalAmount(),
+                    orderEntity.getItems().stream()
+                            .map(item -> new OrderItemInfo(item.product().getId(), item.quantity()))
                             .collect(Collectors.toList())
             );
         }

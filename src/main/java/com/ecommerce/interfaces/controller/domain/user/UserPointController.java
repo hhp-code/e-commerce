@@ -2,7 +2,7 @@ package com.ecommerce.interfaces.controller.domain.user;
 
 import com.ecommerce.interfaces.controller.domain.user.dto.UserDto;
 import com.ecommerce.interfaces.controller.domain.user.dto.UserBalanceMapper;
-import com.ecommerce.application.usecase.UserPointUseCase;
+import com.ecommerce.application.UserFacade;
 import com.ecommerce.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -21,11 +21,11 @@ import java.math.BigDecimal;
 @RequestMapping("/api")
 public class UserPointController {
 
-    private final UserPointUseCase userPointUseCase;
+    private final UserFacade userFacade;
     private final UserService userService;
 
-    public UserPointController(UserPointUseCase userPointUseCase, UserService userService) {
-        this.userPointUseCase = userPointUseCase;
+    public UserPointController(UserFacade userFacade, UserService userService) {
+        this.userFacade = userFacade;
         this.userService = userService;
     }
 
@@ -54,6 +54,6 @@ public class UserPointController {
             @Parameter(description = "사용자 ID") @PathVariable Long userId,
             @Parameter(description = "충전 요청 정보") @RequestBody BigDecimal amount) {
         return UserBalanceMapper.toResponse(
-                userPointUseCase.chargePoint(userId, amount));
+                userFacade.chargePoint(userId, amount));
     }
 }

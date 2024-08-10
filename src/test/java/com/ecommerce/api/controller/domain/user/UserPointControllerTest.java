@@ -1,6 +1,6 @@
 package com.ecommerce.api.controller.domain.user;
 
-import com.ecommerce.application.usecase.UserPointUseCase;
+import com.ecommerce.application.UserFacade;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
 import com.ecommerce.interfaces.controller.domain.user.UserPointController;
@@ -31,14 +31,14 @@ class UserPointControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private UserPointUseCase userPointUseCase;
+    private UserFacade userFacade;
 
     @MockBean
     private UserService userService;
 
     @BeforeEach
     void setUp() {
-        when(userPointUseCase.chargePoint(any(), any())).thenReturn(new User("test", BigDecimal.valueOf(1000)));
+        when(userFacade.chargePoint(any(), any())).thenReturn(new User("test", BigDecimal.valueOf(1000)));
         when(userService.getPoint(any())).thenReturn(new User("test", BigDecimal.valueOf(0)));
 
     }

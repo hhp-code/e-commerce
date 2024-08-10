@@ -1,7 +1,7 @@
 package com.ecommerce.domain.user.service;
 
 import com.ecommerce.DatabaseCleanUp;
-import com.ecommerce.application.usecase.UserPointUseCase;
+import com.ecommerce.application.UserFacade;
 import com.ecommerce.interfaces.exception.domain.UserException;
 import com.ecommerce.domain.user.User;
 import org.junit.jupiter.api.AfterEach;
@@ -31,7 +31,7 @@ class UserPointServiceTest {
     }
 
     @Autowired
-    private UserPointUseCase userPointUseCase;
+    private UserFacade userFacade;
 
     @Autowired
     private UserService userService;
@@ -75,7 +75,7 @@ class UserPointServiceTest {
         BigDecimal expectedBalance = initialBalance.add(chargeAmount);
 
         // when
-        User user = userPointUseCase.chargePoint(userId, chargeAmount);
+        User user = userFacade.chargePoint(userId, chargeAmount);
         BigDecimal newBalance =  user.getPoint();
 
         // then
@@ -92,7 +92,7 @@ class UserPointServiceTest {
 
         // when & then
         assertThrows(UserException.ServiceException.class,
-                () -> userPointUseCase.chargePoint(userId, chargeAmount));
+                () -> userFacade.chargePoint(userId, chargeAmount));
     }
 
     @Test
@@ -103,9 +103,9 @@ class UserPointServiceTest {
         BigDecimal secondCharge = BigDecimal.valueOf(1000);
 
         // when
-        User user = userPointUseCase.chargePoint(userId, firstCharge);
+        User user = userFacade.chargePoint(userId, firstCharge);
         BigDecimal balanceAfterFirstCharge = user.getPoint();
-        User user1 = userPointUseCase.chargePoint(userId, secondCharge);
+        User user1 = userFacade.chargePoint(userId, secondCharge);
         BigDecimal finalBalance = user1.getPoint();
 
         // then

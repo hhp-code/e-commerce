@@ -1,7 +1,7 @@
 package com.ecommerce.domain.user.service;
 
 import com.ecommerce.DatabaseCleanUp;
-import com.ecommerce.application.usecase.UserPointUseCase;
+import com.ecommerce.application.UserFacade;
 import com.ecommerce.domain.user.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +32,7 @@ class UserPointServiceConcurrencyTest {
 
 
     @Autowired
-    UserPointUseCase userPointService;
+    UserFacade userPointService;
     @Autowired
     private UserService userService;
 

@@ -1,5 +1,6 @@
 package com.ecommerce.domain.product.service;
 
+import com.ecommerce.application.ProductFacade;
 import com.ecommerce.interfaces.exception.domain.ProductException;
 import com.ecommerce.domain.product.service.repository.ProductRepository;
 import com.ecommerce.domain.product.Product;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,6 +31,9 @@ class ProductServiceUnitTest {
 
     @InjectMocks
     private ProductService productService;
+
+    @InjectMocks
+    private ProductFacade productFacade;
 
     private Product sampleProduct;
 
@@ -107,13 +112,13 @@ class ProductServiceUnitTest {
     @Test
     @DisplayName("상품 재고 차감 - 상품 저장실패")
     void testDeductStockWhenSaveFailed() {
-        assertThrows(ProductException.ServiceException.class, () -> productService.deductStock(sampleProduct, 10));
+        assertThrows(ProductException.ServiceException.class, () -> productFacade.deductStock(sampleProduct, 10));
     }
 
     @Test
     @DisplayName("상품 재고 충전 - 상품 저장실패")
     void testChargeStockWhenSaveFailed() {
-        assertThrows(ProductException.ServiceException.class, () -> productService.chargeStock(sampleProduct, 10));
+        assertThrows(ProductException.ServiceException.class, () -> productFacade.chargeStock(sampleProduct, 10));
     }
 
     private Product createProductRequest(String name, String price, Integer availableStock) {
