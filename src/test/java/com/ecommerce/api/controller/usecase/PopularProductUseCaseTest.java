@@ -3,8 +3,8 @@ package com.ecommerce.api.controller.usecase;
 import com.ecommerce.DatabaseCleanUp;
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.application.usecase.PopularProductUseCase;
+import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.domain.order.command.OrderCommand;
-import com.ecommerce.domain.order.command.OrderCommandService;
 import com.ecommerce.domain.order.service.OrderInfo;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
@@ -48,7 +48,7 @@ class PopularProductUseCaseTest {
     private ProductService productService;
 
     @Autowired
-    private OrderCommandService orderCommandService;
+    private OrderService orderCommandService;
 
     @Autowired
     private PaymentUseCase paymentUseCase;

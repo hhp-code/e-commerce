@@ -5,6 +5,7 @@ import com.ecommerce.domain.order.OrderWrite;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.service.UserService;
+import com.ecommerce.infra.order.entity.OrderEntity;
 import lombok.experimental.UtilityClass;
 
 import java.util.List;
@@ -20,10 +21,10 @@ public class OrderCommand {
     }
 
     public record Add(long orderId, long productId, int quantity) {
-        public OrderWrite execute(OrderWrite order, ProductService productService) {
+        public OrderWrite execute(OrderWrite orderWrite, ProductService productService) {
             Product product = productService.getProduct(productId);
             OrderItemWrite item = new OrderItemWrite(product, quantity);
-            return order.addItem(item);
+            return orderWrite.addItem(item);
         }
     }
     public record Payment(long orderId) {

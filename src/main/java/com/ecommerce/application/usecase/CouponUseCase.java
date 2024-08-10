@@ -4,12 +4,13 @@ import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.coupon.service.CouponCommand;
 import com.ecommerce.domain.coupon.service.CouponService;
 import com.ecommerce.domain.coupon.Coupon;
+import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.domain.order.OrderWrite;
-import com.ecommerce.domain.order.command.OrderCommandService;
 import com.ecommerce.domain.order.query.OrderQuery;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserCouponService;
 import com.ecommerce.domain.user.service.UserService;
+import com.ecommerce.infra.order.entity.OrderEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,23 +22,24 @@ public class CouponUseCase {
     private final UserService userService;
     private final UserCouponService userCouponService;
     private final QuantumLockManager quantumLockManager;
-    private final OrderCommandService orderCommandService;
+    private final OrderService orderService;
 
-    public CouponUseCase(CouponService couponService, UserService userService, UserCouponService userCouponService, QuantumLockManager quantumLockManager, OrderCommandService orderCommandService) {
+    public CouponUseCase(CouponService couponService, UserService userService, UserCouponService userCouponService, QuantumLockManager quantumLockManager, OrderService orderService) {
         this.couponService = couponService;
         this.userService = userService;
         this.userCouponService = userCouponService;
         this.quantumLockManager = quantumLockManager;
-        this.orderCommandService = orderCommandService;
+        this.orderService = orderService;
     }
 
     public User useCoupon(Long userId, Long couponId) {
         User user = userService.getUser(userId);
         Coupon userCoupon = userCouponService.getUserCoupon(userId, couponId);
         OrderQuery.GetOrder getOrderQuery = new OrderQuery.GetOrder(userId);
-        OrderWrite orderEntity = orderCommandService.getOrder(getOrderQuery.orderId());
+        OrderWrite orderEntity = orderService.getOrder(getOrderQuery.orderId());
+
         orderEntity.applyCoupon(userCoupon);
-        orderCommandService.saveOrder(orderEntity);
+        orderService.saveOrder(orderEntity);
         return userCouponService.updateUserCoupon(user,userCoupon);
     }
 

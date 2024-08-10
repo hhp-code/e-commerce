@@ -1,9 +1,9 @@
 package com.ecommerce.cache;
 
+import com.ecommerce.application.OrderFacade;
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.command.OrderCommand;
-import com.ecommerce.domain.order.command.OrderCommandService;
-import com.ecommerce.domain.order.query.OrderQueryService;
+import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
@@ -24,7 +24,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @AutoConfigureTestDatabase
 public class OrderEntityCacheTest {
     @Autowired
-    private OrderCommandService orderCommandService;
+    private OrderService orderCommandService;
 
     @Autowired
     private CacheManager cacheManager;
@@ -37,7 +37,9 @@ public class OrderEntityCacheTest {
     @Autowired
     private PaymentUseCase paymentUseCase;
     @Autowired
-    private OrderQueryService orderQueryService;
+    private OrderService orderService;
+    @Autowired
+    private OrderFacade orderFacade;
 
     @BeforeEach
     void setUp() {
@@ -46,7 +48,7 @@ public class OrderEntityCacheTest {
         Long productId = 1L;
         Map<Long, Integer> items = Map.of(productId, 1);
         OrderCommand.Create createOrderCommand = new OrderCommand.Create(1L, items);
-        paymentUseCase.orderCommandService.createOrder(createOrderCommand, paymentUseCase);
+        orderFacade.createOrder(createOrderCommand, paymentUseCase);
     }
 
     @Test
@@ -55,8 +57,8 @@ public class OrderEntityCacheTest {
         Long userId = 1L;
 
         //when
-        orderQueryService.getOrder(1L);
-        orderQueryService.getOrder(1L);
+        orderService.getOrder(1L);
+        orderService.getOrder(1L);
 
         //then
         assertThat(cacheManager.getCache("orders").get(userId)).isNotNull();

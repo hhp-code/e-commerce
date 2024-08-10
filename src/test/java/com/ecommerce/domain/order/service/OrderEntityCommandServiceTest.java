@@ -3,10 +3,11 @@ package com.ecommerce.domain.order.service;
 import com.ecommerce.DatabaseCleanUp;
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.OrderRead;
+import com.ecommerce.domain.order.OrderWrite;
 import com.ecommerce.domain.order.command.OrderCommand;
-import com.ecommerce.domain.order.command.OrderCommandService;
+import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 import com.ecommerce.domain.order.query.OrderQuery;
-import com.ecommerce.domain.order.query.OrderQueryService;
+import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.infra.order.entity.OrderEntity;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
@@ -34,7 +35,7 @@ class OrderEntityCommandServiceTest {
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
     @Autowired
-    private OrderQueryService orderQueryService;
+    private OrderService orderService;
 
     @AfterEach
     void tearDown() {
@@ -45,14 +46,14 @@ class OrderEntityCommandServiceTest {
 
 
     @Autowired
-    private OrderCommandService orderCommandService;
+    private OrderService orderCommandService;
 
     @Autowired
     private UserService userService;
     @Autowired
     private ProductService productService;
 
-    private OrderEntity testOrderEntity;
+    private OrderWrite testOrderWrite;
     private User testUser;
     private Product testProduct;
     @Autowired
@@ -64,19 +65,20 @@ class OrderEntityCommandServiceTest {
         Product product = new Product( "test", BigDecimal.TWO, 1000);
         testUser = userService.saveUser(user);
         testProduct = productService.saveAndGet(product);
-        Map<Product,Integer> orderItem = Map.of(testProduct, 1);
-        OrderEntity orderEntity = new OrderEntity(testUser, orderItem);
-        testOrderEntity = orderCommandService.saveOrder(orderEntity);
+        OrderItemWrite orderItem = new OrderItemWrite(testProduct, 1);
+        OrderEntity orderEntity = new OrderEntity(testUser, List.of(orderItem));
+        OrderWrite orderWrite = OrderDomainMapper.toWriteModel(orderEntity);
+        testOrderWrite = orderCommandService.saveOrder(orderWrite);
     }
 
     @Test
     @DisplayName("주문 ID로 주문을 조회한다")
     void getOrder_ShouldReturnOrder_WhenOrderExists() {
 
-        OrderEntity result = orderQueryService.getOrder(testOrderEntity.getId());
+        OrderEntity result = orderService.getOrder(testOrderWrite.getId());
 
         assertNotNull(result);
-        assertEquals(testOrderEntity.getId(), result.getId());
+        assertEquals(testOrderWrite.getId(), result.getId());
     }
 
     @Test
@@ -84,7 +86,7 @@ class OrderEntityCommandServiceTest {
     void getOrders_ShouldReturnOrderList_WhenSearchConditionProvided() {
         OrderQuery.GetUserOrders searchCommand = new OrderQuery.GetUserOrders(testUser.getId());
 
-        List<OrderRead> result = orderQueryService.getOrders(searchCommand);
+        List<OrderRead> result = orderService.getOrders(searchCommand);
 
         assertNotNull(result);
         assertEquals(1, result.size());

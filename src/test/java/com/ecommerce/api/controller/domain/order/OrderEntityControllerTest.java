@@ -1,14 +1,14 @@
 package com.ecommerce.api.controller.domain.order;
 
+import com.ecommerce.application.OrderFacade;
 import com.ecommerce.infra.order.entity.OrderEntity;
 import com.ecommerce.domain.order.service.OrderInfo;
-import com.ecommerce.domain.order.query.OrderQueryService;
+import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.interfaces.controller.domain.order.OrderController;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderMapper;
 import com.ecommerce.application.usecase.CartUseCase;
 import com.ecommerce.domain.order.command.OrderCommand;
-import com.ecommerce.domain.order.command.OrderCommandService;
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.user.User;
@@ -51,7 +51,7 @@ class OrderEntityControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private OrderCommandService orderCommandService;
+    private OrderService orderCommandService;
 
     @MockBean
     private PaymentUseCase paymentUseCase;
@@ -67,7 +67,9 @@ class OrderEntityControllerTest {
     private final Map<Long, Integer> create = Map.of(PRODUCT_ID, 1);
     private final OrderCommand.Create request = new OrderCommand.Create(VALID_USER_ID, create);
     private final OrderEntity orderEntity = new OrderEntity( new User(VALID_USER_ID, "test", PRODUCT_PRICE), items);
-    private OrderQueryService orderQueryService;
+    private OrderService orderService;
+    @Autowired
+    private OrderFacade orderFacade;
 
     @BeforeEach
     void setup() {
@@ -80,7 +82,7 @@ class OrderEntityControllerTest {
     void createOrder_Success() throws Exception {
 
         OrderInfo.Summary orderInfo = OrderInfo.Summary.from(orderEntity);
-        when(paymentUseCase.orderCommandService.createOrder(any(OrderCommand.Create.class), paymentUseCase)).thenReturn(orderInfo);
+        when(orderFacade.createOrder(any(OrderCommand.Create.class), paymentUseCase)).thenReturn(orderInfo);
 
 
         mockMvc.perform(post(API_ORDERS)
@@ -94,7 +96,7 @@ class OrderEntityControllerTest {
     @Test
     @DisplayName("주문 조회 실패 - 존재하지 않는 주문")
     void getOrder_NonExistentOrder_ShouldFail() throws Exception {
-        when(orderQueryService.getOrder(NON_EXISTENT_ORDER_ID)).thenThrow(new RuntimeException("주문을 찾을 수 없습니다."));
+        when(orderService.getOrder(NON_EXISTENT_ORDER_ID)).thenThrow(new RuntimeException("주문을 찾을 수 없습니다."));
 
         mockMvc.perform(get(API_ORDERS + "/{orderId}", NON_EXISTENT_ORDER_ID))
                 .andExpect(status().isInternalServerError())

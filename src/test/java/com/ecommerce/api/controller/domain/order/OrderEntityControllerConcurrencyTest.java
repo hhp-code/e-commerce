@@ -1,9 +1,11 @@
 package com.ecommerce.api.controller.domain.order;
 
 import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.domain.order.OrderService;
+import com.ecommerce.domain.order.OrderWrite;
+import com.ecommerce.domain.order.service.OrderDomainMapper;
 import com.ecommerce.infra.order.entity.OrderEntity;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
-import com.ecommerce.domain.order.command.OrderCommandService;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
@@ -57,7 +59,7 @@ public class OrderEntityControllerConcurrencyTest {
     private UserService userService;
 
     @Autowired
-    private OrderCommandService orderCommandService;
+    private OrderService orderService;
 
     @Autowired
     private ProductService productService;
@@ -77,7 +79,8 @@ public class OrderEntityControllerConcurrencyTest {
         for(User user : testUsers) {
             Map<Product, Integer> items = Map.of(testProduct, 1);
             OrderEntity orderEntity = new OrderEntity(user, items);
-            orderCommandService.saveOrder(orderEntity);
+            OrderWrite writeModel = OrderDomainMapper.toWriteModel(orderEntity);
+            orderService.saveOrder(writeModel);
             orderPayRequest.add(new OrderDto.OrderPayRequest(user.getId()));
         }
 

@@ -2,9 +2,8 @@ package com.ecommerce.domain.order.service;
 
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.command.OrderCommand;
-import com.ecommerce.domain.order.command.OrderCommandService;
 import com.ecommerce.domain.order.query.OrderQuery;
-import com.ecommerce.domain.order.query.OrderQueryService;
+import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.infra.order.entity.OrderEntity;
 import com.ecommerce.domain.order.command.OrderCommandRepository;
 import com.ecommerce.domain.order.query.OrderQueryRepository;
@@ -39,11 +38,11 @@ class OrderEntityCommandServiceUnitTest {
     private OrderQueryRepository orderQueryRepository;
 
     @InjectMocks
-    private OrderCommandService orderCommandService;
+    private OrderService orderCommandService;
 
     PaymentUseCase paymentUseCase;
     @InjectMocks
-    private OrderQueryService orderQueryService;
+    private OrderService orderService;
 
 
     @Test
@@ -52,7 +51,7 @@ class OrderEntityCommandServiceUnitTest {
         OrderEntity mockOrderEntity = createMockOrder();
         when(orderQueryRepository.getById(VALID_USER_ID)).thenReturn(Optional.of(mockOrderEntity));
 
-        OrderEntity result = orderQueryService.getOrder(VALID_USER_ID);
+        OrderEntity result = orderService.getOrder(VALID_USER_ID);
 
         assertNotNull(result);
         verify(orderQueryRepository).getById(VALID_USER_ID);
@@ -63,7 +62,7 @@ class OrderEntityCommandServiceUnitTest {
     void getOrder_NonExistentOrder_ShouldThrowException() {
         when(orderQueryRepository.getById(INVALID_USER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> orderQueryService.getOrder(INVALID_USER_ID));
+        assertThrows(RuntimeException.class, () -> orderService.getOrder(INVALID_USER_ID));
         verify(orderQueryRepository).getById(INVALID_USER_ID);
     }
 
@@ -75,7 +74,7 @@ class OrderEntityCommandServiceUnitTest {
         List<OrderEntity> mockOrderEntities = Arrays.asList(createMockOrder(), createMockOrder());
         when(orderQueryRepository.getOrders(searchCommand.userId())).thenReturn(mockOrderEntities);
 
-        List<OrderEntity> result = orderQueryService.getOrders(searchCommand);
+        List<OrderEntity> result = orderService.getOrders(searchCommand);
 
         assertNotNull(result);
         assertEquals(2, result.size());

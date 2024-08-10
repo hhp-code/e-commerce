@@ -7,8 +7,7 @@ import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.infra.order.entity.OrderEntity;
 import com.ecommerce.domain.order.OrderStatus;
 import com.ecommerce.domain.order.command.OrderCommand;
-import com.ecommerce.domain.order.command.OrderCommandService;
-import com.ecommerce.domain.order.query.OrderQueryService;
+import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.application.external.DummyPlatform;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
@@ -48,7 +47,7 @@ class PaymentUseCaseConcurrencyTest {
     @Autowired
     private UserFacade userFacade;
     @Autowired
-    private OrderQueryService orderQueryService;
+    private OrderService orderService;
 
     @AfterEach
     void tearDown() {
@@ -58,7 +57,7 @@ class PaymentUseCaseConcurrencyTest {
     @Autowired
     private UserService userService;
     @Autowired
-    private OrderCommandService orderCommandService;
+    private OrderService orderCommandService;
     @Autowired
     private ProductService productService;
     @Mock
@@ -135,7 +134,7 @@ class PaymentUseCaseConcurrencyTest {
         // 사용자 포인트 및 주문 상태 확인
         for (int i = 0; i < concurrentRequests; i++) {
             User user = userService.getUser(testUsers.get(i).getId());
-            OrderEntity orderEntity = orderQueryService.getOrder(testOrderEntities.get(i).getId());
+            OrderEntity orderEntity = orderService.getOrder(testOrderEntities.get(i).getId());
             if (Objects.equals(orderEntity.getOrderStatus(), OrderStatus.ORDERED.name())) {
                 assertThat(BigDecimal.TEN ).isEqualByComparingTo(user.getPoint());
             } else {

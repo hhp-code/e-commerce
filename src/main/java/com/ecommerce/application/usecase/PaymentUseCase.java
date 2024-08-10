@@ -1,12 +1,12 @@
 package com.ecommerce.application.usecase;
 
 import com.ecommerce.domain.event.DomainEventPublisher;
+import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.domain.order.OrderWrite;
 import com.ecommerce.domain.order.event.OrderPayAfterEvent;
 import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.order.command.OrderCommand;
 import com.ecommerce.domain.order.service.OrderInfo;
-import com.ecommerce.domain.order.command.OrderCommandService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -21,11 +21,11 @@ public class PaymentUseCase {
     private static final Duration ORDER_LOCK_TIMEOUT = Duration.ofSeconds(5);
 
 
-    public final OrderCommandService orderCommandService;
+    public final OrderService orderCommandService;
     private final QuantumLockManager quantumLockManager;
     private final DomainEventPublisher eventPublisher;
 
-    public PaymentUseCase(OrderCommandService orderCommandService, QuantumLockManager quantumLockManager, DomainEventPublisher eventPublisher) {
+    public PaymentUseCase(OrderService orderCommandService, QuantumLockManager quantumLockManager, DomainEventPublisher eventPublisher) {
         this.orderCommandService = orderCommandService;
         this.quantumLockManager = quantumLockManager;
         this.eventPublisher = eventPublisher;
