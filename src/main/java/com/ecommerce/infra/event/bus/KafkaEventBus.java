@@ -1,10 +1,11 @@
 package com.ecommerce.infra.event.bus;
 
+import com.ecommerce.domain.event.EventBus;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,8 +13,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
-@Service
-public class KafkaEventBus {
+@Component
+public class KafkaEventBus implements EventBus {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final Map<String, List<Consumer<String>>> subscribers;
 
@@ -22,6 +23,7 @@ public class KafkaEventBus {
         this.subscribers = new HashMap<>();
     }
 
+    @Override
     public void publish(String topic, String event) {
         kafkaTemplate.send(topic, event);
         if (subscribers.containsKey(topic)) {
@@ -29,6 +31,7 @@ public class KafkaEventBus {
         }
     }
 
+    @Override
     public void subscribe(String topic, Consumer<String> eventHandler) {
         subscribers.computeIfAbsent(topic, k -> new ArrayList<>()).add(eventHandler);
     }

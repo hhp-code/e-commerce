@@ -27,6 +27,6 @@ public record OrderPayAfterEvent(
 
     @Override
     public String getEventType() {
-        return "PayAfter";
+        return "pay-after";
     }
 }

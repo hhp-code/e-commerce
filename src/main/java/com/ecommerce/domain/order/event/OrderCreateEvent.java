@@ -1,18 +1,21 @@
 package com.ecommerce.domain.order.event;
 
 import com.ecommerce.domain.event.DomainEvent;
+import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
-public record OrderCancelEvent(
+public record OrderCreateEvent(
         UUID eventId,
         LocalDateTime occurredOn,
-        Long orderId
+        Long userId,
+        List<OrderItemWrite> orderItems
 ) implements DomainEvent {
 
-    public OrderCancelEvent(Long orderId) {
-        this(UUID.randomUUID(), LocalDateTime.now(), orderId);
+    public OrderCreateEvent(Long userId, List<OrderItemWrite> orderItems) {
+        this(UUID.randomUUID(), LocalDateTime.now(), userId, orderItems);
     }
 
     @Override
@@ -27,7 +30,6 @@ public record OrderCancelEvent(
 
     @Override
     public String getEventType() {
-        return "order-cancel";
+        return "order-create";
     }
-
 }

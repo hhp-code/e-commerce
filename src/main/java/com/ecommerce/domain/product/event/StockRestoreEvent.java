@@ -1,19 +1,18 @@
-package com.ecommerce.domain.user.event;
+package com.ecommerce.domain.product.event;
 
 import com.ecommerce.domain.event.DomainEvent;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record PointChargeEvent(
+public record StockRestoreEvent(
         UUID eventId,
         LocalDateTime occurredOn,
-        Long userId,
-        BigDecimal pointChange
+        Long productId,
+        int quantityChange
 ) implements DomainEvent {
-    public PointChargeEvent(Long userId, BigDecimal pointChange) {
-        this(UUID.randomUUID(), LocalDateTime.now(), userId, pointChange);
+    public StockRestoreEvent(Long productId, int quantityChange) {
+        this(UUID.randomUUID(), LocalDateTime.now(), productId, quantityChange);
     }
 
     @Override
@@ -28,6 +27,6 @@ public record PointChargeEvent(
 
     @Override
     public String getEventType() {
-        return "PointCharge";
+        return "StockRestore";
     }
 }
