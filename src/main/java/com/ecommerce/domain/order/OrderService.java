@@ -1,9 +1,9 @@
 package com.ecommerce.domain.order;
 
 import com.ecommerce.domain.order.command.OrderCommandRepository;
+import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 import com.ecommerce.domain.order.query.OrderQuery;
 import com.ecommerce.domain.order.query.OrderQueryRepository;
-import com.ecommerce.domain.order.service.OrderDomainMapper;
 import com.ecommerce.infra.order.entity.OrderEntity;
 import com.ecommerce.interfaces.exception.domain.OrderException;
 import org.springframework.cache.annotation.CacheEvict;
@@ -52,5 +52,7 @@ public class OrderService {
                 .orElseThrow(() -> new OrderException.ServiceException("주문 저장에 실패하였습니다."));
         return OrderDomainMapper.toWriteModel(orderEntity);
     }
+
+
 
 }

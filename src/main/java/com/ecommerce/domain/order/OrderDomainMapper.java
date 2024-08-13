@@ -1,6 +1,5 @@
-package com.ecommerce.domain.order.service;
+package com.ecommerce.domain.order;
 
-import com.ecommerce.domain.order.*;
 import com.ecommerce.domain.order.orderitem.OrderItemRead;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 import com.ecommerce.infra.order.entity.OrderEntity;

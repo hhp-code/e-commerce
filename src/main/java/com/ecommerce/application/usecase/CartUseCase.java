@@ -3,10 +3,8 @@ package com.ecommerce.application.usecase;
 import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.domain.order.OrderWrite;
 import com.ecommerce.domain.order.command.OrderCommand;
-import com.ecommerce.domain.order.service.OrderDomainMapper;
-import com.ecommerce.domain.order.service.OrderInfo;
+import com.ecommerce.domain.order.OrderInfo;
 import com.ecommerce.domain.product.service.ProductService;
-import com.ecommerce.infra.order.entity.OrderEntity;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,15 +18,14 @@ public class CartUseCase {
     }
 
     public OrderInfo.Detail addItemToOrder(OrderCommand.Add command) {
-        OrderEntity orderEntity = orderService.getOrder(command.orderId());
-        OrderWrite afterExecute = command.execute(OrderDomainMapper.toWriteModel(orderEntity), productService);
-        OrderWrite execute = command.execute(afterExecute, productService);
+        OrderWrite orderEntity = orderService.getOrder(command.orderId());
+        OrderWrite execute = command.execute(orderEntity, productService);
         return OrderInfo.Detail.from(orderService.saveOrder(execute));
     }
 
     public OrderInfo.Detail deleteItemFromOrder(OrderCommand.Delete command) {
-        OrderEntity queryOrderEntity = orderService.getOrder(command.orderId());
-        OrderWrite execute = command.execute(OrderDomainMapper.toWriteModel(queryOrderEntity));
+        OrderWrite queryOrderEntity = orderService.getOrder(command.orderId());
+        OrderWrite execute = command.execute(queryOrderEntity);
         return OrderInfo.Detail.from(orderService.saveOrder(execute));
     }
 }

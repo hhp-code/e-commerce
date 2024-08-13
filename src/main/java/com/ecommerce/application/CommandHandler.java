@@ -37,8 +37,10 @@ public class CommandHandler {
             case OrderCommand.Create c -> handleCreateOrder(c);
             case OrderCommand.Payment p -> handlePayment(p);
             case OrderCommand.Cancel c -> handleCancelOrder(c);
-            case null, default ->
-                    throw new IllegalArgumentException("Unknown command type: " + command.getClass().getSimpleName());
+            case null, default -> {
+                assert command != null;
+                throw new IllegalArgumentException("Unknown command type: " + command.getClass().getSimpleName());
+            }
         };
 
         publishEvents(events);

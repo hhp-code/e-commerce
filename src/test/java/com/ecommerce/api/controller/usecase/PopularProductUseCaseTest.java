@@ -1,11 +1,10 @@
 package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.application.OrderFacade;
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.application.usecase.PopularProductUseCase;
 import com.ecommerce.domain.order.OrderService;
-import com.ecommerce.domain.order.command.OrderCommand;
-import com.ecommerce.domain.order.service.OrderInfo;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
@@ -53,6 +52,9 @@ class PopularProductUseCaseTest {
     @Autowired
     private PaymentUseCase paymentUseCase;
 
+    @Autowired
+    private OrderFacade orderFacade;
+
 
     @BeforeEach
     void setUp() {
@@ -93,11 +95,12 @@ class PopularProductUseCaseTest {
             for (int j = 0; j < random.nextInt(productCount)+1; j++) {
                 orderItems.put((long)random.nextInt(productCount) + 1, random.nextInt(10)+1);
             }
-            OrderCommand.Create command = new OrderCommand.Create(user.getId(), orderItems);
-            OrderInfo.Summary order1 = paymentUseCase.orderCommandService.createOrder(command, paymentUseCase);
-            long orderId = order1.orderId();
-            OrderCommand.Payment payment = new OrderCommand.Payment(orderId);
-            futures.add(CompletableFuture.runAsync(() -> paymentUseCase.payOrder(payment)));
+//            OrderItemWrite orderItemWrite = new OrderItemWrite();
+//            OrderCommand.Create command = new OrderCommand.Create(user.getId(), orderItems);
+//            OrderInfo.Summary order1 = orderFacade.createOrder(command);
+//            long orderId = order1.orderId();
+//            OrderCommand.Payment payment = new OrderCommand.Payment(orderId);
+//            futures.add(CompletableFuture.runAsync(() -> paymentUseCase.payOrder(payment)));
 //            paymentUseCase.payOrder(payment);
         }
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();

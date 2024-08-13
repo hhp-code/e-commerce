@@ -1,10 +1,12 @@
 package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.application.OrderFacade;
 import com.ecommerce.application.usecase.CartUseCase;
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.command.OrderCommand;
-import com.ecommerce.domain.order.service.OrderInfo;
+import com.ecommerce.domain.order.orderitem.OrderItemWrite;
+import com.ecommerce.domain.order.OrderInfo;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
@@ -16,7 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Map;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,6 +43,8 @@ class CartUseCaseTest {
 
     private User testUser;
     private Product testProduct;
+    @Autowired
+    private OrderFacade orderFacade;
 
     @BeforeEach
     void setUp(){
@@ -54,8 +58,10 @@ class CartUseCaseTest {
     void addCartItemToOrder_ShouldAddItemToExistingOrder_WhenValidCommandProvided() {
         //given
         OrderCommand.Add addCommand = new OrderCommand.Add(testUser.getId(), testProduct.getId(), 1);
-        OrderCommand.Create createCommand = new OrderCommand.Create(testUser.getId(), Map.of(testProduct.getId(), 1));
-        paymentUseCase.orderCommandService.createOrder(createCommand, paymentUseCase);
+        OrderItemWrite orderItemWrite = new OrderItemWrite(testProduct, 1);
+
+        OrderCommand.Create createCommand = new OrderCommand.Create(testUser.getId(), List.of(orderItemWrite));
+        orderFacade.createOrder(createCommand);
 
         //when
         OrderInfo.Detail result = cartUseCase.addItemToOrder(addCommand);

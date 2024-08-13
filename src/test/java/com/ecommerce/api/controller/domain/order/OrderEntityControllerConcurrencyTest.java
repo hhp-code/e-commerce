@@ -3,8 +3,9 @@ package com.ecommerce.api.controller.domain.order;
 import com.ecommerce.DatabaseCleanUp;
 import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.domain.order.OrderWrite;
-import com.ecommerce.domain.order.service.OrderDomainMapper;
+import com.ecommerce.domain.order.OrderDomainMapper;
 import com.ecommerce.infra.order.entity.OrderEntity;
+import com.ecommerce.infra.order.entity.OrderItemEntity;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
@@ -27,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -77,7 +77,7 @@ public class OrderEntityControllerConcurrencyTest {
 
         List<User> testUsers = userService.getAllUsers();
         for(User user : testUsers) {
-            Map<Product, Integer> items = Map.of(testProduct, 1);
+            List<OrderItemEntity> items = new ArrayList<>();
             OrderEntity orderEntity = new OrderEntity(user, items);
             OrderWrite writeModel = OrderDomainMapper.toWriteModel(orderEntity);
             orderService.saveOrder(writeModel);

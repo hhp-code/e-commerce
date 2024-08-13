@@ -6,7 +6,7 @@ import com.ecommerce.domain.order.OrderWrite;
 import com.ecommerce.domain.order.event.OrderPayAfterEvent;
 import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.order.command.OrderCommand;
-import com.ecommerce.domain.order.service.OrderInfo;
+import com.ecommerce.domain.order.OrderInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

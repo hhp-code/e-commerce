@@ -1,6 +1,7 @@
 package com.ecommerce.api.controller.domain.order;
 
 import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
@@ -18,6 +19,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -59,9 +61,8 @@ class OrderEntityControllerIntegrationTest {
     void createOrder() throws Exception {
         testProduct = productService.saveAndGet(new Product("testProduct1", BigDecimal.valueOf(100), 10));
         testUser = userService.saveUser(new User("testUser1", BigDecimal.valueOf(1000)));
-        Map<Long, Integer> createOrderRequest = Map.of(testProduct.getId(), 1);
-        orderCreateRequest = new OrderDto.OrderCreateRequest(testUser.getId(), createOrderRequest);
-        OrderDto.OrderCreateRequest orderCreateRequest = new OrderDto.OrderCreateRequest(testUser.getId(), Map.of(testProduct.getId(), 3));
+        OrderItemWrite orderItemWrite = new OrderItemWrite(testProduct, 1);
+        orderCreateRequest = new OrderDto.OrderCreateRequest(testUser.getId(), List.of(orderItemWrite));
         mockMvc.perform(post("/api/orders")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(orderCreateRequest)))
@@ -74,9 +75,10 @@ class OrderEntityControllerIntegrationTest {
     void createOrderWithInsufficientStock() throws Exception {
         testProduct = productService.saveAndGet(new Product("testProduct1", BigDecimal.valueOf(100), 10));
         testUser = userService.saveUser(new User("testUser1", BigDecimal.valueOf(1000)));
+        List<OrderItemWrite> orderItems = List.of(new OrderItemWrite(testProduct, 11));
         Map<Long, Integer> createOrderRequest = Map.of(testProduct.getId(), 11);
-        orderCreateRequest = new OrderDto.OrderCreateRequest(testUser.getId(), createOrderRequest);
-        OrderDto.OrderCreateRequest orderCreateRequest = new OrderDto.OrderCreateRequest(testUser.getId(), createOrderRequest);
+        orderCreateRequest = new OrderDto.OrderCreateRequest(testUser.getId(), orderItems);
+        OrderDto.OrderCreateRequest orderCreateRequest = new OrderDto.OrderCreateRequest(testUser.getId(), orderItems);
 
         mockMvc.perform(post("/api/orders")
                         .contentType("application/json")
@@ -90,8 +92,8 @@ class OrderEntityControllerIntegrationTest {
     void getOrder() throws Exception {
         Product testProduct = productService.saveAndGet(new Product("testProduct2", BigDecimal.valueOf(100), 10));
         User testUser = userService.saveUser(new User("testUser2", BigDecimal.valueOf(1000)));
-        Map<Long, Integer> createOrderRequest = Map.of(testProduct.getId(), 1);
-        orderCreateRequest = new OrderDto.OrderCreateRequest(testUser.getId(), createOrderRequest);
+        List<OrderItemWrite> orderItems = List.of(new OrderItemWrite(testProduct, 1));
+        orderCreateRequest = new OrderDto.OrderCreateRequest(testUser.getId(), orderItems);
         ResultActions perform = mockMvc.perform(post("/api/orders")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(orderCreateRequest)));
@@ -131,8 +133,8 @@ class OrderEntityControllerIntegrationTest {
     void payOrder() throws Exception {
         testProduct = productService.saveAndGet(new Product("testProduct3", BigDecimal.valueOf(100), 10));
         testUser = userService.saveUser(new User("testUser3", BigDecimal.valueOf(1000)));
-        Map<Long, Integer> createOrderRequest = Map.of(testProduct.getId(), 1);
-        orderCreateRequest = new OrderDto.OrderCreateRequest(testUser.getId(), createOrderRequest);
+        List<OrderItemWrite> orderItems = List.of(new OrderItemWrite(testProduct, 1));
+        orderCreateRequest = new OrderDto.OrderCreateRequest(testUser.getId(), orderItems);
         mockMvc.perform(post("/api/orders")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(orderCreateRequest)));
@@ -160,8 +162,8 @@ class OrderEntityControllerIntegrationTest {
     void payOrderWithInvalidRequest() throws Exception {
         testProduct = productService.saveAndGet(new Product("testProduct4", BigDecimal.valueOf(100), 10));
         testUser = userService.saveUser(new User("testUser4", BigDecimal.valueOf(1000)));
-        Map<Long, Integer> createOrderRequest = Map.of(testProduct.getId(), 1);
-        orderCreateRequest = new OrderDto.OrderCreateRequest(testUser.getId(), createOrderRequest);
+        List<OrderItemWrite> orderItems = List.of(new OrderItemWrite(testProduct, 1));
+        orderCreateRequest = new OrderDto.OrderCreateRequest(testUser.getId(), orderItems);
         mockMvc.perform(post("/api/orders")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(orderCreateRequest)));

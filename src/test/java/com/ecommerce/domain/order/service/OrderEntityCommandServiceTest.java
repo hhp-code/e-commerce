@@ -1,13 +1,12 @@
 package com.ecommerce.domain.order.service;
 
 import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.application.OrderFacade;
 import com.ecommerce.application.usecase.PaymentUseCase;
-import com.ecommerce.domain.order.OrderRead;
-import com.ecommerce.domain.order.OrderWrite;
+import com.ecommerce.domain.order.*;
 import com.ecommerce.domain.order.command.OrderCommand;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 import com.ecommerce.domain.order.query.OrderQuery;
-import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.infra.order.entity.OrderEntity;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
@@ -24,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,6 +34,8 @@ class OrderEntityCommandServiceTest {
     private DatabaseCleanUp databaseCleanUp;
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private OrderFacade orderFacade;
 
     @AfterEach
     void tearDown() {
@@ -66,7 +66,7 @@ class OrderEntityCommandServiceTest {
         testUser = userService.saveUser(user);
         testProduct = productService.saveAndGet(product);
         OrderItemWrite orderItem = new OrderItemWrite(testProduct, 1);
-        OrderEntity orderEntity = new OrderEntity(testUser, List.of(orderItem));
+        OrderEntity orderEntity = new OrderEntity(testUser, List.of());
         OrderWrite orderWrite = OrderDomainMapper.toWriteModel(orderEntity);
         testOrderWrite = orderCommandService.saveOrder(orderWrite);
     }
@@ -75,7 +75,7 @@ class OrderEntityCommandServiceTest {
     @DisplayName("주문 ID로 주문을 조회한다")
     void getOrder_ShouldReturnOrder_WhenOrderExists() {
 
-        OrderEntity result = orderService.getOrder(testOrderWrite.getId());
+        OrderWrite result = orderService.getOrder(testOrderWrite.getId());
 
         assertNotNull(result);
         assertEquals(testOrderWrite.getId(), result.getId());
@@ -96,9 +96,10 @@ class OrderEntityCommandServiceTest {
     @Test
     @DisplayName("새로운 주문을 생성한다")
     void createOrder_ShouldCreateNewOrder_WhenValidCommandProvided() {
-        OrderCommand.Create createCommand = new OrderCommand.Create(testUser.getId(), Map.of(testProduct.getId(), 1));
+        OrderItemWrite orderItem = new OrderItemWrite(testProduct, 1);
+        OrderCommand.Create createCommand = new OrderCommand.Create(testUser.getId(), List.of(orderItem));
 
-        OrderInfo.Summary result = paymentUseCase.orderCommandService.createOrder(createCommand, paymentUseCase);
+        OrderInfo.Summary result = orderFacade.createOrder(createCommand);
 
         assertNotNull(result);
         assertEquals("PREPARED", result.status());

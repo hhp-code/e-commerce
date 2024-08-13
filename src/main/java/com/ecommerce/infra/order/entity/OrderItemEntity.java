@@ -18,6 +18,10 @@ public class OrderItemEntity {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private OrderEntity order;
+
     private Integer quantity;
 
 

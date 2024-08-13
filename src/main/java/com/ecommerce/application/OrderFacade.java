@@ -1,11 +1,11 @@
 package com.ecommerce.application;
 
+import com.ecommerce.domain.order.OrderInfo;
 import com.ecommerce.domain.order.command.OrderCommand;
 import com.ecommerce.domain.order.query.OrderQuery;
 import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.domain.order.OrderRead;
 import com.ecommerce.domain.order.OrderWrite;
-import com.ecommerce.domain.order.service.*;
 import com.ecommerce.domain.user.service.UserService;
 import org.springframework.stereotype.Component;
 

@@ -4,6 +4,7 @@ import com.ecommerce.application.OrderFacade;
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.command.OrderCommand;
 import com.ecommerce.domain.order.OrderService;
+import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
@@ -16,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -46,9 +48,10 @@ public class OrderEntityCacheTest {
         userService.saveUser(new User(1L, "TestUser", BigDecimal.valueOf(1000)));
         productService.saveAndGet(new Product(1L, "TestProduct", BigDecimal.valueOf(1000), 10));
         Long productId = 1L;
-        Map<Long, Integer> items = Map.of(productId, 1);
-        OrderCommand.Create createOrderCommand = new OrderCommand.Create(1L, items);
-        orderFacade.createOrder(createOrderCommand, paymentUseCase);
+        Product product = productService.getProduct(productId);
+        List<OrderItemWrite> orderItems = List.of(new OrderItemWrite(product, 1));
+        OrderCommand.Create createOrderCommand = new OrderCommand.Create(1L, orderItems);
+        orderFacade.createOrder(createOrderCommand);
     }
 
     @Test

@@ -1,9 +1,14 @@
 package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.application.OrderFacade;
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.application.UserFacade;
 import com.ecommerce.config.QuantumLockManager;
+import com.ecommerce.domain.event.DomainEventPublisher;
+import com.ecommerce.domain.order.OrderWrite;
+import com.ecommerce.domain.order.orderitem.OrderItemWrite;
+import com.ecommerce.domain.order.OrderDomainMapper;
 import com.ecommerce.infra.order.entity.OrderEntity;
 import com.ecommerce.domain.order.OrderStatus;
 import com.ecommerce.domain.order.command.OrderCommand;
@@ -25,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -48,6 +52,10 @@ class PaymentUseCaseConcurrencyTest {
     private UserFacade userFacade;
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private DomainEventPublisher domainEventPublisher;
+    @Autowired
+    private OrderFacade orderFacade;
 
     @AfterEach
     void tearDown() {
@@ -56,8 +64,6 @@ class PaymentUseCaseConcurrencyTest {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private OrderService orderCommandService;
     @Autowired
     private ProductService productService;
     @Mock
@@ -80,17 +86,19 @@ class PaymentUseCaseConcurrencyTest {
         for (int i = 0; i < 10; i++) {
             User user = userService.saveUser(new User("testUser" + i, BigDecimal.valueOf(20)));
             testUsers.add(user);
-            Map<Product, Integer> orderItem = Map.of(testProduct, 1);
-            testOrderEntities.add(orderCommandService.saveOrder(new OrderEntity(user, orderItem)));
+            OrderItemWrite orderItemWrite = new OrderItemWrite(testProduct, 1);
+            OrderWrite orderItemWrite1 = new OrderWrite(user, List.of(orderItemWrite));
+            testOrderEntities.add(OrderDomainMapper.toEntity(orderService.saveOrder(orderItemWrite1)));
         }
 
-        when(dummyPlatform.send(any(OrderEntity.class))).thenReturn(true);
+        when(dummyPlatform.send(any(com.ecommerce.domain.order.event.OrderPayAfterEvent.class))).thenReturn(true);
 
-        paymentUseCase = new PaymentUseCase(orderCommandService,
-                quantumLockManager);
+        paymentUseCase = new PaymentUseCase(orderService,
+                quantumLockManager,domainEventPublisher);
         for(OrderEntity orderEntity : testOrderEntities) {
-            OrderCommand.Create orderCreate = new OrderCommand.Create(orderEntity.getId(), Map.of(testProduct.getId(), 1));
-            paymentUseCase.orderCommandService.createOrder(orderCreate, paymentUseCase);
+            OrderItemWrite orderItemWrite = new OrderItemWrite(testProduct, 1);
+            OrderCommand.Create orderCreate = new OrderCommand.Create(orderEntity.getId(), List.of(orderItemWrite));
+            orderFacade.createOrder(orderCreate);
         }
     }
 
@@ -134,7 +142,7 @@ class PaymentUseCaseConcurrencyTest {
         // 사용자 포인트 및 주문 상태 확인
         for (int i = 0; i < concurrentRequests; i++) {
             User user = userService.getUser(testUsers.get(i).getId());
-            OrderEntity orderEntity = orderService.getOrder(testOrderEntities.get(i).getId());
+            OrderWrite orderEntity = orderService.getOrder(testOrderEntities.get(i).getId());
             if (Objects.equals(orderEntity.getOrderStatus(), OrderStatus.ORDERED.name())) {
                 assertThat(BigDecimal.TEN ).isEqualByComparingTo(user.getPoint());
             } else {
