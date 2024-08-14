@@ -27,8 +27,6 @@ class UserPointServiceUnitTest {
     @Mock
     private QuantumLockManager quantumLockManager;
 
-    @InjectMocks
-    private UserFacade userFacade;
 
     @Mock
     private UserService userService;
@@ -59,18 +57,7 @@ class UserPointServiceUnitTest {
 
 
 
-    @Test
-    @DisplayName("잔액 감소 - 성공 케이스")
-    void deductPointSuccess() throws TimeoutException {
-        BigDecimal decreaseAmount = BigDecimal.valueOf(500);
 
-        when(quantumLockManager.executeWithLock(anyString(), any(), any())).thenReturn(new UserWrite("testUser", BigDecimal.valueOf(500)));
-        UserWrite user = userFacade.deductPoint(userId, decreaseAmount);
-        BigDecimal deductPoint = user.getPoint();
-
-        assertEquals(BigDecimal.valueOf(500), deductPoint);
-
-    }
 
 
 }

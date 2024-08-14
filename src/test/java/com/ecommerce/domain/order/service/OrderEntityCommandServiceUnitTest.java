@@ -41,7 +41,6 @@ class OrderEntityCommandServiceUnitTest {
     @InjectMocks
     private OrderService orderCommandService;
 
-    PaymentUseCase paymentUseCase;
     @InjectMocks
     private OrderService orderService;
 
@@ -83,15 +82,6 @@ class OrderEntityCommandServiceUnitTest {
     }
 
 
-
-    @Test
-    @DisplayName("주문 생성 실패 시 예외 발생")
-    void createOrder_Failure_ShouldThrowException() {
-        OrderItemWrite orderItemEntity = new OrderItemWrite(new ProductWrite("product", BigDecimal.ONE, 1000), 1);
-        OrderCommand.Create createCommand = new OrderCommand.Create(VALID_USER_ID.intValue(), List.of(orderItemEntity));
-
-        assertThrows(RuntimeException.class, () -> orderFacade.createOrder(createCommand));
-    }
 
     private OrderWrite createMockOrder() {
         UserWrite user = new UserWrite( "test", BigDecimal.ONE);

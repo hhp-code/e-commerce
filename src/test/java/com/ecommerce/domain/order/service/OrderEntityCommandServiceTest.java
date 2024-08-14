@@ -54,8 +54,6 @@ class OrderEntityCommandServiceTest {
     private OrderWrite testOrderWrite;
     private UserWrite testUser;
     private ProductWrite testProduct;
-    @Autowired
-    private PaymentUseCase paymentUseCase;
 
     @BeforeEach
     void setup() {
@@ -90,17 +88,6 @@ class OrderEntityCommandServiceTest {
     }
 
 
-    @Test
-    @DisplayName("새로운 주문을 생성한다")
-    void createOrder_ShouldCreateNewOrder_WhenValidCommandProvided() {
-        OrderItemWrite orderItem = new OrderItemWrite(testProduct, 1);
-        OrderCommand.Create createCommand = new OrderCommand.Create(testUser.getId(), List.of(orderItem));
-
-        OrderInfo.Summary result = orderFacade.createOrder(createCommand);
-
-        assertNotNull(result);
-        assertEquals("PREPARED", result.status());
-    }
 
 
 

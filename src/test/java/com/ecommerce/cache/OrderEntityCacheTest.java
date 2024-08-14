@@ -35,8 +35,6 @@ public class OrderEntityCacheTest {
     @Autowired
     private ProductService productService;
     @Autowired
-    private PaymentUseCase paymentUseCase;
-    @Autowired
     private OrderService orderService;
     @Autowired
     private OrderFacade orderFacade;
@@ -49,7 +47,6 @@ public class OrderEntityCacheTest {
         ProductWrite product = productService.getProduct(productId);
         List<OrderItemWrite> orderItems = List.of(new OrderItemWrite(product, 1));
         OrderCommand.Create createOrderCommand = new OrderCommand.Create(1L, orderItems);
-        orderFacade.createOrder(createOrderCommand);
     }
 
     @Test

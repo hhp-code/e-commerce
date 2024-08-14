@@ -52,11 +52,7 @@ class OrderEntityControllerTest {
     @MockBean
     private OrderService orderCommandService;
 
-    @MockBean
-    private PaymentUseCase paymentUseCase;
 
-    @MockBean
-    private CartUseCase cartUseCase;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -83,7 +79,6 @@ class OrderEntityControllerTest {
     void createOrder_Success() throws Exception {
 
         OrderInfo.Summary orderInfo = OrderInfo.Summary.from(orderEntity);
-        when(orderFacade.createOrder(any(OrderCommand.Create.class))).thenReturn(orderInfo);
 
 
         mockMvc.perform(post(API_ORDERS)
@@ -125,7 +120,6 @@ class OrderEntityControllerTest {
 
         OrderInfo.Detail orderInfo = OrderInfo.Detail.from(orderEntity
         );
-        when(paymentUseCase.payOrder(OrderMapper.toOrderPay(request))).thenReturn(orderInfo);
 
         mockMvc.perform(post(API_ORDERS_PAYMENTS)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -143,7 +137,6 @@ class OrderEntityControllerTest {
         OrderWrite orderEntity = createSampleOrder();
         OrderInfo.Detail orderInfo = OrderInfo.Detail.from(orderEntity);
 
-        when(cartUseCase.addItemToOrder(request)).thenReturn(orderInfo);
 
         mockMvc.perform(patch(API_ORDERS +"/{orderId}"+"/items", orderEntity.getId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -159,7 +152,6 @@ class OrderEntityControllerTest {
         OrderWrite orderEntity = createSampleOrder();
         OrderInfo.Detail orderInfo = OrderInfo.Detail.from(orderEntity);
 
-        when(cartUseCase.deleteItemFromOrder(request)).thenReturn(orderInfo);
 
         mockMvc.perform(delete(API_ORDERS +"/{orderID}"+ "/items", orderEntity.getId())
                         .contentType(MediaType.APPLICATION_JSON)

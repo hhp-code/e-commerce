@@ -38,8 +38,6 @@ class UserPointControllerConcurrencyTest {
     private UserService userService;
 
 
-    @Autowired
-    private UserFacade userPointService;
 
     private UserWrite testUser;
 

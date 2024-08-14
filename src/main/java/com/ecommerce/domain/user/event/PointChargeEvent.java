@@ -28,6 +28,6 @@ public record PointChargeEvent(
 
     @Override
     public String getEventType() {
-        return "PointRestore";
+        return "point-charge";
     }
 }

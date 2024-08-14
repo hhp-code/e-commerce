@@ -48,8 +48,6 @@ class PopularProductUseCaseTest {
     @Autowired
     private OrderService orderCommandService;
 
-    @Autowired
-    private PaymentUseCase paymentUseCase;
 
     @Autowired
     private OrderFacade orderFacade;

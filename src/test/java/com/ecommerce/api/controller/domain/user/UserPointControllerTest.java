@@ -29,15 +29,12 @@ class UserPointControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
-    private UserFacade userFacade;
 
     @MockBean
     private UserService userService;
 
     @BeforeEach
     void setUp() {
-        when(userFacade.chargePoint(any(), any())).thenReturn(new UserWrite("test", BigDecimal.valueOf(1000)));
         when(userService.getPoint(any())).thenReturn(new UserWrite("test", BigDecimal.valueOf(0)));
 
     }

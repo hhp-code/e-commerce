@@ -114,7 +114,7 @@ public class EventHandler {
         }
     }
 
-    @KafkaListener(topics = "stock-restore", groupId = "ecommerce-group")
+    @KafkaListener(topics = "stock-charge", groupId = "ecommerce-group")
     public void handleStockRestoreEvent(String eventJson) {
         try {
             StockChargeEvent event = objectMapper.readValue(eventJson, StockChargeEvent.class);
@@ -125,7 +125,7 @@ public class EventHandler {
         }
     }
 
-    @KafkaListener(topics = "point-restore", groupId = "ecommerce-group")
+    @KafkaListener(topics = "point-charge", groupId = "ecommerce-group")
     public void handlePointRestoreEvent(String eventJson) {
         try {
             PointChargeEvent event = objectMapper.readValue(eventJson, PointChargeEvent.class);

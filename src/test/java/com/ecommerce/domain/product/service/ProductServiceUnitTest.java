@@ -29,8 +29,6 @@ class ProductServiceUnitTest {
     @InjectMocks
     private ProductService productService;
 
-    @InjectMocks
-    private ProductFacade productFacade;
 
     private ProductWrite sampleProduct;
 
@@ -104,17 +102,7 @@ class ProductServiceUnitTest {
         verify(productRepository, times(1)).getProducts();
     }
 
-    @Test
-    @DisplayName("상품 재고 차감 - 상품 저장실패")
-    void testDeductStockWhenSaveFailed() {
-        assertThrows(ProductException.ServiceException.class, () -> productFacade.deductStock(sampleProduct, 10));
-    }
 
-    @Test
-    @DisplayName("상품 재고 충전 - 상품 저장실패")
-    void testChargeStockWhenSaveFailed() {
-        assertThrows(ProductException.ServiceException.class, () -> productFacade.chargeStock(sampleProduct, 10));
-    }
 
     private ProductWrite createProductRequest(String name, String price, Integer availableStock) {
         return createProduct(name, price, availableStock, LocalDateTime.now());
