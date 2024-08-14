@@ -1,7 +1,7 @@
 package com.ecommerce.domain.coupon.service;
 
 import com.ecommerce.DatabaseCleanUp;
-import com.ecommerce.domain.coupon.Coupon;
+import com.ecommerce.domain.coupon.CouponWrite;
 import com.ecommerce.domain.coupon.DiscountType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +48,7 @@ class CouponServiceTest {
     @DisplayName("쿠폰 생성 성공 시나리오")
     void createCoupon() {
         // given //when
-        Coupon coupon = couponService.createCoupon(create);
+        CouponWrite coupon = couponService.createCoupon(create);
 
         //then
         assertNotNull(coupon);
@@ -61,10 +61,10 @@ class CouponServiceTest {
     @DisplayName("쿠폰 조회 성공 시나리오")
     void getCoupon() {
         //given
-        Coupon coupon1 = couponService.createCoupon(create);
+        CouponWrite coupon1 = couponService.createCoupon(create);
 
         //when
-        Coupon coupon = couponService.getCoupon(1L);
+        CouponWrite coupon = couponService.getCoupon(1L);
 
         //then
         assertThat(coupon1).isNotNull();

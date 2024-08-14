@@ -1,7 +1,7 @@
 package com.ecommerce.interfaces.controller.domain.coupon.dto;
 
+import com.ecommerce.domain.coupon.CouponWrite;
 import com.ecommerce.domain.coupon.service.CouponCommand;
-import com.ecommerce.domain.coupon.Coupon;
 
 import java.time.Instant;
 
@@ -11,15 +11,15 @@ public class CouponMapper {
                 request.validFrom(), request.validTo(), request.active());
     }
 
-    public static CouponDto.CouponResponse toCouponResponse(Coupon coupon) {
+    public static CouponDto.CouponResponse toCouponResponse(CouponWrite coupon) {
         return new CouponDto.CouponResponse( coupon.getCode(), coupon.getDiscountAmount(),
                 coupon.getValidFrom(), coupon.getValidTo(), coupon.getActive());
 
     }
 
 
-    public static CouponDto.CouponDetailResponse toCouponDetailResponse(Coupon coupon) {
-        return new CouponDto.CouponDetailResponse(coupon.getId(), coupon.getCode(), coupon.getDiscountAmount(), coupon.getQuantity(),
+    public static CouponDto.CouponDetailResponse toCouponDetailResponse(CouponWrite coupon) {
+        return new CouponDto.CouponDetailResponse( coupon.getCode(), coupon.getDiscountAmount(), coupon.getQuantity(),
                 coupon.getValidFrom(), coupon.getValidTo(), coupon.getActive());
     }
 

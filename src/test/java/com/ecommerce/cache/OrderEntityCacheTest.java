@@ -1,13 +1,12 @@
 package com.ecommerce.cache;
 
 import com.ecommerce.application.OrderFacade;
-import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.command.OrderCommand;
 import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
-import com.ecommerce.domain.product.Product;
+import com.ecommerce.domain.product.ProductWrite;
 import com.ecommerce.domain.product.service.ProductService;
-import com.ecommerce.domain.user.User;
+import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.domain.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,6 @@ import org.springframework.cache.CacheManager;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -45,10 +43,10 @@ public class OrderEntityCacheTest {
 
     @BeforeEach
     void setUp() {
-        userService.saveUser(new User(1L, "TestUser", BigDecimal.valueOf(1000)));
-        productService.saveAndGet(new Product(1L, "TestProduct", BigDecimal.valueOf(1000), 10));
+        userService.saveUser(new UserWrite("TestUser", BigDecimal.valueOf(1000)));
+        productService.saveAndGet(new ProductWrite("TestProduct", BigDecimal.valueOf(1000), 10));
         Long productId = 1L;
-        Product product = productService.getProduct(productId);
+        ProductWrite product = productService.getProduct(productId);
         List<OrderItemWrite> orderItems = List.of(new OrderItemWrite(product, 1));
         OrderCommand.Create createOrderCommand = new OrderCommand.Create(1L, orderItems);
         orderFacade.createOrder(createOrderCommand);

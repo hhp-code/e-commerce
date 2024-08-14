@@ -1,8 +1,7 @@
 package com.ecommerce.domain.user.service;
 
 import com.ecommerce.DatabaseCleanUp;
-import com.ecommerce.application.UserFacade;
-import com.ecommerce.domain.user.User;
+import com.ecommerce.domain.user.UserWrite;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,14 +35,14 @@ class UserPointServiceConcurrencyTest {
     @Autowired
     private UserService userService;
 
-    private User charge;
-    private User deduct;
+    private UserWrite charge;
+    private UserWrite deduct;
 
     @BeforeEach
     @Transactional
     void setUp() {
-        charge = userService.saveUser( new User("testChargeUser", BigDecimal.valueOf(100)));
-        deduct = userService.saveUser(new User("testDeductUser", BigDecimal.valueOf(100)));
+        charge = userService.saveUser( new UserWrite("testChargeUser", BigDecimal.valueOf(100)));
+        deduct = userService.saveUser(new UserWrite("testDeductUser", BigDecimal.valueOf(100)));
     }
 
 

@@ -1,10 +1,12 @@
 package com.ecommerce.api.controller.domain.user;
 
-import com.ecommerce.domain.coupon.Coupon;
+import com.ecommerce.domain.coupon.CouponWrite;
 import com.ecommerce.domain.coupon.DiscountType;
 import com.ecommerce.domain.coupon.service.CouponService;
-import com.ecommerce.domain.user.User;
+import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.domain.user.service.UserService;
+import com.ecommerce.infra.coupon.entity.CouponEntity;
+import com.ecommerce.infra.user.entity.UserEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -43,15 +45,15 @@ class UserCouponControllerIntegrationTest {
     private CouponService couponService;
 
 
-    private User testUser;
-    private Coupon testCoupon;
+    private UserWrite testUser;
+    private CouponWrite testCoupon;
 
     @BeforeEach
     @Transactional
     void setUp(){
-        testCoupon = new Coupon(1L, "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
-        couponService.save(testCoupon);
-        testUser = new User(1L,"test", BigDecimal.ZERO, List.of(testCoupon));
+        testCoupon = new CouponWrite( "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
+        couponService.saveCoupon(testCoupon);
+        testUser = new UserWrite(1L,"test", BigDecimal.ZERO, List.of(testCoupon));
         userService.saveUser(testUser);
     }
 

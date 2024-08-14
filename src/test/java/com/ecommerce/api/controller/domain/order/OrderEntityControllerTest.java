@@ -1,20 +1,16 @@
 package com.ecommerce.api.controller.domain.order;
 
 import com.ecommerce.application.OrderFacade;
+import com.ecommerce.domain.order.OrderWrite;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
-import com.ecommerce.domain.order.OrderDomainMapper;
-import com.ecommerce.infra.order.entity.OrderEntity;
+import com.ecommerce.domain.product.ProductWrite;
+import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.domain.order.OrderInfo;
 import com.ecommerce.domain.order.OrderService;
-import com.ecommerce.infra.order.entity.OrderItemEntity;
 import com.ecommerce.interfaces.controller.domain.order.OrderController;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderMapper;
-import com.ecommerce.application.usecase.CartUseCase;
 import com.ecommerce.domain.order.command.OrderCommand;
-import com.ecommerce.application.usecase.PaymentUseCase;
-import com.ecommerce.domain.product.Product;
-import com.ecommerce.domain.user.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -64,14 +60,14 @@ class OrderEntityControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-    private final Product product = new Product(1L,"product", PRODUCT_PRICE, PRODUCT_STOCK);
+    private final ProductWrite product = new ProductWrite("product", PRODUCT_PRICE, PRODUCT_STOCK);
 
-    private final Map<Product, Integer> items = Map.of(product, 1);
+    private final Map<ProductWrite, Integer> items = Map.of(product, 1);
     private final Map<Long, Integer> create = Map.of(PRODUCT_ID, 1);
     List<OrderItemWrite> orderItems = List.of(new OrderItemWrite(product, 1));
     private final OrderCommand.Create request = new OrderCommand.Create(VALID_USER_ID, orderItems);
-    OrderItemEntity orderItemEntity = new OrderItemEntity(product, 1);
-    private final OrderEntity orderEntity = new OrderEntity( new User(VALID_USER_ID, "test", PRODUCT_PRICE), List.of(orderItemEntity));
+    OrderItemWrite orderItemEntity = new OrderItemWrite(product, 1);
+    private final OrderWrite orderEntity = new OrderWrite( new UserWrite("test", PRODUCT_PRICE), List.of(orderItemEntity));
     private OrderService orderService;
     @Autowired
     private OrderFacade orderFacade;
@@ -86,8 +82,7 @@ class OrderEntityControllerTest {
     @DisplayName("주문 생성 - 성공")
     void createOrder_Success() throws Exception {
 
-        OrderInfo.Summary orderInfo = OrderInfo.Summary.from(
-                OrderDomainMapper.toWriteModel(orderEntity));
+        OrderInfo.Summary orderInfo = OrderInfo.Summary.from(orderEntity);
         when(orderFacade.createOrder(any(OrderCommand.Create.class))).thenReturn(orderInfo);
 
 
@@ -126,10 +121,9 @@ class OrderEntityControllerTest {
     @DisplayName("결제 요청 - 결제 성공")
     void payOrder_Success() throws Exception {
         OrderDto.OrderPayRequest request = new OrderDto.OrderPayRequest(ORDER_ID);
-        OrderEntity orderEntity = createSampleOrder();
+        OrderWrite orderEntity = createSampleOrder();
 
-        OrderInfo.Detail orderInfo = OrderInfo.Detail.from(
-                OrderDomainMapper.toWriteModel(orderEntity)
+        OrderInfo.Detail orderInfo = OrderInfo.Detail.from(orderEntity
         );
         when(paymentUseCase.payOrder(OrderMapper.toOrderPay(request))).thenReturn(orderInfo);
 
@@ -146,9 +140,8 @@ class OrderEntityControllerTest {
     @DisplayName("주문 상품 추가")
     void addCartItemToOrder_Success() throws Exception {
         OrderCommand.Add request = new OrderCommand.Add(VALID_USER_ID, ORDER_ID, 1);
-        OrderEntity orderEntity = createSampleOrder();
-        OrderInfo.Detail orderInfo = OrderInfo.Detail.from(
-                OrderDomainMapper.toWriteModel(orderEntity));
+        OrderWrite orderEntity = createSampleOrder();
+        OrderInfo.Detail orderInfo = OrderInfo.Detail.from(orderEntity);
 
         when(cartUseCase.addItemToOrder(request)).thenReturn(orderInfo);
 
@@ -163,9 +156,8 @@ class OrderEntityControllerTest {
     @DisplayName("주문 상품 삭제")
     void deleteCartItemToOrder_Success() throws Exception {
         OrderCommand.Delete request = new OrderCommand.Delete(ORDER_ID,PRODUCT_ID);
-        OrderEntity orderEntity = createSampleOrder();
-        OrderInfo.Detail orderInfo = OrderInfo.Detail.from(
-                OrderDomainMapper.toWriteModel(orderEntity));
+        OrderWrite orderEntity = createSampleOrder();
+        OrderInfo.Detail orderInfo = OrderInfo.Detail.from(orderEntity);
 
         when(cartUseCase.deleteItemFromOrder(request)).thenReturn(orderInfo);
 
@@ -176,10 +168,8 @@ class OrderEntityControllerTest {
                 .andExpect(jsonPath("$.id").value(VALID_USER_ID));
     }
 
-    private OrderEntity createSampleOrder() {
-        User user = new User(VALID_USER_ID, "test", PRODUCT_PRICE);
-        OrderEntity orderEntity = new OrderEntity(user,List.of(orderItemEntity));
-        user.addOrder(orderEntity);
-        return orderEntity;
+    private OrderWrite createSampleOrder() {
+        UserWrite user = new UserWrite( "test", PRODUCT_PRICE);
+        return new OrderWrite(user,List.of(orderItemEntity));
     }
 }

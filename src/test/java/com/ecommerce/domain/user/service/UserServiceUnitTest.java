@@ -1,8 +1,9 @@
 package com.ecommerce.domain.user.service;
 
-import com.ecommerce.domain.coupon.Coupon;
-import com.ecommerce.domain.user.User;
+import com.ecommerce.domain.coupon.CouponWrite;
+import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.domain.user.service.repository.UserRepository;
+import com.ecommerce.infra.user.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,11 +28,11 @@ public class UserServiceUnitTest {
     private UserRepository userRepository;
     @InjectMocks
     private UserService userService;
-    private List<Coupon> testCoupons;
+    private List<CouponWrite> testCoupons;
 
     @BeforeEach
     void setUp() {
-        testCoupons = Arrays.asList(new Coupon(), new Coupon());
+        testCoupons = Arrays.asList(new CouponWrite(), new CouponWrite());
     }
 
     @Test
@@ -40,11 +41,11 @@ public class UserServiceUnitTest {
         // Given
         Long userId = 1L;
         when(userRepository.getById(userId)).thenReturn(
-                Optional.of(new User(userId, "testUser", BigDecimal.ZERO, testCoupons))
+                Optional.of(new UserEntity(userId, "testUser", BigDecimal.ZERO, testCoupons))
         );
 
         // When
-        List<Coupon> result = userService.getUserCoupons(userId);
+        List<CouponWrite> result = userService.getUserCoupons(userId);
 
         // Then
         assertNotNull(result);

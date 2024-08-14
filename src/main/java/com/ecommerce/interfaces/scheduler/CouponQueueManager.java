@@ -4,7 +4,7 @@ import com.ecommerce.application.usecase.CouponUseCase;
 import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.coupon.service.CouponCommand;
 import com.ecommerce.domain.coupon.service.CouponService;
-import com.ecommerce.domain.user.User;
+import com.ecommerce.domain.user.UserWrite;
 import jakarta.annotation.PreDestroy;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ public class CouponQueueManager {
     private static final long SHUTDOWN_TIMEOUT = 60L;
 
     @Getter
-    private final Map<Long, CompletableFuture<User>> userFutureMap = new ConcurrentHashMap<>();
+    private final Map<Long, CompletableFuture<UserWrite>> userFutureMap = new ConcurrentHashMap<>();
 
     private final ExecutorService executorService;
     private final PriorityBlockingQueue<CouponCommand.Issue> couponQueue;
@@ -46,9 +46,9 @@ public class CouponQueueManager {
         startProcessingQueue();
     }
 
-    public User addToQueueAsync(CouponCommand.Issue issue) {
+    public UserWrite addToQueueAsync(CouponCommand.Issue issue) {
         currentCouponId.set(issue.couponId());
-        CompletableFuture<User> future = new CompletableFuture<>();
+        CompletableFuture<UserWrite> future = new CompletableFuture<>();
         userFutureMap.put(issue.userId(), future);
         couponQueue.offer(issue);
         return future.join();
@@ -59,8 +59,8 @@ public class CouponQueueManager {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     CouponCommand.Issue issue = couponQueue.take();
-                    User user = processCouponRequest(issue);
-                    CompletableFuture<User> future = userFutureMap.remove(issue.userId());
+                    UserWrite user = processCouponRequest(issue);
+                    CompletableFuture<UserWrite> future = userFutureMap.remove(issue.userId());
                     if (future != null) {
                         future.complete(user);
                     }
@@ -73,7 +73,7 @@ public class CouponQueueManager {
         });
     }
 
-    private User processCouponRequest(CouponCommand.Issue issue) {
+    private UserWrite processCouponRequest(CouponCommand.Issue issue) {
         String lockKey = "coupon:" + issue.couponId();
         Duration timeout = Duration.ofSeconds(5);
         try{

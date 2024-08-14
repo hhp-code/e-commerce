@@ -6,13 +6,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record PointRestoreEvent(
+public record PointChargeEvent(
         UUID eventId,
         LocalDateTime occurredOn,
         Long userId,
         BigDecimal pointChange
 ) implements DomainEvent {
-    public PointRestoreEvent(Long userId, BigDecimal pointChange) {
+    public PointChargeEvent(Long userId, BigDecimal pointChange) {
         this(UUID.randomUUID(), LocalDateTime.now(), userId, pointChange);
     }
 

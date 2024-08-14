@@ -1,9 +1,8 @@
 package com.ecommerce.domain.product.service;
 
-import com.ecommerce.application.ProductFacade;
+import com.ecommerce.domain.product.ProductWrite;
 import com.ecommerce.interfaces.exception.domain.ProductException;
 import com.ecommerce.domain.product.service.repository.ProductRepository;
-import com.ecommerce.domain.product.Product;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,14 +10,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -35,7 +32,7 @@ class ProductServiceUnitTest {
     @InjectMocks
     private ProductFacade productFacade;
 
-    private Product sampleProduct;
+    private ProductWrite sampleProduct;
 
     @BeforeEach
     void setUp() {
@@ -46,10 +43,9 @@ class ProductServiceUnitTest {
     @DisplayName("존재하는 상품 ID로 조회 시 상품 반환")
     void testGetExistingProduct() {
         //given
-        when(productRepository.getProduct(1L)).thenReturn(Optional.of(sampleProduct));
 
         //when
-        Product result = productService.getProduct(1L);
+        ProductWrite result = productService.getProduct(1L);
 
         //then
         assertNotNull(result);
@@ -67,7 +63,7 @@ class ProductServiceUnitTest {
     void testGetPopularProductsWhenEmpty() {
         when(productRepository.getPopularProducts()).thenReturn(Collections.emptyList());
 
-        List<Product> result = productService.getPopularProducts();
+        List<ProductWrite> result = productService.getPopularProducts();
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -78,15 +74,14 @@ class ProductServiceUnitTest {
     @Test
     @DisplayName("전체 상품 조회")
     void testGetProducts() {
-        List<Product> allProducts = Arrays.asList(
+        List<ProductWrite> allProducts = Arrays.asList(
                 createProductRequest("ProductRequest 1", "10000", 100),
                 createProductRequest("ProductRequest 2", "15000", 80),
                 createProductRequest("ProductRequest 3", "20000", 60)
         );
 
-        when(productRepository.getProducts()).thenReturn(allProducts);
 
-        List<Product> result = productService.getProducts();
+        List<ProductWrite> result = productService.getProducts();
 
         assertNotNull(result);
         assertEquals(3, result.size());
@@ -101,7 +96,7 @@ class ProductServiceUnitTest {
     void testGetProductsWhenEmpty() {
         when(productRepository.getProducts()).thenReturn(Collections.emptyList());
 
-        List<Product> result = productService.getProducts();
+        List<ProductWrite> result = productService.getProducts();
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -121,11 +116,11 @@ class ProductServiceUnitTest {
         assertThrows(ProductException.ServiceException.class, () -> productFacade.chargeStock(sampleProduct, 10));
     }
 
-    private Product createProductRequest(String name, String price, Integer availableStock) {
+    private ProductWrite createProductRequest(String name, String price, Integer availableStock) {
         return createProduct(name, price, availableStock, LocalDateTime.now());
     }
 
-    private Product createProduct(String name, String price, Integer availableStock, LocalDateTime lastUpdated) {
-        return new Product(name, new BigDecimal(price), availableStock);
+    private ProductWrite createProduct(String name, String price, Integer availableStock, LocalDateTime lastUpdated) {
+        return new ProductWrite(name, new BigDecimal(price), availableStock);
     }
 }

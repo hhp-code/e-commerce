@@ -1,12 +1,12 @@
 package com.ecommerce.interfaces.controller.domain.user.dto;
 
-import com.ecommerce.domain.user.User;
+import com.ecommerce.domain.user.UserWrite;
 
 import java.math.BigDecimal;
 import java.util.Map;
 
 public class UserBalanceMapper {
-    public static UserDto.UserBalanceResponse toResponse(User user) {
+    public static UserDto.UserBalanceResponse toResponse(UserWrite user) {
         BigDecimal result = user.getPoint();
         if(result !=null){
             String message = "Success";

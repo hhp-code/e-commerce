@@ -1,16 +1,17 @@
 package com.ecommerce.application;
 
-import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.OrderService;
-import com.ecommerce.domain.order.event.OrderCancelEvent;
-import com.ecommerce.domain.order.event.OrderCreateEvent;
-import com.ecommerce.domain.order.event.OrderPayAfterEvent;
-import com.ecommerce.domain.product.Product;
+import com.ecommerce.domain.order.OrderWrite;
+import com.ecommerce.domain.order.event.*;
+import com.ecommerce.domain.order.orderitem.OrderItemWrite;
+import com.ecommerce.domain.product.ProductWrite;
 import com.ecommerce.domain.product.event.StockDeductEvent;
-import com.ecommerce.domain.product.event.StockRestoreEvent;
+import com.ecommerce.domain.product.event.StockChargeEvent;
 import com.ecommerce.domain.product.service.ProductService;
+import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.domain.user.event.PointDeductEvent;
-import com.ecommerce.domain.user.event.PointRestoreEvent;
+import com.ecommerce.domain.user.event.PointChargeEvent;
+import com.ecommerce.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -18,26 +19,24 @@ import org.springframework.stereotype.Component;
 @Component
 public class EventHandler {
     private final ObjectMapper objectMapper;
-    private final OrderSecondFacade orderFacade;
     private final OrderService orderService;
-    private final ProductFacade productFacade;
-    private final UserFacade userFacade;
     private final ProductService productService;
+    private final UserService userService;
 
-    public EventHandler(ObjectMapper objectMapper, OrderSecondFacade orderFacade, OrderService orderService, ProductFacade productFacade, UserFacade userFacade, ProductService productService, PaymentUseCase paymentUseCase) {
+    public EventHandler(ObjectMapper objectMapper, OrderService orderService, ProductService productService, UserService userService) {
         this.objectMapper = objectMapper;
-        this.orderFacade = orderFacade;
         this.orderService = orderService;
-        this.productFacade = productFacade;
-        this.userFacade = userFacade;
         this.productService = productService;
+        this.userService = userService;
     }
 
     @KafkaListener(topics = "order-create", groupId = "ecommerce-group")
     public void handleOrderCreateEvent(String eventJson) {
         try {
             OrderCreateEvent event = objectMapper.readValue(eventJson, OrderCreateEvent.class);
-            orderFacade.createOrder(event.userId(), event.orderItems());
+            UserWrite user = userService.getUser(event.userId());
+            OrderWrite orderWrite = new OrderWrite(user).addItems(event.orderItems());
+            orderService.saveOrder(orderWrite);
         } catch (Exception e) {
             // 예외 처리
         }
@@ -47,18 +46,56 @@ public class EventHandler {
     public void handleStockDeductEvent(String eventJson) {
         try {
             StockDeductEvent event = objectMapper.readValue(eventJson, StockDeductEvent.class);
-            Product product = productService.getProduct(event.productId());
-            productFacade.deductStock(product, event.quantityChange());
+            ProductWrite product = productService.getProduct(event.productId()).deductStock(event.quantityChange());
+            productService.saveAndGet(product);
+        } catch (Exception e) {
+            // 예외 처리
+        }
+    }
+    @KafkaListener(topics= "order-item-add", groupId = "ecommerce-group")
+    public void handleOrderAddItemEvent(String eventJson) {
+        try {
+            OrderItemAddEvent event = objectMapper.readValue(eventJson, OrderItemAddEvent.class);
+            ProductWrite product = productService.getProduct(event.productId());
+            int quantity = event.quantity();
+            OrderItemWrite item = new OrderItemWrite(product, quantity);
+            orderService.saveOrder(
+                    orderService.getOrder(
+                            event.orderId()
+                    ).addItem(
+                            item
+                    )
+            );
+        } catch (Exception e) {
+            // 예외 처리
+        }
+    }
+    @KafkaListener(topics = "order-item-delete", groupId = "ecommerce-group")
+    public void handleOrderDeleteItemEvent(String eventJson) {
+        try {
+            OrderItemDeleteEvent event = objectMapper.readValue(eventJson, OrderItemDeleteEvent.class);
+
+            orderService.saveOrder(
+                    orderService.getOrder(
+                            event.orderId()
+                    ).deleteItem(
+                            event.productId()
+                    )
+            );
         } catch (Exception e) {
             // 예외 처리
         }
     }
 
+
+
+
     @KafkaListener(topics = "point-deduct", groupId = "ecommerce-group")
     public void handlePointDeductEvent(String eventJson) {
         try {
             PointDeductEvent event = objectMapper.readValue(eventJson, PointDeductEvent.class);
-            userFacade.deductPoint(event.userId(), event.pointChange());
+            UserWrite userWrite = userService.getUser(event.userId()).deductPoint(event.pointChange());
+            userService.saveUser(userWrite);
         } catch (Exception e) {
             // 예외 처리
         }
@@ -80,9 +117,9 @@ public class EventHandler {
     @KafkaListener(topics = "stock-restore", groupId = "ecommerce-group")
     public void handleStockRestoreEvent(String eventJson) {
         try {
-            StockRestoreEvent event = objectMapper.readValue(eventJson, StockRestoreEvent.class);
-            Product product = productService.getProduct(event.productId());
-            productFacade.chargeStock(product, event.quantityChange());
+            StockChargeEvent event = objectMapper.readValue(eventJson, StockChargeEvent.class);
+            ProductWrite product = productService.getProduct(event.productId()).chargeStock(event.quantityChange());
+            productService.saveAndGet(product);
         } catch (Exception e) {
             // 예외 처리
         }
@@ -91,8 +128,9 @@ public class EventHandler {
     @KafkaListener(topics = "point-restore", groupId = "ecommerce-group")
     public void handlePointRestoreEvent(String eventJson) {
         try {
-            PointRestoreEvent event = objectMapper.readValue(eventJson, PointRestoreEvent.class);
-            userFacade.chargePoint(event.userId(), event.pointChange());
+            PointChargeEvent event = objectMapper.readValue(eventJson, PointChargeEvent.class);
+            UserWrite userWrite = userService.getUser(event.userId()).chargePoint(event.pointChange());
+            userService.saveUser(userWrite);
         } catch (Exception e) {
             // 예외 처리
         }

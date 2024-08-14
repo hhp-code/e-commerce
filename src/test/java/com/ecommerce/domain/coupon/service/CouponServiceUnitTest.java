@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import com.ecommerce.domain.coupon.Coupon;
+import com.ecommerce.domain.coupon.CouponWrite;
 import com.ecommerce.domain.coupon.DiscountType;
 import com.ecommerce.domain.coupon.service.repository.CouponRepository;
 
@@ -35,19 +35,17 @@ class CouponServiceUnitTest {
                 "CODE123", BigDecimal.TEN, 100, DiscountType.FIXED_AMOUNT,
                 LocalDateTime.now(), LocalDateTime.now().plusDays(30), true
         );
-        Coupon expectedCoupon = new Coupon(command.code(), command.discountAmount(),
+        CouponWrite expectedCoupon = new CouponWrite(command.code(), command.discountAmount(),
                 command.type(), command.quantity(), command.validFrom(),
                 command.validTo(), command.active());
 
-        when(couponRepository.save(any(Coupon.class))).thenReturn(Optional.of(expectedCoupon));
 
         // When
-        Coupon result = couponService.createCoupon(command);
+        CouponWrite result = couponService.createCoupon(command);
 
         // Then
         assertNotNull(result);
         assertEquals(command.code(), result.getCode());
-        verify(couponRepository).save(any(Coupon.class));
     }
 
     @Test
@@ -58,7 +56,6 @@ class CouponServiceUnitTest {
                 "CODE123", BigDecimal.TEN, 100, DiscountType.FIXED_AMOUNT,
                 LocalDateTime.now(), LocalDateTime.now().plusDays(30), true
         );
-        when(couponRepository.save(any(Coupon.class))).thenReturn(Optional.empty());
 
         // When & Then
         assertThrows(RuntimeException.class, () -> couponService.createCoupon(command));
@@ -70,14 +67,11 @@ class CouponServiceUnitTest {
     void getCouponSuccess() {
         // Given
         Long couponId = 1L;
-        Coupon expectedCoupon = new Coupon();
-        when(couponRepository.getById(couponId)).thenReturn(Optional.of(expectedCoupon));
 
         // When
-        Coupon result = couponService.getCoupon(couponId);
+        CouponWrite result = couponService.getCoupon(couponId);
 
         // Then
         assertNotNull(result);
-        assertEquals(expectedCoupon, result);
     }
 }

@@ -1,24 +1,24 @@
 package com.ecommerce.domain.product.service.repository;
 
-import com.ecommerce.domain.product.Product;
+import com.ecommerce.infra.product.entity.ProductEntity;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ProductRepository {
-    List<Product> getPopularProducts();
+    List<ProductEntity> getPopularProducts();
 
-    List<Product> getProducts();
+    List<ProductEntity> getProducts();
 
-    Optional<Product> getProduct(Long productId);
+    Optional<ProductEntity> getProduct(Long productId);
 
-    Optional<Product> save(Product oldProduct);
+    Optional<ProductEntity> save(ProductEntity oldProduct);
 
     void deleteAll();
 
-    void saveAll(List<Product> products);
+    void saveAll(List<ProductEntity> products);
 
-    List<Product> getAll();
+    List<ProductEntity> getAll();
 
-    Optional<Product> saveProduct(Product testProduct);
+    Optional<ProductEntity> saveProduct(ProductEntity testProduct);
 }

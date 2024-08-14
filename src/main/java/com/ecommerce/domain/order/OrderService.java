@@ -1,7 +1,6 @@
 package com.ecommerce.domain.order;
 
 import com.ecommerce.domain.order.command.OrderCommandRepository;
-import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 import com.ecommerce.domain.order.query.OrderQuery;
 import com.ecommerce.domain.order.query.OrderQueryRepository;
 import com.ecommerce.infra.order.entity.OrderEntity;
@@ -19,10 +18,12 @@ import java.util.List;
 public class OrderService {
     private final OrderQueryRepository orderQueryRepository;
     private final OrderCommandRepository orderCommandRepository;
+
     public OrderService(OrderQueryRepository orderQueryRepository, OrderCommandRepository orderCommandRepository) {
         this.orderQueryRepository = orderQueryRepository;
         this.orderCommandRepository = orderCommandRepository;
     }
+
     @Transactional(readOnly = true)
     public List<OrderRead> getOrders(OrderQuery.GetUserOrders query) {
         List<OrderEntity> orderEntities = orderQueryRepository.getOrders(query.userId());
@@ -52,6 +53,7 @@ public class OrderService {
                 .orElseThrow(() -> new OrderException.ServiceException("주문 저장에 실패하였습니다."));
         return OrderDomainMapper.toWriteModel(orderEntity);
     }
+
 
 
 

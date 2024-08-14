@@ -5,18 +5,18 @@ import com.ecommerce.domain.event.EventBus;
 import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.domain.order.OrderWrite;
 import com.ecommerce.domain.order.command.OrderCommand;
-import com.ecommerce.domain.order.event.OrderCancelEvent;
-import com.ecommerce.domain.order.event.OrderCreateEvent;
-import com.ecommerce.domain.order.event.OrderPayAfterEvent;
+import com.ecommerce.domain.order.event.*;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 import com.ecommerce.domain.product.event.StockDeductEvent;
-import com.ecommerce.domain.product.event.StockRestoreEvent;
+import com.ecommerce.domain.product.event.StockChargeEvent;
+import com.ecommerce.domain.user.command.UserCommand;
 import com.ecommerce.domain.user.event.PointDeductEvent;
-import com.ecommerce.domain.user.event.PointRestoreEvent;
+import com.ecommerce.domain.user.event.PointChargeEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 @Component
@@ -37,6 +37,9 @@ public class CommandHandler {
             case OrderCommand.Create c -> handleCreateOrder(c);
             case OrderCommand.Payment p -> handlePayment(p);
             case OrderCommand.Cancel c -> handleCancelOrder(c);
+            case OrderCommand.Add a-> handleAddItemToOrder(a);
+            case OrderCommand.Delete d -> handleDeleteItemFromOrder(d);
+            case UserCommand.Charge c-> handleChargePoint(c);
             case null, default -> {
                 assert command != null;
                 throw new IllegalArgumentException("Unknown command type: " + command.getClass().getSimpleName());
@@ -44,6 +47,31 @@ public class CommandHandler {
         };
 
         publishEvents(events);
+    }
+
+    private List<DomainEvent> handleChargePoint(UserCommand.Charge c) {
+        long userId = c.userId();
+        BigDecimal amount = c.amount();
+        return List.of(
+                new PointChargeEvent(userId, amount)
+        );
+    }
+
+    private List<DomainEvent> handleDeleteItemFromOrder(OrderCommand.Delete d) {
+        long orderId = d.orderId();
+        long productId = d.productId();
+        return List.of(
+                new OrderItemDeleteEvent(orderId, productId)
+        );
+    }
+
+    private List<DomainEvent> handleAddItemToOrder(OrderCommand.Add a) {
+        long orderId = a.orderId();
+        long productId = a.productId();
+        int quantity = a.quantity();
+        return List.of(
+                new OrderItemAddEvent(orderId, productId,quantity)
+        );
     }
 
     private List<DomainEvent> handleCreateOrder(OrderCommand.Create command) {
@@ -70,9 +98,9 @@ public class CommandHandler {
         OrderWrite order = orderService.getOrder(command.orderId());
         List<DomainEvent> events = new ArrayList<>();
         for(OrderItemWrite item : order.getItems()) {
-            events.add(new StockRestoreEvent(item.product().getId(), item.quantity()));
+            events.add(new StockChargeEvent(item.product().getId(), item.quantity()));
         }
-        events.add(new PointRestoreEvent(order.getUserId(), order.getTotalAmount()));
+        events.add(new PointChargeEvent(order.getUserId(), order.getTotalAmount()));
         events.add(new OrderCancelEvent(order.getId()));
         return events;
     }

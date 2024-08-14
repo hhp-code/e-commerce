@@ -5,13 +5,13 @@ import com.ecommerce.domain.event.DomainEvent;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record StockRestoreEvent(
+public record StockChargeEvent(
         UUID eventId,
         LocalDateTime occurredOn,
         Long productId,
         int quantityChange
 ) implements DomainEvent {
-    public StockRestoreEvent(Long productId, int quantityChange) {
+    public StockChargeEvent(Long productId, int quantityChange) {
         this(UUID.randomUUID(), LocalDateTime.now(), productId, quantityChange);
     }
 

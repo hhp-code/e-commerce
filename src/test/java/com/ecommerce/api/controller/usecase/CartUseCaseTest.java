@@ -2,14 +2,12 @@ package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.DatabaseCleanUp;
 import com.ecommerce.application.OrderFacade;
-import com.ecommerce.application.usecase.CartUseCase;
-import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.command.OrderCommand;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 import com.ecommerce.domain.order.OrderInfo;
-import com.ecommerce.domain.product.Product;
+import com.ecommerce.domain.product.ProductWrite;
 import com.ecommerce.domain.product.service.ProductService;
-import com.ecommerce.domain.user.User;
+import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.domain.user.service.UserService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,15 +39,15 @@ class CartUseCaseTest {
     @Autowired
     private PaymentUseCase paymentUseCase;
 
-    private User testUser;
-    private Product testProduct;
+    private UserWrite testUser;
+    private ProductWrite testProduct;
     @Autowired
     private OrderFacade orderFacade;
 
     @BeforeEach
     void setUp(){
-        testUser = userService.saveUser(new User("testUser", BigDecimal.valueOf(1000)));
-        testProduct = productService.saveProduct(new Product("testProduct", BigDecimal.valueOf(1000), 100));
+        testUser = userService.saveUser(new UserWrite("testUser", BigDecimal.valueOf(1000)));
+        testProduct = productService.saveAndGet(new ProductWrite("testProduct", BigDecimal.valueOf(1000), 100));
 
     }
 

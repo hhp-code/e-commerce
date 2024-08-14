@@ -2,12 +2,11 @@ package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.DatabaseCleanUp;
 import com.ecommerce.application.OrderFacade;
-import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.application.usecase.PopularProductUseCase;
 import com.ecommerce.domain.order.OrderService;
-import com.ecommerce.domain.product.Product;
+import com.ecommerce.domain.product.ProductWrite;
 import com.ecommerce.domain.product.service.ProductService;
-import com.ecommerce.domain.user.User;
+import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.domain.user.service.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,28 +68,32 @@ class PopularProductUseCaseTest {
 
     private void createUsers(int count) {
         System.out.println("createUsers");
-        List<User> users = new ArrayList<>();
+        List<UserWrite> users = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            users.add(new User("user" + i, BigDecimal.valueOf(100000000)));
+            users.add(new UserWrite("user" + i, BigDecimal.valueOf(100000000)));
         }
-        userService.saveAll(users);
+        for(UserWrite user : users){
+            userService.saveUser(user);
+        }
         System.out.println("createUsers end");
     }
 
     private void createProducts(int count) {
-        List<Product> products = new ArrayList<>();
+        List<ProductWrite> products = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            products.add(new Product("product" + i, BigDecimal.valueOf(10 + i), 1000000000));
+            products.add(new ProductWrite("product" + i, BigDecimal.valueOf(10 + i), 1000000000));
         }
-        productService.saveAll(products);
+        for(ProductWrite write : products){
+            productService.saveAndGet(write);
+        }
     }
 
     private void createOrders(int orderCount, int userCount, int productCount) {
-        List<User> users = userService.getAllUsers();
+        List<UserWrite> users = userService.getAllUsers();
         List<CompletableFuture<Void>> futures = new ArrayList<>();
         ThreadLocalRandom random = ThreadLocalRandom.current();
         for (int i = 0; i < orderCount; i++) {
-            User user = users.get(random.nextInt(userCount));
+            UserWrite user = users.get(random.nextInt(userCount));
             Map<Long, Integer> orderItems = new HashMap<>();
             for (int j = 0; j < random.nextInt(productCount)+1; j++) {
                 orderItems.put((long)random.nextInt(productCount) + 1, random.nextInt(10)+1);
@@ -114,9 +117,9 @@ class PopularProductUseCaseTest {
         // given
         // when
 
-        List<Product> popularProducts = popularProductUseCase.getPopularProducts();
+        List<ProductWrite> popularProducts = popularProductUseCase.getPopularProducts();
         // then
-        for(Product product : popularProducts){
+        for(ProductWrite product : popularProducts){
             System.out.println(product.getName()+ ":" + "재고수량" + product.getStock());
         }
         assertThat(popularProducts).isNotEmpty();

@@ -1,8 +1,7 @@
 package com.ecommerce.domain.product.service;
 
 import com.ecommerce.DatabaseCleanUp;
-import com.ecommerce.application.ProductFacade;
-import com.ecommerce.domain.product.Product;
+import com.ecommerce.domain.product.ProductWrite;
 import com.ecommerce.domain.user.service.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,11 +41,11 @@ class ProductServiceConcurrencyTest {
     UserService userService;
 
 
-    private Product testProduct;
+    private ProductWrite testProduct;
 
     @BeforeEach
     void setUp() {
-        Product sample = new Product("Test Product", BigDecimal.valueOf(100), 10);
+        ProductWrite sample = new ProductWrite("Test Product", BigDecimal.valueOf(100), 10);
         testProduct = productService.saveAndGet(sample);
 
     }

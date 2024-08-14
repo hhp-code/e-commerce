@@ -1,9 +1,8 @@
 package com.ecommerce.domain.user.service;
 
 import com.ecommerce.DatabaseCleanUp;
-import com.ecommerce.application.UserFacade;
+import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.interfaces.exception.domain.UserException;
-import com.ecommerce.domain.user.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,8 +39,8 @@ class UserPointServiceTest {
 
     @BeforeEach
     void setup(){
-        User testUser = new User("testUser", BigDecimal.valueOf(1000));
-        User savedUser = userService.saveUser(testUser);
+        UserWrite testUser = new UserWrite("testUser", BigDecimal.valueOf(1000));
+        UserWrite savedUser = userService.saveUser(testUser);
         userId = savedUser.getId();
     }
 
@@ -50,7 +49,7 @@ class UserPointServiceTest {
     @DisplayName("잔액 조회 성공 시나리오")
     void getPointSuccess() {
         // given &when
-        User point = userService.getPoint(userId);
+        UserWrite point = userService.getPoint(userId);
         BigDecimal balance = point.getPoint();
 
         // then
@@ -75,7 +74,7 @@ class UserPointServiceTest {
         BigDecimal expectedBalance = initialBalance.add(chargeAmount);
 
         // when
-        User user = userFacade.chargePoint(userId, chargeAmount);
+        UserWrite user = userFacade.chargePoint(userId, chargeAmount);
         BigDecimal newBalance =  user.getPoint();
 
         // then
@@ -103,9 +102,9 @@ class UserPointServiceTest {
         BigDecimal secondCharge = BigDecimal.valueOf(1000);
 
         // when
-        User user = userFacade.chargePoint(userId, firstCharge);
+        UserWrite user = userFacade.chargePoint(userId, firstCharge);
         BigDecimal balanceAfterFirstCharge = user.getPoint();
-        User user1 = userFacade.chargePoint(userId, secondCharge);
+        UserWrite user1 = userFacade.chargePoint(userId, secondCharge);
         BigDecimal finalBalance = user1.getPoint();
 
         // then

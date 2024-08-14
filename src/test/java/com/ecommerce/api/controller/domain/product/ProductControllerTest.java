@@ -1,7 +1,7 @@
 package com.ecommerce.api.controller.domain.product;
 
 import com.ecommerce.application.usecase.PopularProductUseCase;
-import com.ecommerce.domain.product.Product;
+import com.ecommerce.domain.product.ProductWrite;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.interfaces.controller.domain.product.ProductController;
 import org.junit.jupiter.api.DisplayName;
@@ -70,8 +70,8 @@ class ProductControllerTest {
     @Test
     @DisplayName("인기 상품 조회")
     void getPopularProducts_Success() throws Exception {
-        Product product = new Product("test", BigDecimal.ONE,1000);
-        List<Product> products = List.of(product);
+        ProductWrite product = new ProductWrite("test", BigDecimal.ONE,1000);
+        List<ProductWrite> products = List.of(product);
         when(popularProductCase.getPopularProducts()).thenReturn(products);
 
         mockMvc.perform(get("/api/products/popular")

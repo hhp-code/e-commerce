@@ -1,12 +1,12 @@
 package com.ecommerce.api.controller.domain.user;
 
 import com.ecommerce.application.usecase.CouponUseCase;
+import com.ecommerce.domain.coupon.CouponWrite;
+import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.interfaces.controller.domain.user.UserCouponController;
 import com.ecommerce.interfaces.scheduler.CouponQueueManager;
-import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
 import com.ecommerce.domain.coupon.service.CouponCommand;
-import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -44,12 +44,12 @@ public class UserCouponControllerTest {
     @MockBean
     private CouponUseCase couponUseCase;
 
-    private final Coupon testCoupon = new Coupon(1L, "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
-    private final User testUser= new User(1L, "test", BigDecimal.ZERO, List.of(testCoupon));
+    private final CouponWrite testCoupon = new CouponWrite(1L, "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
+    private final UserWrite testUser= new UserWrite(1L, "test", BigDecimal.ZERO, List.of(testCoupon));
 
     @Test
     void testIssueCouponToUser() throws Exception {
-        CompletableFuture<User>  test = CompletableFuture.completedFuture(testUser);
+        CompletableFuture<UserWrite>  test = CompletableFuture.completedFuture(testUser);
         Long userId = 1L;
         Long couponId = 1L;
         when(couponQueueManager.addToQueueAsync(any(CouponCommand.Issue.class))).thenReturn(testUser);
@@ -65,9 +65,9 @@ public class UserCouponControllerTest {
     @Test
     void testGetUserCoupons() throws Exception {
         long userId = 1L;
-        List<Coupon> userCoupons = Arrays.asList(
-                        new Coupon(1L, "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true),
-                        new Coupon(2L, "WELCOME", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true)
+        List<CouponWrite> userCoupons = Arrays.asList(
+                        new CouponWrite(1L, "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true),
+                        new CouponWrite(2L, "WELCOME", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true)
         );
 
         when(userService.getUserCoupons(userId)).thenReturn(userCoupons);

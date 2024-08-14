@@ -2,21 +2,19 @@ package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.DatabaseCleanUp;
 import com.ecommerce.application.OrderFacade;
-import com.ecommerce.application.usecase.PaymentUseCase;
-import com.ecommerce.application.UserFacade;
 import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.event.DomainEventPublisher;
 import com.ecommerce.domain.order.OrderWrite;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 import com.ecommerce.domain.order.OrderDomainMapper;
+import com.ecommerce.domain.product.ProductWrite;
+import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.infra.order.entity.OrderEntity;
 import com.ecommerce.domain.order.OrderStatus;
 import com.ecommerce.domain.order.command.OrderCommand;
 import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.application.external.DummyPlatform;
-import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
-import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,8 +47,6 @@ class PaymentUseCaseConcurrencyTest {
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
     @Autowired
-    private UserFacade userFacade;
-    @Autowired
     private OrderService orderService;
     @Autowired
     private DomainEventPublisher domainEventPublisher;
@@ -73,18 +69,18 @@ class PaymentUseCaseConcurrencyTest {
     @Autowired
     private QuantumLockManager quantumLockManager;
 
-    private Product testProduct;
-    private List<User> testUsers;
+    private ProductWrite testProduct;
+    private List<UserWrite> testUsers;
     private List<OrderEntity> testOrderEntities;
 
     @BeforeEach
     void setUp() {
-        testProduct = productService.saveAndGet(new Product("test", BigDecimal.valueOf(1), 10));
+        testProduct = productService.saveAndGet(new ProductWrite("test", BigDecimal.valueOf(1), 10));
 
         testUsers = new ArrayList<>();
         testOrderEntities = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
-            User user = userService.saveUser(new User("testUser" + i, BigDecimal.valueOf(20)));
+            UserWrite user = userService.saveUser(new UserWrite("testUser" + i, BigDecimal.valueOf(20)));
             testUsers.add(user);
             OrderItemWrite orderItemWrite = new OrderItemWrite(testProduct, 1);
             OrderWrite orderItemWrite1 = new OrderWrite(user, List.of(orderItemWrite));
@@ -135,13 +131,13 @@ class PaymentUseCaseConcurrencyTest {
         finishLatch.await(10, TimeUnit.SECONDS); // 모든 스레드가 작업을 완료할 때까지 대기
 
         // 재고 확인
-        Product updatedProduct = productService.getProduct(testProduct.getId());
+        ProductWrite updatedProduct = productService.getProduct(testProduct.getId());
         assertEquals(10 - successfulPayments.get(), updatedProduct.getStock(),
                 "재고는 성공한 결제 수만큼 감소해야 합니다.");
 
         // 사용자 포인트 및 주문 상태 확인
         for (int i = 0; i < concurrentRequests; i++) {
-            User user = userService.getUser(testUsers.get(i).getId());
+            UserWrite user = userService.getUser(testUsers.get(i).getId());
             OrderWrite orderEntity = orderService.getOrder(testOrderEntities.get(i).getId());
             if (Objects.equals(orderEntity.getOrderStatus(), OrderStatus.ORDERED.name())) {
                 assertThat(BigDecimal.TEN ).isEqualByComparingTo(user.getPoint());

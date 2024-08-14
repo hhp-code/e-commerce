@@ -1,8 +1,8 @@
 package com.ecommerce.interfaces.controller.domain.order.dto;
 
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
+import com.ecommerce.domain.product.ProductWrite;
 import com.ecommerce.interfaces.exception.domain.OrderException;
-import com.ecommerce.domain.product.Product;
 import lombok.experimental.UtilityClass;
 
 import java.math.BigDecimal;
@@ -76,6 +76,6 @@ public class OrderDto {
             }
         }
     }
-    public record PopularListResponse(List<Product> products) {
+    public record PopularListResponse(List<ProductWrite> products) {
     }
 }

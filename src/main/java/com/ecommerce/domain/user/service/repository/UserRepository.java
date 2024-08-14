@@ -1,24 +1,24 @@
 package com.ecommerce.domain.user.service.repository;
 
-import com.ecommerce.domain.coupon.Coupon;
-import com.ecommerce.domain.user.User;
+import com.ecommerce.infra.coupon.entity.CouponEntity;
+import com.ecommerce.infra.user.entity.UserEntity;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository {
-    Optional<User> getById(Long id);
+    Optional<UserEntity> getById(Long id);
 
-    Optional<User> save(User testUser);
+    Optional<UserEntity> save(UserEntity testUser);
 
-    Optional<Coupon> getCouponByUser(long userId, long couponId);
+    Optional<CouponEntity> getCouponByUser(long userId, long couponId);
 
     Optional<BigDecimal> getAmountByUserId(Long userId);
 
-    void saveAll(List<User> users);
+    void saveAll(List<UserEntity> users);
 
-    List<User> getAll();
+    List<UserEntity> getAll();
 
-    Optional<User> getUser(Long userId);
+    Optional<UserEntity> getUser(Long userId);
 }

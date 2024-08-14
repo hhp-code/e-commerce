@@ -1,9 +1,9 @@
 package com.ecommerce.api.controller.domain.user;
 
-import com.ecommerce.domain.coupon.Coupon;
+import com.ecommerce.domain.coupon.CouponWrite;
 import com.ecommerce.domain.coupon.DiscountType;
 import com.ecommerce.domain.coupon.service.CouponService;
-import com.ecommerce.domain.user.User;
+import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.domain.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -44,18 +44,18 @@ class UserCouponControllerConcurrencyTest {
     @Autowired
     private UserService userService;
 
-    private Coupon testCoupon;
-    private Coupon testCoupon2;
+    private CouponWrite testCoupon;
+    private CouponWrite testCoupon2;
 
     @BeforeEach
     @Transactional
     void setUp(){
-        testCoupon=couponService.saveAndGet(new Coupon(1L,"SUMMER2024", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT, 1000
+        testCoupon=couponService.saveAndGet(new CouponWrite(1L,"SUMMER2024", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT, 1000
                 , LocalDateTime.now(),LocalDateTime.now().plusDays(7),true));
-        testCoupon2= couponService.saveAndGet(new Coupon(2L,"WINTER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 500
+        testCoupon2= couponService.saveAndGet(new CouponWrite(2L,"WINTER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 500
                 , LocalDateTime.now(),LocalDateTime.now().plusDays(7),true));
         for(int i=0; i<1000; i++){
-            userService.saveUser(new User("TestUser"+i, BigDecimal.ZERO));
+            userService.saveUser(new UserWrite("TestUser"+i, BigDecimal.ZERO));
         }
 
     }

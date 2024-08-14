@@ -1,7 +1,7 @@
 package com.ecommerce.domain.user;
 
+import com.ecommerce.domain.coupon.CouponWrite;
 import com.ecommerce.interfaces.exception.domain.UserException;
-import com.ecommerce.domain.coupon.Coupon;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -14,10 +14,10 @@ class UserTest {
     @Test
     @DisplayName("잔액 충전 테스트")
     void testChargePoint() {
-        User user = new User("testUser", BigDecimal.ZERO);
+        UserWrite user = new UserWrite("testUser", BigDecimal.ZERO);
         BigDecimal chargeAmount = BigDecimal.valueOf(100);
 
-        User user1 = user.chargePoint(chargeAmount);
+        UserWrite user1 = user.chargePoint(chargeAmount);
         BigDecimal newBalance = user1.getPoint();
 
         assertEquals(chargeAmount, newBalance);
@@ -26,7 +26,7 @@ class UserTest {
     @Test
     @DisplayName("잔액 감소 실패 테스트")
     void testDeductPointInsufficientFunds() {
-        User user = new User("testUser", BigDecimal.valueOf(100));
+        UserWrite user = new UserWrite("testUser", BigDecimal.valueOf(100));
         BigDecimal decreaseAmount = BigDecimal.valueOf(150);
 
         assertThrows(UserException.class, () -> user.deductPoint(decreaseAmount));
@@ -34,10 +34,10 @@ class UserTest {
     @Test
     @DisplayName("잔액 감소 테스트")
     void testDeductPoint() {
-        User user = new User("testUser", BigDecimal.valueOf(100));
+        UserWrite user = new UserWrite("testUser", BigDecimal.valueOf(100));
         BigDecimal decreaseAmount = BigDecimal.valueOf(50);
 
-        User user1 = user.deductPoint(decreaseAmount);
+        UserWrite user1 = user.deductPoint(decreaseAmount);
         BigDecimal newBalance = user1.getPoint();
 
         assertEquals(BigDecimal.valueOf(50), newBalance);
@@ -47,8 +47,8 @@ class UserTest {
     @Test
     @DisplayName("쿠폰 추가 테스트")
     void testAddCoupon() {
-        User user = new User("testUser", BigDecimal.ZERO);
-        Coupon coupon = new Coupon();
+        UserWrite user = new UserWrite("testUser", BigDecimal.ZERO);
+        CouponWrite coupon = new CouponWrite();
         user.addCoupon(coupon);
 
         assertTrue(user.getCoupons().contains(coupon));
@@ -56,7 +56,7 @@ class UserTest {
     @Test
     @DisplayName("잔액 음수 테스트 실패")
     void testChargePointWithNegativeAmount() {
-        User user = new User("testUser", BigDecimal.ZERO);
+        UserWrite user = new UserWrite("testUser", BigDecimal.ZERO);
         BigDecimal negativeAmount = BigDecimal.valueOf(-50);
 
         assertThrows(UserException.class, () -> user.chargePoint(negativeAmount));
@@ -65,7 +65,7 @@ class UserTest {
     @Test
     @DisplayName("잔액 감소 음수 테스트 실패")
     void testDeductPointWithNegativeAmount() {
-        User user = new User("testUser", BigDecimal.valueOf(100));
+        UserWrite user = new UserWrite("testUser", BigDecimal.valueOf(100));
         BigDecimal negativeAmount = BigDecimal.valueOf(-50);
 
         assertThrows(UserException.class, () -> user.deductPoint(negativeAmount));

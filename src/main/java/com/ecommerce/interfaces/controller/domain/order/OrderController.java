@@ -1,16 +1,16 @@
 package com.ecommerce.interfaces.controller.domain.order;
 
+import com.ecommerce.application.CommandHandler;
 import com.ecommerce.application.OrderFacade;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderMapper;
-import com.ecommerce.application.usecase.CartUseCase;
-import com.ecommerce.application.usecase.PaymentUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "order", description = "주문 관련 API")
@@ -18,13 +18,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 public class OrderController {
     private final OrderFacade orderFacade;
-    private final CartUseCase cartUseCase;
-    private final PaymentUseCase paymentUseCase;
+    private final CommandHandler commandHandler;
 
-    public OrderController(OrderFacade orderFacade, CartUseCase cartUseCase, PaymentUseCase paymentUseCase) {
+    public OrderController(OrderFacade orderFacade, CommandHandler commandHandler) {
         this.orderFacade = orderFacade;
-        this.cartUseCase = cartUseCase;
-        this.paymentUseCase = paymentUseCase;
+        this.commandHandler = commandHandler;
     }
 
     @PostMapping("/orders")
@@ -37,9 +35,10 @@ public class OrderController {
                     @ApiResponse(responseCode = "400", description = "잘못된 요청")
             }
     )
-    public OrderDto.OrderSummaryResponse createOrder(@RequestBody OrderDto.OrderCreateRequest request) {
+    public ResponseEntity<String> createOrder(@RequestBody OrderDto.OrderCreateRequest request) {
         request.validate();
-        return OrderMapper.toOrderSummaryResponse(orderFacade.createOrder(OrderMapper.toOrder(request)));
+        commandHandler.handle(OrderMapper.toOrder(request));
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/orders/{orderId}")
@@ -76,12 +75,13 @@ public class OrderController {
                     @ApiResponse(responseCode = "404", description = "주문을 찾을 수 없음")
             }
     )
-    public OrderDto.OrderDetailResponse addCartItemToOrder(
+    public ResponseEntity<String> addCartItemToOrder(
             @Parameter(description = "상품을 추가할 주문의 ID") @PathVariable Long orderId,
             @RequestBody OrderDto.OrderAddItemRequest request
     ) {
         request.validate();
-        return OrderMapper.toOrderDetailResponse(cartUseCase.addItemToOrder(OrderMapper.toOrderAddItem(orderId, request)));
+        commandHandler.handle(OrderMapper.toOrderAddItem(orderId, request));
+        return ResponseEntity.ok().build();
     }
     @DeleteMapping("/orders/{orderId}/items")
     @Operation(
@@ -94,14 +94,13 @@ public class OrderController {
                     @ApiResponse(responseCode = "404", description = "주문을 찾을 수 없음")
             }
     )
-    public OrderDto.OrderDetailResponse deleteCartItemToOrder(
+    public ResponseEntity<String> deleteCartItemToOrder(
             @Parameter(description = "주문에서 제거할 상품의 ID") @PathVariable Long orderId,
             @RequestBody OrderDto.OrderDeleteItemRequest request
     ) {
         request.validate();
-        return OrderMapper.toOrderDetailResponse(
-                cartUseCase.deleteItemFromOrder(OrderMapper.toOrderDeleteItem(orderId, request))
-        );
+        commandHandler.handle(OrderMapper.toOrderDeleteItem(orderId, request));
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/orders")
@@ -130,9 +129,10 @@ public class OrderController {
                     @ApiResponse(responseCode = "404", description = "주문을 찾을 수 없음")
             }
     )
-    public OrderDto.OrderDetailResponse payOrder(@RequestBody OrderDto.OrderPayRequest request){
+    public ResponseEntity<String> payOrder(@RequestBody OrderDto.OrderPayRequest request){
         request.validate();
-        return OrderMapper.toOrderDetailResponse(paymentUseCase.payOrder(OrderMapper.toOrderPay(request)));
+        commandHandler.handle(OrderMapper.toOrderPay(request));
+        return ResponseEntity.ok().build();
     }
     @PatchMapping("/orders/cancel")
     @Operation(
@@ -145,12 +145,9 @@ public class OrderController {
                     @ApiResponse(responseCode = "404", description = "주문을 찾을 수 없음")
             }
     )
-    public OrderDto.OrderDetailResponse cancelOrder(@RequestBody OrderDto.OrderCancelRequest request){
+    public ResponseEntity<String> cancelOrder(@RequestBody OrderDto.OrderCancelRequest request){
         request.validate();
-        return OrderMapper.toOrderDetailResponse(
-                paymentUseCase.cancelOrder(
-                        OrderMapper.toOrderCancel(request)
-                )
-        );
+        commandHandler.handle(OrderMapper.toOrderCancel(request));
+        return ResponseEntity.ok().build();
     }
 }
