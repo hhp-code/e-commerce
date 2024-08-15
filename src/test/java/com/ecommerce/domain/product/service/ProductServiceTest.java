@@ -1,8 +1,8 @@
 package com.ecommerce.domain.product.service;
 
 import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.domain.product.ProductWrite;
 import com.ecommerce.domain.product.service.repository.ProductRepository;
-import com.ecommerce.domain.product.Product;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,21 +33,18 @@ class ProductServiceTest {
     @Autowired
     private ProductService productService;
 
-    @Autowired
-    private ProductRepository productRepository;
-
-    private Product sampleProduct;
+    private ProductWrite sampleProduct;
 
     @BeforeEach
     void setUp() {
-        sampleProduct = new Product("Sample ProductRequest", new BigDecimal("100.00"), 50);
-        productRepository.save(sampleProduct);
+        sampleProduct = new ProductWrite("Sample ProductRequest", new BigDecimal("100.00"), 50);
+        productService.saveAndGet(sampleProduct);
     }
 
     @Test
     @DisplayName("상품 조회 테스트")
     void testGetProduct() {
-        Product result = productService.getProduct(sampleProduct.getId());
+        ProductWrite result = productService.getProduct(sampleProduct.getId());
 
         assertNotNull(result);
         assertEquals(sampleProduct.getId(), result.getId());
@@ -60,7 +57,7 @@ class ProductServiceTest {
     @Test
     @DisplayName("전체 상품 조회 테스트")
     void testGetProducts() {
-        List<Product> products = productService.getProducts();
+        List<ProductWrite> products = productService.getProducts();
 
         assertFalse(products.isEmpty());
         assertTrue(products.stream().anyMatch(p -> p.getName().equals("Sample ProductRequest")));

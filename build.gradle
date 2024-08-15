@@ -53,6 +53,9 @@ dependencies {
     // 카프카 의존성 추가
     implementation 'org.springframework.kafka:spring-kafka'
     testImplementation 'org.springframework.kafka:spring-kafka-test'
+
+    //레디스 의존성 추가
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 }
 
 def querydslDir = "src/main/generated"

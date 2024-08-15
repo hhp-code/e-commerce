@@ -2,18 +2,17 @@ package com.ecommerce.infra.order;
 
 import com.ecommerce.infra.order.entity.OrderEntity;
 import com.ecommerce.domain.order.OrderStatus;
-import com.ecommerce.domain.order.QOrder;
 import com.ecommerce.domain.order.query.OrderQueryRepository;
+import com.ecommerce.infra.order.entity.QOrderEntity;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 @Repository
 public class OrderQueryRepositoryImpl implements OrderQueryRepository {
     private final JPAQueryFactory queryFactory;
-    private final QOrder order = QOrder.order;
+    private final QOrderEntity order = QOrderEntity.orderEntity;
     public OrderQueryRepositoryImpl(JPAQueryFactory queryFactory) {
         this.queryFactory = queryFactory;
     }
@@ -23,7 +22,7 @@ public class OrderQueryRepositoryImpl implements OrderQueryRepository {
         return Optional.ofNullable(queryFactory
                 .selectFrom(order)
                 .leftJoin(order.user).fetchJoin()
-                .leftJoin(order.orderItems).fetchJoin()
+                .leftJoin(order.orderItemEntities).fetchJoin()
                 .where(order.id.eq(customerId))
                 .fetchOne());
     }

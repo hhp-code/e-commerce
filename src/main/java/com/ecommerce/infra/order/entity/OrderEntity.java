@@ -1,10 +1,10 @@
 package com.ecommerce.infra.order.entity;
 
-import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
 import com.ecommerce.domain.order.OrderStatus;
-import com.ecommerce.domain.product.Product;
-import com.ecommerce.domain.user.User;
+import com.ecommerce.infra.coupon.entity.CouponEntity;
+import com.ecommerce.infra.product.entity.ProductEntity;
+import com.ecommerce.infra.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -44,11 +44,11 @@ public class OrderEntity {
     @Getter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User user;
+    private UserEntity user;
 
     @ManyToOne
     @JoinColumn(name = "coupon_id")
-    private Coupon coupon;
+    private CouponEntity coupon;
 
     @Getter
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -59,7 +59,7 @@ public class OrderEntity {
 
     public OrderEntity() {
     }
-    public OrderEntity(User user) {
+    public OrderEntity(UserEntity user) {
         this.orderDate = LocalDateTime.now();
         this.user = user;
         this.orderItemEntities = new ArrayList<>();
@@ -67,7 +67,7 @@ public class OrderEntity {
         this.orderStatus = OrderStatus.PREPARED;
     }
 
-    public OrderEntity(User user, List<OrderItemEntity> orderItemEntities) {
+    public OrderEntity(UserEntity user, List<OrderItemEntity> orderItemEntities) {
         this.orderDate = LocalDateTime.now();
         this.user = user;
         this.orderItemEntities = new ArrayList<>(orderItemEntities);
@@ -88,7 +88,7 @@ public class OrderEntity {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private BigDecimal calculateItemPrice(Product product, Integer price) {
+    private BigDecimal calculateItemPrice(ProductEntity product, Integer price) {
         return product.getPrice().multiply(BigDecimal.valueOf(price));
 
     }

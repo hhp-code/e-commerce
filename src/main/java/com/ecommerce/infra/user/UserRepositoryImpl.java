@@ -1,10 +1,10 @@
 package com.ecommerce.infra.user;
 
-import com.ecommerce.domain.coupon.Coupon;
-import com.ecommerce.domain.coupon.QCoupon;
-import com.ecommerce.domain.user.QUser;
-import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.repository.UserRepository;
+import com.ecommerce.infra.coupon.entity.CouponEntity;
+import com.ecommerce.infra.coupon.entity.QCouponEntity;
+import com.ecommerce.infra.user.entity.QUserEntity;
+import com.ecommerce.infra.user.entity.UserEntity;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
 
@@ -17,9 +17,8 @@ public class UserRepositoryImpl implements UserRepository {
 
     private final UserJPARepository userJPARepository;
     private final JPAQueryFactory queryFactory;
-    private final QUser user = QUser.user;
-    private final QCoupon coupon = QCoupon.coupon;
-
+    private final QUserEntity user = QUserEntity.userEntity;
+    private final QCouponEntity coupon = QCouponEntity.couponEntity;
 
     public UserRepositoryImpl(UserJPARepository userJPARepository, JPAQueryFactory queryFactory) {
         this.userJPARepository = userJPARepository;
@@ -27,18 +26,18 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<User> getById(Long id) {
-        User user1 = queryFactory.select(user).from(user).where(user.id.eq(id)).fetchOne();
+    public Optional<UserEntity> getById(Long id) {
+        UserEntity user1 = queryFactory.select(user).from(user).where(user.id.eq(id)).fetchOne();
         return Optional.ofNullable(user1);
     }
 
     @Override
-    public Optional<User> save(User user) {
+    public Optional<UserEntity> save(UserEntity user) {
         return Optional.of(userJPARepository.save(user));
     }
 
     @Override
-    public Optional<Coupon> getCouponByUser(long userId, long couponId) {
+    public Optional<CouponEntity> getCouponByUser(long userId, long couponId) {
         return Optional.ofNullable(queryFactory
                 .select(coupon)
                 .from(user)
@@ -50,17 +49,17 @@ public class UserRepositoryImpl implements UserRepository {
 
 
     @Override
-    public void saveAll(List<User> users) {
+    public void saveAll(List<UserEntity> users) {
         userJPARepository.saveAll(users);
     }
 
     @Override
-    public List<User> getAll() {
+    public List<UserEntity> getAll() {
         return userJPARepository.findAll();
     }
 
     @Override
-    public Optional<User> getUser(Long userId) {
+    public Optional<UserEntity> getUser(Long userId) {
         return userJPARepository.findById(userId);
     }
 

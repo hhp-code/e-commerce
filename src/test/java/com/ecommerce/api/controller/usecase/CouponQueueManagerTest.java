@@ -1,13 +1,13 @@
 package com.ecommerce.api.controller.usecase;
 
+import com.ecommerce.domain.coupon.CouponWrite;
+import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.interfaces.scheduler.CouponQueueManager;
 import com.ecommerce.application.usecase.CouponUseCase;
 import com.ecommerce.config.QuantumLockManager;
-import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
 import com.ecommerce.domain.coupon.service.CouponCommand;
 import com.ecommerce.domain.coupon.service.CouponService;
-import com.ecommerce.domain.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,13 +39,13 @@ class CouponQueueManagerTest {
     private QuantumLockManager quantumLockManager;
 
     private CouponCommand.Issue testIssue;
-    private User testUser;
+    private UserWrite testUser;
 
     @BeforeEach
     void setUp() {
-        Coupon testCoupon = new Coupon("TEST123", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT, 10);
+        CouponWrite testCoupon = new CouponWrite("TEST123", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT, 10);
         testIssue =new CouponCommand.Issue(1L, 1L, Instant.now());
-        testUser = new User(1L, "test", null, List.of(testCoupon));
+        testUser = new UserWrite("test", null, List.of(testCoupon));
 
         couponQueueManager = new CouponQueueManager(couponUseCase, couponService,quantumLockManager);
     }

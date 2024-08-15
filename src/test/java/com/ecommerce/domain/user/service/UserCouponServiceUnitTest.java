@@ -1,8 +1,8 @@
 package com.ecommerce.domain.user.service;
 
+import com.ecommerce.domain.coupon.CouponWrite;
+import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.interfaces.exception.domain.UserException;
-import com.ecommerce.domain.coupon.Coupon;
-import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,9 +42,8 @@ class UserCouponServiceUnitTest {
     @DisplayName("사용자의 쿠폰 업데이트 실패 - 사용자 조회실패")
     void getUpdateCouponsFail(){
         // Given
-        User user = new User(1L, "testUser", BigDecimal.ZERO);
-        Coupon coupon = new Coupon();
-        when(userRepository.save(any(User.class))).thenReturn(Optional.empty());
+        UserWrite user = new UserWrite( "testUser", BigDecimal.ZERO);
+        CouponWrite coupon = new CouponWrite();
 
         // When & Then
         assertThrows(UserException.ServiceException.class, () -> userCouponService.updateUserCoupon(user, coupon));
@@ -53,9 +52,8 @@ class UserCouponServiceUnitTest {
     @DisplayName("사용자의 쿠폰 업데이트 실패 - 업데이트 실패")
     void getUpdateCouponsFail2(){
         // Given
-        User user = new User(1L, "testUser", BigDecimal.ZERO);
-        Coupon coupon = new Coupon();
-        when(userRepository.save(user)).thenReturn(Optional.empty());
+        UserWrite user = new UserWrite( "testUser", BigDecimal.ZERO);
+        CouponWrite coupon = new CouponWrite();
 
         // When & Then
         assertThrows(UserException.ServiceException.class, () -> userCouponService.updateUserCoupon(user, coupon));

@@ -1,7 +1,6 @@
 package com.ecommerce.api.controller.domain.user;
 
-import com.ecommerce.application.UserFacade;
-import com.ecommerce.domain.user.User;
+import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.domain.user.service.UserService;
 import com.ecommerce.interfaces.controller.domain.user.UserPointController;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,16 +29,13 @@ class UserPointControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
-    private UserFacade userFacade;
 
     @MockBean
     private UserService userService;
 
     @BeforeEach
     void setUp() {
-        when(userFacade.chargePoint(any(), any())).thenReturn(new User("test", BigDecimal.valueOf(1000)));
-        when(userService.getPoint(any())).thenReturn(new User("test", BigDecimal.valueOf(0)));
+        when(userService.getPoint(any())).thenReturn(new UserWrite("test", BigDecimal.valueOf(0)));
 
     }
 

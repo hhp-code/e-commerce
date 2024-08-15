@@ -1,10 +1,10 @@
 package com.ecommerce.domain.user.service;
 
 import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.domain.coupon.CouponWrite;
+import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.interfaces.exception.domain.UserException;
-import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
-import com.ecommerce.domain.user.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,12 +39,12 @@ public class UserCouponServiceTest {
 
     @BeforeEach
     void setup(){
-        User testUser = new User(1L, "testUser", BigDecimal.ZERO);
-        User user = userService.saveUser(testUser);
-        List<Coupon> testCoupons = Arrays.asList(
-                new Coupon("testCoupon1", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT, 10),
-                new Coupon("testCoupon2", BigDecimal.valueOf(2000), DiscountType.FIXED_AMOUNT, 10));
-        for(Coupon coupon : testCoupons){
+        UserWrite testUser = new UserWrite( "testUser", BigDecimal.ZERO);
+        UserWrite user = userService.saveUser(testUser);
+        List<CouponWrite> testCoupons = Arrays.asList(
+                new CouponWrite("testCoupon1", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT, 10),
+                new CouponWrite("testCoupon2", BigDecimal.valueOf(2000), DiscountType.FIXED_AMOUNT, 10));
+        for(CouponWrite coupon : testCoupons){
             user.addCoupon(coupon);
         }
         userService.saveUser(user);

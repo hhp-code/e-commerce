@@ -1,8 +1,10 @@
 package com.ecommerce.domain.coupon.service;
 
+import com.ecommerce.domain.coupon.CouponDomainMapper;
+import com.ecommerce.domain.coupon.CouponWrite;
+import com.ecommerce.infra.coupon.entity.CouponEntity;
 import com.ecommerce.interfaces.exception.domain.CouponException;
 import com.ecommerce.domain.coupon.service.repository.CouponRepository;
-import com.ecommerce.domain.coupon.Coupon;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,37 +17,42 @@ public class CouponService {
     }
 
     @Transactional
-    public Coupon createCoupon(CouponCommand.Create create) {
-        Coupon coupon = new Coupon(create.code(),
+    public CouponWrite createCoupon(CouponCommand.Create create) {
+        CouponEntity coupon = new CouponEntity(create.code(),
                 create.discountAmount(),
                 create.type(),
                 create.quantity(),
                 create.validFrom(),
                 create.validTo(), true);
-        return couponRepository.save(coupon).orElseThrow(
+        CouponEntity coupon1 = couponRepository.save(coupon).orElseThrow(
                 () -> new CouponException.ServiceException("쿠폰을 생성할 수 없습니다.")
         );
+        return CouponDomainMapper.toCouponWrite(coupon1);
     }
 
     @Transactional(readOnly = true)
-    public Coupon getCoupon(Long couponId) {
-        return couponRepository.getById(couponId).orElseThrow(
+    public CouponWrite getCoupon(Long couponId) {
+        CouponEntity couponEntity = couponRepository.getById(couponId).orElseThrow(
                 () -> new CouponException.ServiceException("쿠폰을 찾을 수 없습니다.")
         );
+        return CouponDomainMapper.toCouponWrite(couponEntity);
     }
 
     @Transactional
-    public Coupon deductCoupon(Long couponId) {
-        Coupon coupon = getCoupon(couponId);
+    public CouponWrite deductCoupon(Long couponId) {
+        CouponEntity coupon = couponRepository.getById(couponId).orElseThrow(
+                () -> new CouponException.ServiceException("쿠폰을 찾을 수 없습니다.")
+        );
         if (coupon.deductQuantity()) {
             throw new CouponException.ServiceException("쿠폰 수량이 부족합니다.");
         }
-        return coupon;
+        return CouponDomainMapper.toCouponWrite(coupon);
     }
 
     @Transactional
-    public void saveCoupon(Coupon coupon) {
-        couponRepository.save(coupon).orElseThrow(
+    public void saveCoupon(CouponWrite coupon) {
+        CouponEntity entity = CouponDomainMapper.toEntity(coupon);
+        couponRepository.save(entity).orElseThrow(
                 () -> new CouponException.ServiceException("쿠폰을 저장할 수 없습니다.")
         );
     }
@@ -59,13 +66,15 @@ public class CouponService {
         couponRepository.deleteAll();
     }
 
-    public void save(Coupon coupon) {
+    public void save(CouponEntity coupon) {
         couponRepository.save(coupon);
     }
 
-    public Coupon saveAndGet(Coupon coupon) {
-        return couponRepository.save(coupon).orElseThrow(
+    public CouponWrite saveAndGet(CouponWrite coupon) {
+        CouponEntity entity = CouponDomainMapper.toEntity(coupon);
+        CouponEntity couponEntity = couponRepository.save(entity).orElseThrow(
                 () -> new CouponException.ServiceException("쿠폰 저장에 실패했습니다.")
         );
+        return CouponDomainMapper.toCouponWrite(couponEntity);
     }
 }

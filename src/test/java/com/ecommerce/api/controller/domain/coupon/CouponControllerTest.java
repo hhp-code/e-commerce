@@ -1,10 +1,10 @@
 package com.ecommerce.api.controller.domain.coupon;
 
+import com.ecommerce.domain.coupon.CouponWrite;
 import com.ecommerce.interfaces.controller.domain.coupon.CouponController;
 import com.ecommerce.interfaces.controller.domain.coupon.dto.CouponDto;
 import com.ecommerce.domain.coupon.service.CouponCommand;
 import com.ecommerce.domain.coupon.service.CouponService;
-import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,7 @@ class CouponControllerTest {
     @Test
     void testCreateCoupon() throws Exception {
         CouponDto.CouponRequest request = new CouponDto.CouponRequest("SUMMER2024", BigDecimal.valueOf(5000), 100, DiscountType.FIXED_AMOUNT, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
-        Coupon coupon = new Coupon(1L, "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.FIXED_AMOUNT, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
+        CouponWrite coupon = new CouponWrite(1L, "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.FIXED_AMOUNT, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
 
         when(couponService.createCoupon(any(CouponCommand.Create.class))).thenReturn(coupon);
 

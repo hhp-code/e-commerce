@@ -1,7 +1,5 @@
-package com.ecommerce.domain.order.service;
+package com.ecommerce.domain.order;
 
-import com.ecommerce.domain.order.OrderRead;
-import com.ecommerce.domain.order.OrderWrite;
 import lombok.experimental.UtilityClass;
 
 import java.math.BigDecimal;

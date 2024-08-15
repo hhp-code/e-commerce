@@ -1,12 +1,10 @@
 package com.ecommerce.application;
 
-import com.ecommerce.domain.order.command.OrderCommand;
+import com.ecommerce.domain.order.OrderInfo;
 import com.ecommerce.domain.order.query.OrderQuery;
 import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.domain.order.OrderRead;
 import com.ecommerce.domain.order.OrderWrite;
-import com.ecommerce.domain.order.service.*;
-import com.ecommerce.domain.user.service.UserService;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -15,11 +13,9 @@ import java.util.List;
 @Component
 public class OrderFacade {
     private final OrderService orderService;
-    private final UserService userService;
 
-    public OrderFacade(OrderService orderService, UserService userService) {
+    public OrderFacade(OrderService orderService) {
         this.orderService = orderService;
-        this.userService = userService;
     }
 
     public OrderInfo.Detail getOrder(OrderQuery.GetOrder query) {
@@ -36,9 +32,4 @@ public class OrderFacade {
         return orderDetails;
     }
 
-    public OrderInfo.Summary createOrder(OrderCommand.Create command) {
-        OrderWrite execute = command.execute(userService);
-        OrderWrite orderEntity = orderService.saveOrder(execute);
-        return OrderInfo.Summary.from(orderEntity);
-    }
 }

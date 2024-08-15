@@ -1,17 +1,16 @@
 package com.ecommerce.api.controller.domain.order;
 
 import com.ecommerce.application.OrderFacade;
-import com.ecommerce.infra.order.entity.OrderEntity;
-import com.ecommerce.domain.order.service.OrderInfo;
+import com.ecommerce.domain.order.OrderWrite;
+import com.ecommerce.domain.order.orderitem.OrderItemWrite;
+import com.ecommerce.domain.product.ProductWrite;
+import com.ecommerce.domain.user.UserWrite;
+import com.ecommerce.domain.order.OrderInfo;
 import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.interfaces.controller.domain.order.OrderController;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderMapper;
-import com.ecommerce.application.usecase.CartUseCase;
 import com.ecommerce.domain.order.command.OrderCommand;
-import com.ecommerce.application.usecase.PaymentUseCase;
-import com.ecommerce.domain.product.Product;
-import com.ecommerce.domain.user.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -25,7 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -53,20 +52,18 @@ class OrderEntityControllerTest {
     @MockBean
     private OrderService orderCommandService;
 
-    @MockBean
-    private PaymentUseCase paymentUseCase;
 
-    @MockBean
-    private CartUseCase cartUseCase;
 
     @Autowired
     private ObjectMapper objectMapper;
-    private final Product product = new Product(1L,"product", PRODUCT_PRICE, PRODUCT_STOCK);
+    private final ProductWrite product = new ProductWrite("product", PRODUCT_PRICE, PRODUCT_STOCK);
 
-    private final Map<Product, Integer> items = Map.of(product, 1);
+    private final Map<ProductWrite, Integer> items = Map.of(product, 1);
     private final Map<Long, Integer> create = Map.of(PRODUCT_ID, 1);
-    private final OrderCommand.Create request = new OrderCommand.Create(VALID_USER_ID, create);
-    private final OrderEntity orderEntity = new OrderEntity( new User(VALID_USER_ID, "test", PRODUCT_PRICE), items);
+    List<OrderItemWrite> orderItems = List.of(new OrderItemWrite(product, 1));
+    private final OrderCommand.Create request = new OrderCommand.Create(VALID_USER_ID, orderItems);
+    OrderItemWrite orderItemEntity = new OrderItemWrite(product, 1);
+    private final OrderWrite orderEntity = new OrderWrite( new UserWrite("test", PRODUCT_PRICE), List.of(orderItemEntity));
     private OrderService orderService;
     @Autowired
     private OrderFacade orderFacade;
@@ -82,7 +79,6 @@ class OrderEntityControllerTest {
     void createOrder_Success() throws Exception {
 
         OrderInfo.Summary orderInfo = OrderInfo.Summary.from(orderEntity);
-        when(orderFacade.createOrder(any(OrderCommand.Create.class), paymentUseCase)).thenReturn(orderInfo);
 
 
         mockMvc.perform(post(API_ORDERS)
@@ -106,7 +102,8 @@ class OrderEntityControllerTest {
     @Test
     @DisplayName("주문 목록 조회 실패 - 잘못된 요청 파라미터")
     void listOrders_InvalidRequest_ShouldFail() throws Exception {
-        OrderDto.OrderCreateRequest request = new OrderDto.OrderCreateRequest(INVALID_USER_ID, Map.of());
+        OrderItemWrite orderItemWrite = new OrderItemWrite(product, 1);
+        OrderDto.OrderCreateRequest request = new OrderDto.OrderCreateRequest(INVALID_USER_ID, List.of(orderItemWrite));
 
         mockMvc.perform(get(API_ORDERS)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -119,9 +116,10 @@ class OrderEntityControllerTest {
     @DisplayName("결제 요청 - 결제 성공")
     void payOrder_Success() throws Exception {
         OrderDto.OrderPayRequest request = new OrderDto.OrderPayRequest(ORDER_ID);
-        OrderEntity orderEntity = createSampleOrder();
-        OrderInfo.Detail orderInfo = OrderInfo.Detail.from(orderEntity);
-        when(paymentUseCase.payOrder(OrderMapper.toOrderPay(request))).thenReturn(orderInfo);
+        OrderWrite orderEntity = createSampleOrder();
+
+        OrderInfo.Detail orderInfo = OrderInfo.Detail.from(orderEntity
+        );
 
         mockMvc.perform(post(API_ORDERS_PAYMENTS)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -136,10 +134,9 @@ class OrderEntityControllerTest {
     @DisplayName("주문 상품 추가")
     void addCartItemToOrder_Success() throws Exception {
         OrderCommand.Add request = new OrderCommand.Add(VALID_USER_ID, ORDER_ID, 1);
-        OrderEntity orderEntity = createSampleOrder();
+        OrderWrite orderEntity = createSampleOrder();
         OrderInfo.Detail orderInfo = OrderInfo.Detail.from(orderEntity);
 
-        when(cartUseCase.addItemToOrder(request)).thenReturn(orderInfo);
 
         mockMvc.perform(patch(API_ORDERS +"/{orderId}"+"/items", orderEntity.getId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -152,10 +149,9 @@ class OrderEntityControllerTest {
     @DisplayName("주문 상품 삭제")
     void deleteCartItemToOrder_Success() throws Exception {
         OrderCommand.Delete request = new OrderCommand.Delete(ORDER_ID,PRODUCT_ID);
-        OrderEntity orderEntity = createSampleOrder();
+        OrderWrite orderEntity = createSampleOrder();
         OrderInfo.Detail orderInfo = OrderInfo.Detail.from(orderEntity);
 
-        when(cartUseCase.deleteItemFromOrder(request)).thenReturn(orderInfo);
 
         mockMvc.perform(delete(API_ORDERS +"/{orderID}"+ "/items", orderEntity.getId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -164,12 +160,8 @@ class OrderEntityControllerTest {
                 .andExpect(jsonPath("$.id").value(VALID_USER_ID));
     }
 
-    private OrderEntity createSampleOrder() {
-        User user = new User(VALID_USER_ID, "test", PRODUCT_PRICE);
-        Map<Product, Integer> items = new HashMap<>();
-        items.put(product, 1);
-        OrderEntity orderEntity = new OrderEntity(user, items);
-        user.addOrder(orderEntity);
-        return orderEntity;
+    private OrderWrite createSampleOrder() {
+        UserWrite user = new UserWrite( "test", PRODUCT_PRICE);
+        return new OrderWrite(user,List.of(orderItemEntity));
     }
 }

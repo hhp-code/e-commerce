@@ -3,12 +3,14 @@ package com.ecommerce.api.controller.domain.order;
 import com.ecommerce.DatabaseCleanUp;
 import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.domain.order.OrderWrite;
-import com.ecommerce.domain.order.service.OrderDomainMapper;
+import com.ecommerce.domain.order.OrderDomainMapper;
+import com.ecommerce.domain.order.orderitem.OrderItemWrite;
+import com.ecommerce.domain.product.ProductWrite;
+import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.infra.order.entity.OrderEntity;
+import com.ecommerce.infra.order.entity.OrderItemEntity;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
-import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
-import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -27,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -64,23 +65,22 @@ public class OrderEntityControllerConcurrencyTest {
     @Autowired
     private ProductService productService;
 
-    private Product testProduct;
+    private ProductWrite testProduct;
 
     List<OrderDto.OrderPayRequest> orderPayRequest = new ArrayList<>();
     @BeforeEach
     @Transactional
     void setUp() {
-        testProduct = productService.saveAndGet(new Product("testProduct", BigDecimal.valueOf(1), 100));
+        testProduct = productService.saveAndGet(new ProductWrite("testProduct", BigDecimal.valueOf(1), 100));
         for (int i = 0; i < 1000; i++) {
-            userService.saveUser(new User("TestUser" + i, BigDecimal.valueOf(10)));
+            userService.saveUser(new UserWrite("TestUser" + i, BigDecimal.valueOf(10)));
         }
 
-        List<User> testUsers = userService.getAllUsers();
-        for(User user : testUsers) {
-            Map<Product, Integer> items = Map.of(testProduct, 1);
-            OrderEntity orderEntity = new OrderEntity(user, items);
-            OrderWrite writeModel = OrderDomainMapper.toWriteModel(orderEntity);
-            orderService.saveOrder(writeModel);
+        List<UserWrite> testUsers = userService.getAllUsers();
+        for(UserWrite user : testUsers) {
+            List<OrderItemWrite> items = new ArrayList<>();
+            OrderWrite orderEntity = new OrderWrite(user, items);
+            orderService.saveOrder(orderEntity);
             orderPayRequest.add(new OrderDto.OrderPayRequest(user.getId()));
         }
 

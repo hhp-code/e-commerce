@@ -1,14 +1,14 @@
 package com.ecommerce.domain.coupon.service.repository;
 
-import com.ecommerce.domain.coupon.Coupon;
+import com.ecommerce.infra.coupon.entity.CouponEntity;
 
 import java.util.Optional;
 
 public interface CouponRepository {
 
-    Optional<Coupon> save(Coupon coupon);
+    Optional<CouponEntity> save(CouponEntity coupon);
 
-    Optional<Coupon> getById(Long couponId);
+    Optional<CouponEntity> getById(Long couponId);
 
     int getStock(Long couponId);
 

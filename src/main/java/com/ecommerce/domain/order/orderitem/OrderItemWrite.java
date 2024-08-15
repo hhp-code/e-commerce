@@ -1,9 +1,8 @@
 package com.ecommerce.domain.order.orderitem;
 
-import com.ecommerce.domain.product.Product;
+import com.ecommerce.domain.product.ProductWrite;
 import lombok.Getter;
 
-@Getter
-public record OrderItemWrite(Product product, int quantity) {
+public record OrderItemWrite(ProductWrite product, int quantity) {
 
 }

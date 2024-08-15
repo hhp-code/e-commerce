@@ -1,17 +1,14 @@
 package com.ecommerce.domain.order.service;
 
 import com.ecommerce.DatabaseCleanUp;
-import com.ecommerce.application.usecase.PaymentUseCase;
-import com.ecommerce.domain.order.OrderRead;
-import com.ecommerce.domain.order.OrderWrite;
+import com.ecommerce.application.OrderFacade;
+import com.ecommerce.domain.order.*;
 import com.ecommerce.domain.order.command.OrderCommand;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 import com.ecommerce.domain.order.query.OrderQuery;
-import com.ecommerce.domain.order.OrderService;
-import com.ecommerce.infra.order.entity.OrderEntity;
-import com.ecommerce.domain.product.Product;
+import com.ecommerce.domain.product.ProductWrite;
+import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.domain.product.service.ProductService;
-import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,6 +32,8 @@ class OrderEntityCommandServiceTest {
     private DatabaseCleanUp databaseCleanUp;
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private OrderFacade orderFacade;
 
     @AfterEach
     void tearDown() {
@@ -54,20 +52,17 @@ class OrderEntityCommandServiceTest {
     private ProductService productService;
 
     private OrderWrite testOrderWrite;
-    private User testUser;
-    private Product testProduct;
-    @Autowired
-    private PaymentUseCase paymentUseCase;
+    private UserWrite testUser;
+    private ProductWrite testProduct;
 
     @BeforeEach
     void setup() {
-        User user = new User("testUser", BigDecimal.valueOf(1000));
-        Product product = new Product( "test", BigDecimal.TWO, 1000);
+        UserWrite user = new UserWrite("testUser", BigDecimal.valueOf(1000));
+        ProductWrite product = new ProductWrite( "test", BigDecimal.TWO, 1000);
         testUser = userService.saveUser(user);
         testProduct = productService.saveAndGet(product);
         OrderItemWrite orderItem = new OrderItemWrite(testProduct, 1);
-        OrderEntity orderEntity = new OrderEntity(testUser, List.of(orderItem));
-        OrderWrite orderWrite = OrderDomainMapper.toWriteModel(orderEntity);
+        OrderWrite orderWrite = new OrderWrite(testUser, List.of(orderItem));
         testOrderWrite = orderCommandService.saveOrder(orderWrite);
     }
 
@@ -75,7 +70,7 @@ class OrderEntityCommandServiceTest {
     @DisplayName("주문 ID로 주문을 조회한다")
     void getOrder_ShouldReturnOrder_WhenOrderExists() {
 
-        OrderEntity result = orderService.getOrder(testOrderWrite.getId());
+        OrderWrite result = orderService.getOrder(testOrderWrite.getId());
 
         assertNotNull(result);
         assertEquals(testOrderWrite.getId(), result.getId());
@@ -93,16 +88,6 @@ class OrderEntityCommandServiceTest {
     }
 
 
-    @Test
-    @DisplayName("새로운 주문을 생성한다")
-    void createOrder_ShouldCreateNewOrder_WhenValidCommandProvided() {
-        OrderCommand.Create createCommand = new OrderCommand.Create(testUser.getId(), Map.of(testProduct.getId(), 1));
-
-        OrderInfo.Summary result = paymentUseCase.orderCommandService.createOrder(createCommand, paymentUseCase);
-
-        assertNotNull(result);
-        assertEquals("PREPARED", result.status());
-    }
 
 
 

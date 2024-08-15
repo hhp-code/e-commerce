@@ -1,10 +1,15 @@
-package com.ecommerce.domain.order.service;
+package com.ecommerce.domain.order;
 
-import com.ecommerce.domain.order.*;
 import com.ecommerce.domain.order.orderitem.OrderItemRead;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
+import com.ecommerce.domain.product.ProductDomainMapper;
+import com.ecommerce.domain.product.ProductWrite;
+import com.ecommerce.domain.user.UserDomainMapper;
+import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.infra.order.entity.OrderEntity;
 import com.ecommerce.infra.order.entity.OrderItemEntity;
+import com.ecommerce.infra.product.entity.ProductEntity;
+import com.ecommerce.infra.user.entity.UserEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,8 +38,10 @@ public class OrderDomainMapper {
     }
 
     public static OrderEntity toEntity(OrderWrite writeModel) {
+        UserWrite user = writeModel.getUser();
+        UserEntity entity = UserDomainMapper.toEntity(user);
         return new OrderEntity(
-                writeModel.getUser(),
+                entity,
                 writeModel.getItems().stream()
                         .map(OrderDomainMapper::toEntity)
                         .collect(Collectors.toList())
@@ -42,9 +49,11 @@ public class OrderDomainMapper {
     }
 
     public static OrderItemEntity toEntity(OrderItemWrite writeModel) {
+        ProductWrite product = writeModel.product();
+        ProductEntity entity = ProductDomainMapper.toEntity(product);
 
         return new OrderItemEntity(
-                writeModel.product(),
+                entity,
                 writeModel.quantity()
         );
     }
@@ -56,8 +65,10 @@ public class OrderDomainMapper {
     }
 
     public static OrderWrite toWriteModel(OrderEntity orderEntity) {
+        UserEntity user = orderEntity.getUser();
+        UserWrite userWrite = UserDomainMapper.toWriteModel(user);
         return new OrderWrite(
-                orderEntity.getUser(),
+                userWrite,
                 toItemWriteModel(orderEntity.getOrderItemEntities())
             );
     }
@@ -65,7 +76,9 @@ public class OrderDomainMapper {
     private static List<OrderItemWrite> toItemWriteModel(List<OrderItemEntity> items) {
         List<OrderItemWrite> orderItemWrites = new ArrayList<>();
         for(OrderItemEntity item: items){
-            orderItemWrites.add(new OrderItemWrite(item.getProduct(), item.getQuantity()));
+            ProductEntity product = item.getProduct();
+            ProductWrite writeModel = ProductDomainMapper.toWriteModel(product);
+            orderItemWrites.add(new OrderItemWrite(writeModel, item.getQuantity()));
         }
         return orderItemWrites;
     }

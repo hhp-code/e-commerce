@@ -1,12 +1,11 @@
 package com.ecommerce.domain.order;
 
+import com.ecommerce.domain.coupon.CouponWrite;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
+import com.ecommerce.domain.product.ProductWrite;
+import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.interfaces.exception.domain.OrderException;
-import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
-import com.ecommerce.domain.product.Product;
-import com.ecommerce.domain.user.User;
-import com.ecommerce.domain.user.service.UserService;
 import lombok.Getter;
 
 import java.math.BigDecimal;
@@ -32,9 +31,9 @@ public class OrderWrite {
 
 
     @Getter
-    private User user;
+    private UserWrite user;
 
-    private Coupon coupon;
+    private CouponWrite coupon;
 
     @Getter
     private List<OrderItemWrite> orderItems;
@@ -43,7 +42,7 @@ public class OrderWrite {
 
     public OrderWrite() {
     }
-    public OrderWrite(User user) {
+    public OrderWrite(UserWrite user) {
         this.orderDate = LocalDateTime.now();
         this.user = user;
         this.orderItems = new ArrayList<>();
@@ -51,7 +50,7 @@ public class OrderWrite {
         this.orderStatus = OrderStatus.PREPARED;
     }
 
-    public OrderWrite(User user, List<OrderItemWrite> orderItems) {
+    public OrderWrite(UserWrite user, List<OrderItemWrite> orderItems) {
         this.orderDate = LocalDateTime.now();
         this.user = user;
         this.orderItems = new ArrayList<>(orderItems);
@@ -60,7 +59,7 @@ public class OrderWrite {
         calculatePrices();
     }
 
-    public void applyCoupon(Coupon coupon) {
+    public void applyCoupon(CouponWrite coupon) {
         if (coupon != null && coupon.isValid() && coupon.getQuantity() >= 0) {
             this.coupon = coupon;
             calculateDiscount();
@@ -90,7 +89,7 @@ public class OrderWrite {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private BigDecimal calculateItemPrice(Product product, Integer price) {
+    private BigDecimal calculateItemPrice(ProductWrite product, Integer price) {
         return product.getPrice().multiply(BigDecimal.valueOf(price));
 
     }
@@ -148,36 +147,9 @@ public class OrderWrite {
         this.orderItems.remove(orderItemWrite);
     }
 
-    public OrderWrite deductStock() {
-        for(OrderItemWrite orderItemWrite : orderItems){
-            orderItemWrite.product().deductStock(orderItemWrite.quantity());
-        }
-        return this;
-    }
-
-    public OrderWrite deductPoint() {
-        this.user.deductPoint( getTotalAmount());
-        return this;
-    }
-
-
-
-    public OrderWrite chargeStock() {
-        for(OrderItemWrite orderItemWrite : orderItems){
-            orderItemWrite.product().chargeStock(orderItemWrite.quantity());
-        }
-        return this;
-
-    }
-
-    public OrderWrite chargePoint() {
-        this.user.chargePoint(getTotalAmount());
-        return this;
-    }
-
 
     public OrderWrite addItem(OrderItemWrite orderItemWrite) {
-        Product product = orderItemWrite.product();
+        ProductWrite product = orderItemWrite.product();
         validateOrderItem(product, orderItemWrite.quantity());
         this.addOrderItem(orderItemWrite);
         return this;
@@ -193,21 +165,16 @@ public class OrderWrite {
         return this;
     }
 
-    public OrderWrite putUser(UserService userService, long userId) {
-        this.user = userService.getUser(userId);
-        return this;
-    }
-
     public OrderWrite addItems(List<OrderItemWrite> orderItemWrites) {
         for(OrderItemWrite orderItemWrite : orderItemWrites){
-            Product product = orderItemWrite.product();
+            ProductWrite product = orderItemWrite.product();
             validateOrderItem(product, orderItemWrite.quantity());
             this.addOrderItem(orderItemWrite);
         }
         return this;
     }
 
-    private void validateOrderItem(Product product, int quantity) {
+    private void validateOrderItem(ProductWrite product, int quantity) {
         if (quantity <= 0) {
             throw new OrderException("주문 수량은 0보다 커야 합니다.");
         }
@@ -216,14 +183,14 @@ public class OrderWrite {
         }
     }
 
-    public Long getUserId() {
-        return user.getId();
-    }
 
     public List<OrderItemWrite> getItems() {
         return orderItems;
     }
 
 
+    public long getUserId() {
+        return user.getId();
+    }
 }
 
