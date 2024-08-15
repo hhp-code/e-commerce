@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
 @Repository
 public class RedisOutboxRepository implements OutboxRepository {
     private final RedisTemplate<String, OutboxMessage> redisTemplate;

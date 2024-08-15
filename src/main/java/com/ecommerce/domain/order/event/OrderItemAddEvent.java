@@ -33,4 +33,9 @@ public record OrderItemAddEvent(
     public String getEventType() {
         return "order-item-add";
     }
+
+    @Override
+    public String getAggregateId() {
+        return orderId.toString();
+    }
 }

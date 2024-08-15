@@ -30,4 +30,9 @@ public record PointChargeEvent(
     public String getEventType() {
         return "point-charge";
     }
+
+    @Override
+    public String getAggregateId() {
+        return userId.toString();
+    }
 }

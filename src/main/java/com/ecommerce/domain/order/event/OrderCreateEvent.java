@@ -32,4 +32,9 @@ public record OrderCreateEvent(
     public String getEventType() {
         return "order-create";
     }
+
+    @Override
+    public String getAggregateId() {
+        return userId.toString();
+    }
 }

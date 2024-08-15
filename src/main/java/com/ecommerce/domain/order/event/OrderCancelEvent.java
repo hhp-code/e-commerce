@@ -30,4 +30,9 @@ public record OrderCancelEvent(
         return "order-cancel";
     }
 
+    @Override
+    public String getAggregateId() {
+        return orderId.toString();
+    }
+
 }

@@ -29,4 +29,9 @@ public record OrderPayAfterEvent(
     public String getEventType() {
         return "pay-after";
     }
+
+    @Override
+    public String getAggregateId() {
+        return orderId.toString();
+    }
 }

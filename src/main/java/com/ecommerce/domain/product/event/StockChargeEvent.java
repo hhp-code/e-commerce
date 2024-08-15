@@ -27,6 +27,11 @@ public record StockChargeEvent(
 
     @Override
     public String getEventType() {
-        return "StockRestore";
+        return "stock-charge";
+    }
+
+    @Override
+    public String getAggregateId() {
+        return productId.toString();
     }
 }

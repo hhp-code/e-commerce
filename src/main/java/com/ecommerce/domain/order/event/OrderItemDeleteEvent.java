@@ -32,4 +32,9 @@ public record OrderItemDeleteEvent(
     public String getEventType() {
         return "order-item-delete";
     }
+
+    @Override
+    public String getAggregateId() {
+        return orderId.toString();
+    }
 }

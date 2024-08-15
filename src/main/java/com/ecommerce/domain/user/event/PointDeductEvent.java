@@ -30,4 +30,9 @@ public record PointDeductEvent(
     public String getEventType() {
         return "PointDeduct";
     }
+
+    @Override
+    public String getAggregateId() {
+        return userId.toString();
+    }
 }

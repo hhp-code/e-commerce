@@ -27,6 +27,11 @@ public record StockDeductEvent(
 
     @Override
     public String getEventType() {
-        return "StockDeduct";
+        return "stock-deduct";
+    }
+
+    @Override
+    public String getAggregateId() {
+        return productId.toString();
     }
 }
