@@ -1,4 +1,4 @@
-package com.ecommerce;
+package com.ecommerce.event;
 
 import com.ecommerce.application.CommandHandler;
 import com.ecommerce.domain.order.command.OrderCommand;

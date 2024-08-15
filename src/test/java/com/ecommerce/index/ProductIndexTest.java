@@ -1,4 +1,4 @@
-package com.ecommerce;
+package com.ecommerce.index;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,9 +1,8 @@
 package com.ecommerce.domain.order.service;
 
-import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.config.DatabaseCleanUp;
 import com.ecommerce.application.OrderFacade;
 import com.ecommerce.domain.order.*;
-import com.ecommerce.domain.order.command.OrderCommand;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 import com.ecommerce.domain.order.query.OrderQuery;
 import com.ecommerce.domain.product.ProductWrite;

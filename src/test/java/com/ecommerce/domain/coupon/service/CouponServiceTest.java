@@ -1,6 +1,6 @@
 package com.ecommerce.domain.coupon.service;
 
-import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.config.DatabaseCleanUp;
 import com.ecommerce.domain.coupon.CouponWrite;
 import com.ecommerce.domain.coupon.DiscountType;
 import org.junit.jupiter.api.AfterEach;

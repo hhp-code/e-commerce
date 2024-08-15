@@ -1,6 +1,6 @@
 package com.ecommerce.cache;
 
-import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.config.DatabaseCleanUp;
 import com.ecommerce.domain.product.ProductWrite;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.UserWrite;

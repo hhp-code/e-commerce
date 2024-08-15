@@ -1,14 +1,11 @@
 package com.ecommerce.api.controller.domain.order;
 
-import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.config.DatabaseCleanUp;
 import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.domain.order.OrderWrite;
-import com.ecommerce.domain.order.OrderDomainMapper;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 import com.ecommerce.domain.product.ProductWrite;
 import com.ecommerce.domain.user.UserWrite;
-import com.ecommerce.infra.order.entity.OrderEntity;
-import com.ecommerce.infra.order.entity.OrderItemEntity;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.service.UserService;

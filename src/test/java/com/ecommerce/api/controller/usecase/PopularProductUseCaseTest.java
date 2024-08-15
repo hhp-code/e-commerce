@@ -1,6 +1,6 @@
 package com.ecommerce.api.controller.usecase;
 
-import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.config.DatabaseCleanUp;
 import com.ecommerce.application.OrderFacade;
 import com.ecommerce.application.usecase.PopularProductUseCase;
 import com.ecommerce.domain.order.OrderService;

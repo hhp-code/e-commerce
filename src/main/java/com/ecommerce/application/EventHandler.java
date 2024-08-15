@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+//TODO : 상태머신을 활용한 부분보상로직 구현
 @Component
 public class EventHandler {
     private final ObjectMapper objectMapper;

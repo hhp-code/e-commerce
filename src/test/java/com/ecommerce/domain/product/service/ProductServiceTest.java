@@ -1,8 +1,7 @@
 package com.ecommerce.domain.product.service;
 
-import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.config.DatabaseCleanUp;
 import com.ecommerce.domain.product.ProductWrite;
-import com.ecommerce.domain.product.service.repository.ProductRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -1,4 +1,4 @@
-package com.ecommerce;
+package com.ecommerce.index;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.jdbc.Sql;
 
 import javax.sql.DataSource;
 import java.math.BigInteger;
@@ -20,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         "spring.datasource.username=admin",
         "spring.datasource.password=admin"
 })
-public class UserIndexTest {
+public class OrderEntityIndexTest {
 
     @Autowired
     private DataSource dataSource;
@@ -33,26 +34,26 @@ public class UserIndexTest {
     }
 
     @Test
-    void testUsernameIndexPerformance() {
+    void testOrderStatusIndexPerformance() {
         // 인덱스 적용 전 쿼리 실행 계획
         List<Map<String, Object>> beforeIndex = getQueryPlan(
-                "SELECT * FROM users WHERE username = 'testuser'"
+                "SELECT * FROM orders WHERE order_status = 'ORDERED'"
         );
-        System.out.println("쿼리 실행 계획 (username 인덱스 적용 전):");
+        System.out.println("쿼리 실행 계획 (orderStatus 인덱스 적용 전):");
         printQueryPlan(beforeIndex);
 
         // 인덱스 생성
-        jdbcTemplate.execute("CREATE INDEX idx_username ON users (username)");
+        jdbcTemplate.execute("CREATE INDEX idx_order_status ON orders (order_status)");
 
         // 인덱스 적용 후 쿼리 실행 계획
         List<Map<String, Object>> afterIndex = getQueryPlan(
-                "SELECT * FROM users WHERE username = 'testuser'"
+                "SELECT * FROM orders WHERE order_status = 'ORDERED'"
         );
-        System.out.println("쿼리 실행 계획 (username 인덱스 적용 후):");
+        System.out.println("쿼리 실행 계획 (orderStatus 인덱스 적용 후):");
         printQueryPlan(afterIndex);
 
         // 인덱스 삭제
-        jdbcTemplate.execute("DROP INDEX idx_username ON users");
+        jdbcTemplate.execute("DROP INDEX idx_order_status ON orders");
 
         // 인덱스 적용 후 성능 향상 검증
         assertTrue(isPerformanceImproved(beforeIndex, afterIndex));
@@ -69,8 +70,8 @@ public class UserIndexTest {
     }
 
     private boolean isPerformanceImproved(List<Map<String, Object>> before, List<Map<String, Object>> after) {
-        BigInteger beforeRows = (BigInteger) before.get(0).get("rows");
-        BigInteger afterRows = (BigInteger) after.get(0).get("rows");
+        BigInteger beforeRows = (BigInteger) before.getFirst().get("rows");
+        BigInteger afterRows = (BigInteger) after.getFirst().get("rows");
         return afterRows.compareTo(beforeRows) < 0;
     }
 }

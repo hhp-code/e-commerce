@@ -1,4 +1,4 @@
-package com.ecommerce;
+package com.ecommerce.event;
 
 import com.ecommerce.domain.order.event.OrderCancelEvent;
 import com.ecommerce.domain.order.event.OrderCreateEvent;

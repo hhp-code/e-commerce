@@ -1,4 +1,4 @@
-package com.ecommerce;
+package com.ecommerce.config;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
