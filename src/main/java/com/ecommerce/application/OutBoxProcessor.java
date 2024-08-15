@@ -42,7 +42,7 @@ public class OutBoxProcessor {
             try {
                 eventBus.publish(message.getEventType(), message.getPayload());
                 outboxRepository.delete(message.getId());
-                log.info("Successfully processed and deleted message: {}", message.getId());
+                log.info("Successfully published and deleted message: {}", message.getPayload());
             } catch (Exception e) {
                 log.error("Failed to process message: {}", message.getId(), e);
                 handlePublishFailure(message);

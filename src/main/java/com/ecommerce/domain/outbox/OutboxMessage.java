@@ -13,16 +13,22 @@ public class OutboxMessage {
     @Getter
     private String eventType;
     @Getter
+    private String eventId;
+    @Getter
     private String payload;
     private LocalDateTime createdAt;
     @Getter
     private int retryCount;
 
-    public OutboxMessage(String id, String aggregateType, String aggregateId, String eventType, String payload, LocalDateTime now, int retryCount) {
+    public OutboxMessage(){
+
+    }
+    public OutboxMessage(String id, String aggregateType, String aggregateId, String eventType, String eventId, String payload, LocalDateTime now, int retryCount) {
         this.id = id;
         this.aggregateType = aggregateType;
         this.aggregateId = aggregateId;
         this.eventType = eventType;
+        this.eventId = eventId;
         this.payload = payload;
         this.createdAt = now;
         this.retryCount = retryCount;

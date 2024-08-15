@@ -13,10 +13,12 @@ import com.ecommerce.domain.user.event.PointDeductEvent;
 import com.ecommerce.domain.user.event.PointChargeEvent;
 import com.ecommerce.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 //TODO : 상태머신을 활용한 부분보상로직 구현
+@Slf4j
 @Component
 public class EventHandler {
     private final ObjectMapper objectMapper;
@@ -35,6 +37,7 @@ public class EventHandler {
     public void handleOrderCreateEvent(String eventJson) {
         try {
             OrderCreateEvent event = objectMapper.readValue(eventJson, OrderCreateEvent.class);
+            log.info("received order create event: {}", event);
             UserWrite user = userService.getUser(event.userId());
             OrderWrite orderWrite = new OrderWrite(user).addItems(event.orderItems());
             orderService.saveOrder(orderWrite);

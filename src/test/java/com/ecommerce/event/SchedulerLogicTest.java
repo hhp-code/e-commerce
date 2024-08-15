@@ -43,6 +43,7 @@ public class SchedulerLogicTest {
                 event.getClass().getSimpleName(),
                 event.getAggregateId(),
                 event.getEventType(),
+                event.getEventId().toString(),
                 payload,
                 LocalDateTime.now(),
                 0

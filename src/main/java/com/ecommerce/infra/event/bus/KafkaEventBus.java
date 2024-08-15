@@ -36,7 +36,7 @@ public class KafkaEventBus implements EventBus {
         subscribers.computeIfAbsent(topic, k -> new ArrayList<>()).add(eventHandler);
     }
 
-    @KafkaListener(topics = "#{'${kafka.topics}'.split(',')}", groupId = "${kafka.group-id}")
+    @KafkaListener(topics = "#{'${kafka.topics}'.split(',')}", groupId = "myGroup")
     public void consumeEvent(ConsumerRecord<String, String> record, @Payload String event) {
         String topic = record.topic();
         if (subscribers.containsKey(topic)) {

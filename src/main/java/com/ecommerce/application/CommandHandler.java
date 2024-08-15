@@ -15,6 +15,7 @@ import com.ecommerce.domain.user.event.PointDeductEvent;
 import com.ecommerce.domain.user.event.PointChargeEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -22,7 +23,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
+@Slf4j
 @Component
 public class CommandHandler {
     private final ObjectMapper objectMapper;
@@ -115,14 +116,16 @@ public class CommandHandler {
                 String payload = objectMapper.writeValueAsString(event);
                 OutboxMessage outboxMessage = new OutboxMessage(
                         UUID.randomUUID().toString(),
-                        event.getClass().getSimpleName(),  // or a more specific aggregate type if available
-                        event.getAggregateId(), // assuming DomainEvent has getAggregateId method
+                        event.getClass().getSimpleName(),
+                        event.getAggregateId(),
                         event.getEventType(),
+                        event.getEventId().toString(),
                         payload,
                         LocalDateTime.now(),
                         0  // initial retry count
                 );
                 outboxRepository.save(outboxMessage);
+                log.info("Saved to outbox message from commandHandler: {}", outboxMessage.getId());
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("Failed to serialize event", e);
             }
