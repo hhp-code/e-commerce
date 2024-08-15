@@ -1,6 +1,8 @@
 package com.ecommerce;
 
-import com.ecommerce.domain.order.event.OrderCreateEvent;
+import com.ecommerce.application.CommandHandler;
+import com.ecommerce.domain.order.command.OrderCommand;
+import com.ecommerce.domain.user.command.UserCommand;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -9,14 +11,13 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
+import java.math.BigDecimal;
 import java.time.Duration;
-import java.util.Collections;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -32,23 +33,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class KafkaEventTest {
 
     @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private CommandHandler commandHandler;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    private static final String TOPIC = "order-create";
     private static final int TIMEOUT_SECONDS = 30;
 
     @Test
-    public void testOrderCreateEventPublishAndConsume() throws Exception {
+    public void testAllEventsPublishAndConsume() throws Exception {
         waitForConsumerGroupToStabilize();
 
-        CountDownLatch latch = new CountDownLatch(1);
+        CountDownLatch latch = new CountDownLatch(6); // 6개의 이벤트를 기대함
+        Set<String> receivedEvents = Collections.synchronizedSet(new HashSet<>());
 
-        // 테스트용 컨슈머 설정
         KafkaConsumer<String, String> consumer = createTestConsumer();
-        consumer.subscribe(Collections.singletonList(TOPIC));
+        consumer.subscribe(Arrays.asList("order-create", "order-pay-after", "order-cancel", "order-item-add", "order-item-delete", "point-charge"));
 
         // 별도 스레드에서 메시지 수신 대기
         new Thread(() -> {
@@ -56,8 +56,8 @@ public class KafkaEventTest {
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
                 for (ConsumerRecord<String, String> record : records) {
                     try {
-                        OrderCreateEvent event = objectMapper.readValue(record.value(), OrderCreateEvent.class);
-                        System.out.println("Received event: " + event);
+                        System.out.println("Received event on topic " + record.topic() + ": " + record.value());
+                        receivedEvents.add(record.topic());
                         latch.countDown();
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -66,18 +66,30 @@ public class KafkaEventTest {
             }
         }).start();
 
-        // 테스트 이벤트 생성 및 발행
-        OrderCreateEvent testEvent = new OrderCreateEvent(1L, Collections.emptyList());
-        String eventJson = objectMapper.writeValueAsString(testEvent);
-        kafkaTemplate.send(TOPIC, eventJson);
+        // 테스트 커맨드 실행
+        commandHandler.handle(new OrderCommand.Create(1L, Collections.emptyList()));
+        commandHandler.handle(new OrderCommand.Payment(1L));
+        commandHandler.handle(new OrderCommand.Cancel(1L));
+        commandHandler.handle(new OrderCommand.Add(1L, 1L, 1));
+        commandHandler.handle(new OrderCommand.Delete(1L, 1L));
+        commandHandler.handle(new UserCommand.Charge(1L, BigDecimal.valueOf(1000)));
 
-        boolean messageReceived = latch.await(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        boolean allMessagesReceived = latch.await(TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
-        assertTrue(messageReceived, "OrderCreateEvent should be received within " + TIMEOUT_SECONDS + " seconds");
+        assertTrue(allMessagesReceived, "All events should be received within " + TIMEOUT_SECONDS + " seconds");
+
+        // 수신된 이벤트와 수신되지 않은 이벤트 표시
+        System.out.println("Received events:");
+        receivedEvents.forEach(event -> System.out.println("- " + event));
+
+        System.out.println("Missing events:");
+        Arrays.asList("order-create", "order-pay-after", "order-cancel", "order-item-add", "order-item-delete", "point-charge")
+                .stream()
+                .filter(event -> !receivedEvents.contains(event))
+                .forEach(event -> System.out.println("- " + event));
 
         consumer.close();
     }
-
     private void waitForConsumerGroupToStabilize() throws InterruptedException {
         Thread.sleep(10000);
     }
