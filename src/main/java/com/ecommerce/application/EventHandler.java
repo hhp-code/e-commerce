@@ -59,31 +59,20 @@ public class EventHandler {
             ProductWrite product = productService.getProduct(event.productId());
             int quantity = event.quantity();
             OrderItemWrite item = new OrderItemWrite(product, quantity);
-            orderService.saveOrder(
-                    orderService.getOrder(
-                            event.orderId()
-                    ).addItem(
-                            item
-                    )
-            );
+            OrderWrite orderWrite = orderService.getOrder(event.orderId()).addItem(item);
+            orderService.saveOrder(orderWrite);
         } catch (Exception e) {
-            // 예외 처리
+            //TODO: 예외 처리
         }
     }
     @KafkaListener(topics = "order-item-delete", groupId = "ecommerce-group")
     public void handleOrderDeleteItemEvent(String eventJson) {
         try {
             OrderItemDeleteEvent event = objectMapper.readValue(eventJson, OrderItemDeleteEvent.class);
-
-            orderService.saveOrder(
-                    orderService.getOrder(
-                            event.orderId()
-                    ).deleteItem(
-                            event.productId()
-                    )
-            );
+            OrderWrite orderWrite = orderService.getOrder(event.orderId()).deleteItem(event.productId());
+            orderService.saveOrder(orderWrite);
         } catch (Exception e) {
-            // 예외 처리
+            //TODO 예외 처리
         }
     }
 
@@ -97,7 +86,7 @@ public class EventHandler {
             UserWrite userWrite = userService.getUser(event.userId()).deductPoint(event.pointChange());
             userService.saveUser(userWrite);
         } catch (Exception e) {
-            // 예외 처리
+            //TODO: 예외 처리
         }
     }
 
@@ -105,12 +94,10 @@ public class EventHandler {
     public void handleOrderPayAfterEvent(String eventJson) {
         try {
             OrderPayAfterEvent event = objectMapper.readValue(eventJson, OrderPayAfterEvent.class);
-            orderService.saveOrder(
-                    orderService.getOrder(
-                            event.orderId()
-                    ).finish());
+            OrderWrite finish = orderService.getOrder(event.orderId()).finish();
+            orderService.saveOrder(finish);
         } catch (Exception e) {
-            // 예외 처리
+            //TODO: 예외 처리
         }
     }
 
@@ -121,7 +108,7 @@ public class EventHandler {
             ProductWrite product = productService.getProduct(event.productId()).chargeStock(event.quantityChange());
             productService.saveAndGet(product);
         } catch (Exception e) {
-            // 예외 처리
+            //TODO: 예외 처리
         }
     }
 
@@ -132,7 +119,7 @@ public class EventHandler {
             UserWrite userWrite = userService.getUser(event.userId()).chargePoint(event.pointChange());
             userService.saveUser(userWrite);
         } catch (Exception e) {
-            // 예외 처리
+            //TODO: 예외 처리
         }
     }
 
@@ -143,7 +130,7 @@ public class EventHandler {
             Long orderId = event.orderId();
             orderService.saveOrder(orderService.getOrder(orderId));
         } catch (Exception e) {
-            // 예외 처리
+            //TODO: 예외 처리
         }
     }
 }
