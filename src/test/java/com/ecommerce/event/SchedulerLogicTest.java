@@ -3,7 +3,6 @@ package com.ecommerce.event;
 import com.ecommerce.application.CommandHandler;
 import com.ecommerce.application.OutBoxProcessor;
 import com.ecommerce.domain.event.EventBus;
-import com.ecommerce.domain.order.command.OrderCommand;
 import com.ecommerce.domain.order.event.OrderCreateEvent;
 import com.ecommerce.domain.outbox.OutboxMessage;
 import com.ecommerce.domain.outbox.OutboxRepository;
