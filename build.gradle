@@ -56,6 +56,10 @@ dependencies {
 
     //레디스 의존성 추가
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    //Spring stateMachine
+    implementation 'org.springframework.statemachine:spring-statemachine-core:3.2.0'
+    implementation 'org.springframework.statemachine:spring-statemachine-starter:3.2.0'
 }
 
 def querydslDir = "src/main/generated"

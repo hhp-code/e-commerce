@@ -11,11 +11,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ProductTest {
 
-    private ProductWrite product;
+    private Product product;
 
     @BeforeEach
     void setUp() {
-        product = new ProductWrite("Test Product", BigDecimal.valueOf(100), 10);
+        product = new Product("Test Product", BigDecimal.valueOf(100), 10);
     }
 
 

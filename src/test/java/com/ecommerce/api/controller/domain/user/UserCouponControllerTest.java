@@ -2,7 +2,7 @@ package com.ecommerce.api.controller.domain.user;
 
 import com.ecommerce.application.usecase.CouponUseCase;
 import com.ecommerce.domain.coupon.CouponWrite;
-import com.ecommerce.domain.user.UserWrite;
+import com.ecommerce.domain.user.User;
 import com.ecommerce.interfaces.controller.domain.user.UserCouponController;
 import com.ecommerce.interfaces.scheduler.CouponQueueManager;
 import com.ecommerce.domain.coupon.DiscountType;
@@ -45,11 +45,11 @@ public class UserCouponControllerTest {
     private CouponUseCase couponUseCase;
 
     private final CouponWrite testCoupon = new CouponWrite(1L, "SUMMER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 100, LocalDateTime.now(), LocalDateTime.now().plusDays(30), true);
-    private final UserWrite testUser= new UserWrite(1L, "test", BigDecimal.ZERO, List.of(testCoupon));
+    private final User testUser= new User(1L, "test", BigDecimal.ZERO, List.of(testCoupon));
 
     @Test
     void testIssueCouponToUser() throws Exception {
-        CompletableFuture<UserWrite>  test = CompletableFuture.completedFuture(testUser);
+        CompletableFuture<User>  test = CompletableFuture.completedFuture(testUser);
         Long userId = 1L;
         Long couponId = 1L;
         when(couponQueueManager.addToQueueAsync(any(CouponCommand.Issue.class))).thenReturn(testUser);

@@ -1,19 +1,17 @@
 package com.ecommerce.domain.user.service;
 
-import com.ecommerce.domain.user.UserWrite;
+import com.ecommerce.domain.user.User;
 import com.ecommerce.interfaces.exception.domain.UserException;
 import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.user.service.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.Optional;
-import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -39,7 +37,7 @@ class UserPointServiceUnitTest {
     @DisplayName("잔액 조회 - 사용자가 존재하는 경우")
     void getPointWhenUserExists() {
 
-        UserWrite point = userService.getPoint(userId);
+        User point = userService.getPoint(userId);
         BigDecimal balance = point.getPoint();
 
         assertEquals(BigDecimal.valueOf(1000), balance);

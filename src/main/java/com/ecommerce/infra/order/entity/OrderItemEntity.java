@@ -1,6 +1,5 @@
 package com.ecommerce.infra.order.entity;
 
-import com.ecommerce.domain.product.ProductWrite;
 import com.ecommerce.infra.product.entity.ProductEntity;
 import jakarta.persistence.*;
 import lombok.Getter;

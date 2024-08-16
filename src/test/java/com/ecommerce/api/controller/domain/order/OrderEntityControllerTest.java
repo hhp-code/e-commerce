@@ -3,13 +3,12 @@ package com.ecommerce.api.controller.domain.order;
 import com.ecommerce.application.OrderFacade;
 import com.ecommerce.domain.order.OrderWrite;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
-import com.ecommerce.domain.product.ProductWrite;
-import com.ecommerce.domain.user.UserWrite;
+import com.ecommerce.domain.product.Product;
+import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.order.OrderInfo;
 import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.interfaces.controller.domain.order.OrderController;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
-import com.ecommerce.interfaces.controller.domain.order.dto.OrderMapper;
 import com.ecommerce.domain.order.command.OrderCommand;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -56,14 +55,14 @@ class OrderEntityControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-    private final ProductWrite product = new ProductWrite("product", PRODUCT_PRICE, PRODUCT_STOCK);
+    private final Product product = new Product("product", PRODUCT_PRICE, PRODUCT_STOCK);
 
-    private final Map<ProductWrite, Integer> items = Map.of(product, 1);
+    private final Map<Product, Integer> items = Map.of(product, 1);
     private final Map<Long, Integer> create = Map.of(PRODUCT_ID, 1);
     List<OrderItemWrite> orderItems = List.of(new OrderItemWrite(product, 1));
     private final OrderCommand.Create request = new OrderCommand.Create(VALID_USER_ID, orderItems);
     OrderItemWrite orderItemEntity = new OrderItemWrite(product, 1);
-    private final OrderWrite orderEntity = new OrderWrite( new UserWrite("test", PRODUCT_PRICE), List.of(orderItemEntity));
+    private final OrderWrite orderEntity = new OrderWrite( new User("test", PRODUCT_PRICE), List.of(orderItemEntity));
     private OrderService orderService;
     @Autowired
     private OrderFacade orderFacade;
@@ -161,7 +160,7 @@ class OrderEntityControllerTest {
     }
 
     private OrderWrite createSampleOrder() {
-        UserWrite user = new UserWrite( "test", PRODUCT_PRICE);
+        User user = new User( "test", PRODUCT_PRICE);
         return new OrderWrite(user,List.of(orderItemEntity));
     }
 }

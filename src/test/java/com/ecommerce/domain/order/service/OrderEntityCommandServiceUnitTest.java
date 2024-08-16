@@ -3,12 +3,11 @@ package com.ecommerce.domain.order.service;
 import com.ecommerce.application.OrderFacade;
 import com.ecommerce.domain.order.OrderRead;
 import com.ecommerce.domain.order.OrderWrite;
-import com.ecommerce.domain.order.command.OrderCommand;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 import com.ecommerce.domain.order.query.OrderQuery;
 import com.ecommerce.domain.order.OrderService;
-import com.ecommerce.domain.product.ProductWrite;
-import com.ecommerce.domain.user.UserWrite;
+import com.ecommerce.domain.product.Product;
+import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.order.command.OrderCommandRepository;
 import com.ecommerce.domain.order.query.OrderQueryRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -84,8 +83,8 @@ class OrderEntityCommandServiceUnitTest {
 
 
     private OrderWrite createMockOrder() {
-        UserWrite user = new UserWrite( "test", BigDecimal.ONE);
-        OrderItemWrite orderItemEntity = new OrderItemWrite(new ProductWrite("product", BigDecimal.ONE, 1000), 1);
+        User user = new User( "test", BigDecimal.ONE);
+        OrderItemWrite orderItemEntity = new OrderItemWrite(new Product("product", BigDecimal.ONE, 1000), 1);
         return new OrderWrite(user, List.of(orderItemEntity));
     }
 }

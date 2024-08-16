@@ -1,7 +1,7 @@
 package com.ecommerce.infra.order;
 
+import com.ecommerce.domain.order.state.OrderStatus;
 import com.ecommerce.infra.order.entity.OrderEntity;
-import com.ecommerce.domain.order.OrderStatus;
 import com.ecommerce.domain.order.query.OrderQueryRepository;
 import com.ecommerce.infra.order.entity.QOrderEntity;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -45,7 +45,7 @@ public class OrderQueryRepositoryImpl implements OrderQueryRepository {
         return queryFactory
                 .selectFrom(order)
                 .leftJoin(order.user).fetchJoin()
-                .where(order.orderStatus.eq(OrderStatus.ORDERED)
+                .where(order.orderStatus.eq(OrderStatus.STOCK_DEDUCTED)
                         .and(order.orderDate.between(startDate, endDate)))
                 .fetch();
     }

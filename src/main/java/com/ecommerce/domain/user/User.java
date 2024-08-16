@@ -1,7 +1,6 @@
 package com.ecommerce.domain.user;
 
 import com.ecommerce.domain.coupon.CouponWrite;
-import com.ecommerce.domain.order.OrderWrite;
 import com.ecommerce.interfaces.exception.domain.UserException;
 import lombok.Getter;
 
@@ -9,8 +8,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 @Getter
-public class UserWrite {
-    @Getter
+public class User {
     private long id;
     private final String username;
     private BigDecimal initialBalance;
@@ -18,20 +16,20 @@ public class UserWrite {
 
     private List<CouponWrite> coupons = new ArrayList<>();
 
-    public UserWrite(String username, BigDecimal initialBalance) {
+    public User(String username, BigDecimal initialBalance) {
         this.username = username;
         this.initialBalance = initialBalance;
         this.isDeleted = false;
     }
 
-    public UserWrite(String test, Object initialBalance, List<CouponWrite> testCoupon) {
+    public User(String test, Object initialBalance, List<CouponWrite> testCoupon) {
         this.username = test;
         this.initialBalance = (BigDecimal) initialBalance;
         this.coupons = testCoupon;
         this.isDeleted = false;
     }
 
-    public UserWrite(long l, String test, BigDecimal zero, List<CouponWrite> testCoupon) {
+    public User(long l, String test, BigDecimal zero, List<CouponWrite> testCoupon) {
         this.id = l;
         this.username = test;
         this.initialBalance = zero;
@@ -41,7 +39,7 @@ public class UserWrite {
 
 
 
-    public UserWrite chargePoint(BigDecimal amount) {
+    public User chargePoint(BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new UserException("충전 금액은 0보다 커야 합니다.");
         }
@@ -49,7 +47,7 @@ public class UserWrite {
         return this;
     }
 
-    public UserWrite deductPoint(BigDecimal amount) {
+    public User deductPoint(BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new UserException("차감 금액은 0보다 커야 합니다.");
         }

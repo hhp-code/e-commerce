@@ -2,7 +2,7 @@ package com.ecommerce.domain.product.service;
 
 
 import com.ecommerce.domain.product.ProductDomainMapper;
-import com.ecommerce.domain.product.ProductWrite;
+import com.ecommerce.domain.product.Product;
 import com.ecommerce.infra.product.entity.ProductEntity;
 import com.ecommerce.interfaces.exception.domain.ProductException;
 import com.ecommerce.domain.product.service.repository.ProductRepository;
@@ -27,7 +27,7 @@ public class ProductService {
     }
 
     @Cacheable(value = "products", key = "#productId", unless = "#result == null")
-    public ProductWrite getProduct(Long productId) {
+    public Product getProduct(Long productId) {
         ProductEntity product = productRepository.getProduct(productId).orElseThrow(
                 () -> new ProductException.ServiceException("상품을 찾을 수 없습니다.")
         );
@@ -36,14 +36,14 @@ public class ProductService {
 
     @Transactional
     @Cacheable(value = "products", key = "'popularProducts'", unless = "#result.isEmpty()")
-    public List<ProductWrite> getPopularProducts() {
+    public List<Product> getPopularProducts() {
         List<ProductEntity> popularProducts = productRepository.getPopularProducts();
         return  ProductDomainMapper.toWriteModels(popularProducts);
     }
 
     @Transactional(readOnly = true)
     @Cacheable(value = "allProducts", unless = "#result.isEmpty()")
-    public List<ProductWrite> getProducts() {
+    public List<Product> getProducts() {
         List<ProductEntity> products = productRepository.getProducts();
         return ProductDomainMapper.toWriteModels(products);
     }
@@ -54,7 +54,7 @@ public class ProductService {
             put = {@CachePut(value = "products", key = "#product.id")},
             evict = {@CacheEvict(value = {"popularProducts", "allProducts"}, allEntries = true)}
     )
-    public ProductWrite saveAndGet(ProductWrite product) {
+    public Product saveAndGet(Product product) {
         ProductEntity entity = ProductDomainMapper.toEntity(product);
         ProductEntity productEntity = productRepository.save(entity).orElseThrow(
                 () -> new ProductException.ServiceException("상품 저장에 실패했습니다.")

@@ -2,14 +2,14 @@ package com.ecommerce.interfaces.controller.domain.user.dto;
 
 import com.ecommerce.domain.coupon.CouponWrite;
 import com.ecommerce.domain.user.command.UserCommand;
-import com.ecommerce.domain.user.UserWrite;
+import com.ecommerce.domain.user.User;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserMapper {
-    public static UserDto.UserResponse toUserResponse(UserWrite user) {
+    public static UserDto.UserResponse toUserResponse(User user) {
         return new UserDto.UserResponse(user.getUsername(), user.getPoint(), user.getCoupons());
     }
 

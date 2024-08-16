@@ -1,7 +1,6 @@
 package com.ecommerce.domain.product.service;
 
-import com.ecommerce.domain.product.ProductWrite;
-import com.ecommerce.interfaces.exception.domain.ProductException;
+import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +29,7 @@ class ProductServiceUnitTest {
     private ProductService productService;
 
 
-    private ProductWrite sampleProduct;
+    private Product sampleProduct;
 
     @BeforeEach
     void setUp() {
@@ -43,7 +42,7 @@ class ProductServiceUnitTest {
         //given
 
         //when
-        ProductWrite result = productService.getProduct(1L);
+        Product result = productService.getProduct(1L);
 
         //then
         assertNotNull(result);
@@ -61,7 +60,7 @@ class ProductServiceUnitTest {
     void testGetPopularProductsWhenEmpty() {
         when(productRepository.getPopularProducts()).thenReturn(Collections.emptyList());
 
-        List<ProductWrite> result = productService.getPopularProducts();
+        List<Product> result = productService.getPopularProducts();
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -72,14 +71,14 @@ class ProductServiceUnitTest {
     @Test
     @DisplayName("전체 상품 조회")
     void testGetProducts() {
-        List<ProductWrite> allProducts = Arrays.asList(
+        List<Product> allProducts = Arrays.asList(
                 createProductRequest("ProductRequest 1", "10000", 100),
                 createProductRequest("ProductRequest 2", "15000", 80),
                 createProductRequest("ProductRequest 3", "20000", 60)
         );
 
 
-        List<ProductWrite> result = productService.getProducts();
+        List<Product> result = productService.getProducts();
 
         assertNotNull(result);
         assertEquals(3, result.size());
@@ -94,7 +93,7 @@ class ProductServiceUnitTest {
     void testGetProductsWhenEmpty() {
         when(productRepository.getProducts()).thenReturn(Collections.emptyList());
 
-        List<ProductWrite> result = productService.getProducts();
+        List<Product> result = productService.getProducts();
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -104,11 +103,11 @@ class ProductServiceUnitTest {
 
 
 
-    private ProductWrite createProductRequest(String name, String price, Integer availableStock) {
+    private Product createProductRequest(String name, String price, Integer availableStock) {
         return createProduct(name, price, availableStock, LocalDateTime.now());
     }
 
-    private ProductWrite createProduct(String name, String price, Integer availableStock, LocalDateTime lastUpdated) {
-        return new ProductWrite(name, new BigDecimal(price), availableStock);
+    private Product createProduct(String name, String price, Integer availableStock, LocalDateTime lastUpdated) {
+        return new Product(name, new BigDecimal(price), availableStock);
     }
 }

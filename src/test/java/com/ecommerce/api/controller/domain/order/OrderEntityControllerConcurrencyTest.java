@@ -4,8 +4,8 @@ import com.ecommerce.config.DatabaseCleanUp;
 import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.domain.order.OrderWrite;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
-import com.ecommerce.domain.product.ProductWrite;
-import com.ecommerce.domain.user.UserWrite;
+import com.ecommerce.domain.product.Product;
+import com.ecommerce.domain.user.User;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.service.UserService;
@@ -62,19 +62,19 @@ public class OrderEntityControllerConcurrencyTest {
     @Autowired
     private ProductService productService;
 
-    private ProductWrite testProduct;
+    private Product testProduct;
 
     List<OrderDto.OrderPayRequest> orderPayRequest = new ArrayList<>();
     @BeforeEach
     @Transactional
     void setUp() {
-        testProduct = productService.saveAndGet(new ProductWrite("testProduct", BigDecimal.valueOf(1), 100));
+        testProduct = productService.saveAndGet(new Product("testProduct", BigDecimal.valueOf(1), 100));
         for (int i = 0; i < 1000; i++) {
-            userService.saveUser(new UserWrite("TestUser" + i, BigDecimal.valueOf(10)));
+            userService.saveUser(new User("TestUser" + i, BigDecimal.valueOf(10)));
         }
 
-        List<UserWrite> testUsers = userService.getAllUsers();
-        for(UserWrite user : testUsers) {
+        List<User> testUsers = userService.getAllUsers();
+        for(User user : testUsers) {
             List<OrderItemWrite> items = new ArrayList<>();
             OrderWrite orderEntity = new OrderWrite(user, items);
             orderService.saveOrder(orderEntity);

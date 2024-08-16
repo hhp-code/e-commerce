@@ -3,7 +3,7 @@ package com.ecommerce.application.usecase;
 import com.ecommerce.domain.order.orderitem.OrderItemRead;
 import com.ecommerce.domain.order.OrderRead;
 import com.ecommerce.domain.order.OrderService;
-import com.ecommerce.domain.product.ProductWrite;
+import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import org.springframework.stereotype.Component;
 
@@ -21,14 +21,14 @@ public class PopularProductUseCase {
         this.productService = productService;
     }
 
-    public List<ProductWrite> getPopularProducts() {
+    public List<Product> getPopularProducts() {
         int durationDays = 3;
         List<OrderRead> finishedOrderEntityWithDays = orderService.getFinishedOrderWithDays(durationDays);
-        Map<ProductWrite, Integer> sellingMap = new ConcurrentHashMap<>();
+        Map<Product, Integer> sellingMap = new ConcurrentHashMap<>();
         for (OrderRead orderRead : finishedOrderEntityWithDays) {
             for (OrderItemRead orderLine : orderRead.getItems()) {
                 long productId = orderLine.productId();
-                ProductWrite product = productService.getProduct(productId);
+                Product product = productService.getProduct(productId);
                 int quantity = orderLine.quantity();
                 sellingMap.put(product, sellingMap.getOrDefault(product, 0) + quantity);
             }
