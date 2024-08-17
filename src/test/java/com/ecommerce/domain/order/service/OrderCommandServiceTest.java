@@ -29,7 +29,7 @@ class OrderCommandServiceTest {
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
     @Autowired
-    private OrderQueryService orderQueryService;
+    private OrderService orderService;
 
     @AfterEach
     void tearDown() {
@@ -40,7 +40,7 @@ class OrderCommandServiceTest {
 
 
     @Autowired
-    private OrderCommandService orderCommandService;
+    private OrderService orderService;
 
     @Autowired
     private UserService userService;
@@ -61,14 +61,14 @@ class OrderCommandServiceTest {
         testProduct = productService.saveAndGet(product);
         Map<Product,Integer> orderItem = Map.of(testProduct, 1);
         Order order = new Order(testUser, orderItem);
-        testOrder = orderCommandService.saveOrder(order);
+        testOrder = orderService.saveOrder(order);
     }
 
     @Test
     @DisplayName("주문 ID로 주문을 조회한다")
     void getOrder_ShouldReturnOrder_WhenOrderExists() {
 
-        Order result = orderQueryService.getOrder(testOrder.getId());
+        Order result = orderService.getOrder(testOrder.getId());
 
         assertNotNull(result);
         assertEquals(testOrder.getId(), result.getId());
@@ -79,7 +79,7 @@ class OrderCommandServiceTest {
     void getOrders_ShouldReturnOrderList_WhenSearchConditionProvided() {
         OrderQuery.GetUserOrders searchCommand = new OrderQuery.GetUserOrders(testUser.getId());
 
-        List<Order> result = orderQueryService.getOrders(searchCommand);
+        List<Order> result = orderService.getOrders(searchCommand);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -91,7 +91,7 @@ class OrderCommandServiceTest {
     void createOrder_ShouldCreateNewOrder_WhenValidCommandProvided() {
         OrderCommand.Create createCommand = new OrderCommand.Create(testUser.getId(), Map.of(testProduct.getId(), 1));
 
-        OrderInfo.Summary result = paymentUseCase.orderCommandService.createOrder(createCommand, paymentUseCase);
+        OrderInfo.Summary result = paymentUseCase.orderService.createOrder(createCommand, paymentUseCase);
 
         assertNotNull(result);
         assertEquals("PREPARED", result.status());

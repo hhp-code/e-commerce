@@ -3,8 +3,6 @@ package com.ecommerce.domain.order;
 import com.ecommerce.interfaces.exception.domain.OrderException;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
-import com.ecommerce.domain.order.service.OrderCommandService;
-import com.ecommerce.application.external.DummyPlatform;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
@@ -191,14 +189,6 @@ public class Order {
         return this;
     }
 
-    public Order send(DummyPlatform dummyPlatform) {
-        dummyPlatform.send(this);
-        return this;
-    }
-
-    public Order saveAndGet(OrderCommandService orderCommandService) {
-        return orderCommandService.saveOrder(this);
-    }
 
     public Order chargeStock() {
         for (Map.Entry<Product, Integer> entry : this.orderItems.entrySet()) {

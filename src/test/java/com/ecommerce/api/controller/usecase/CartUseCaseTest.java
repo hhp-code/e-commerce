@@ -55,7 +55,7 @@ class CartUseCaseTest {
         //given
         OrderCommand.Add addCommand = new OrderCommand.Add(testUser.getId(), testProduct.getId(), 1);
         OrderCommand.Create createCommand = new OrderCommand.Create(testUser.getId(), Map.of(testProduct.getId(), 1));
-        paymentUseCase.orderCommandService.createOrder(createCommand, paymentUseCase);
+        paymentUseCase.orderService.createOrder(createCommand, paymentUseCase);
 
         //when
         OrderInfo.Detail result = cartUseCase.addItemToOrder(addCommand);

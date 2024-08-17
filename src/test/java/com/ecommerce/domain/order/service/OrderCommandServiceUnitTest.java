@@ -35,11 +35,11 @@ class OrderCommandServiceUnitTest {
     private OrderQueryRepository orderQueryRepository;
 
     @InjectMocks
-    private OrderCommandService orderCommandService;
+    private OrderService orderService;
 
     PaymentUseCase paymentUseCase;
     @InjectMocks
-    private OrderQueryService orderQueryService;
+    private OrderService orderService;
 
 
     @Test
@@ -48,7 +48,7 @@ class OrderCommandServiceUnitTest {
         Order mockOrder = createMockOrder();
         when(orderQueryRepository.getById(VALID_USER_ID)).thenReturn(Optional.of(mockOrder));
 
-        Order result = orderQueryService.getOrder(VALID_USER_ID);
+        Order result = orderService.getOrder(VALID_USER_ID);
 
         assertNotNull(result);
         verify(orderQueryRepository).getById(VALID_USER_ID);
@@ -59,7 +59,7 @@ class OrderCommandServiceUnitTest {
     void getOrder_NonExistentOrder_ShouldThrowException() {
         when(orderQueryRepository.getById(INVALID_USER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> orderQueryService.getOrder(INVALID_USER_ID));
+        assertThrows(RuntimeException.class, () -> orderService.getOrder(INVALID_USER_ID));
         verify(orderQueryRepository).getById(INVALID_USER_ID);
     }
 
@@ -71,7 +71,7 @@ class OrderCommandServiceUnitTest {
         List<Order> mockOrders = Arrays.asList(createMockOrder(), createMockOrder());
         when(orderQueryRepository.getOrders(searchCommand.userId())).thenReturn(mockOrders);
 
-        List<Order> result = orderQueryService.getOrders(searchCommand);
+        List<Order> result = orderService.getOrders(searchCommand);
 
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -85,7 +85,7 @@ class OrderCommandServiceUnitTest {
     void createOrder_Failure_ShouldThrowException() {
         OrderCommand.Create createCommand = new OrderCommand.Create(VALID_USER_ID.intValue(), Map.of());
 
-        assertThrows(RuntimeException.class, () -> paymentUseCase.orderCommandService.createOrder(createCommand, paymentUseCase));
+        assertThrows(RuntimeException.class, () -> paymentUseCase.orderService.createOrder(createCommand, paymentUseCase));
     }
 
     private Order createMockOrder() {

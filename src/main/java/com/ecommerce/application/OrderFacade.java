@@ -11,23 +11,21 @@ import java.util.List;
 
 @Component
 public class OrderFacade {
-    private final OrderQueryService orderQueryService;
-    private final OrderCommandService orderCommandService;
+    private final OrderService orderService;
     private final UserService userService;
     private final ProductService productService;
 
-    public OrderFacade(OrderQueryService orderQueryService, OrderCommandService orderCommandService, UserService userService, ProductService productService) {
-        this.orderQueryService = orderQueryService;
-        this.orderCommandService = orderCommandService;
+    public OrderFacade(OrderService orderService, UserService userService, ProductService productService) {
+        this.orderService = orderService;
         this.userService = userService;
         this.productService = productService;
     }
     public OrderInfo.Detail getOrder(OrderQuery.GetOrder query){
-        Order order = orderQueryService.getOrder(query.orderId());
+        Order order = orderService.getOrder(query.orderId());
         return OrderInfo.Detail.from(order);
     }
     public List<OrderInfo.Detail> getOrders(OrderQuery.GetUserOrders query){
-        List<Order> orders = orderQueryService.getOrders(query);
+        List<Order> orders = orderService.getOrders(query);
         List<OrderInfo.Detail> orderDetails = new ArrayList<>();
         for (Order order : orders) {
             orderDetails.add(OrderInfo.Detail.from(order));
@@ -36,7 +34,7 @@ public class OrderFacade {
     }
     public OrderInfo.Summary createOrder(OrderCommand.Create command) {
         Order execute = command.execute(userService, productService);
-        Order order = orderCommandService.saveOrder(execute);
+        Order order = orderService.saveOrder(execute);
         return OrderInfo.Summary.from(order);
     }
 }

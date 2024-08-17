@@ -7,8 +7,7 @@ import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.OrderStatus;
 import com.ecommerce.domain.order.service.OrderCommand;
-import com.ecommerce.domain.order.service.OrderCommandService;
-import com.ecommerce.domain.order.service.OrderQueryService;
+import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.application.external.DummyPlatform;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
@@ -48,7 +47,7 @@ class PaymentUseCaseConcurrencyTest {
     @Autowired
     private UserFacade userFacade;
     @Autowired
-    private OrderQueryService orderQueryService;
+    private OrderService orderService;
 
     @AfterEach
     void tearDown() {
@@ -58,7 +57,7 @@ class PaymentUseCaseConcurrencyTest {
     @Autowired
     private UserService userService;
     @Autowired
-    private OrderCommandService orderCommandService;
+    private OrderService orderService;
     @Autowired
     private ProductService productService;
     @Mock
@@ -82,16 +81,16 @@ class PaymentUseCaseConcurrencyTest {
             User user = userService.saveUser(new User("testUser" + i, BigDecimal.valueOf(20)));
             testUsers.add(user);
             Map<Product, Integer> orderItem = Map.of(testProduct, 1);
-            testOrders.add(orderCommandService.saveOrder(new Order(user, orderItem)));
+            testOrders.add(orderService.saveOrder(new Order(user, orderItem)));
         }
 
         when(dummyPlatform.send(any(Order.class))).thenReturn(true);
 
-        paymentUseCase = new PaymentUseCase(orderCommandService,
-                quantumLockManager, orderQueryService);
+        paymentUseCase = new PaymentUseCase(
+                quantumLockManager, orderService);
         for(Order order : testOrders) {
             OrderCommand.Create orderCreate = new OrderCommand.Create(order.getId(), Map.of(testProduct.getId(), 1));
-            paymentUseCase.orderCommandService.createOrder(orderCreate, paymentUseCase);
+            paymentUseCase.orderService.createOrder(orderCreate, paymentUseCase);
         }
     }
 
@@ -135,7 +134,7 @@ class PaymentUseCaseConcurrencyTest {
         // 사용자 포인트 및 주문 상태 확인
         for (int i = 0; i < concurrentRequests; i++) {
             User user = userService.getUser(testUsers.get(i).getId());
-            Order order = orderQueryService.getOrder(testOrders.get(i).getId());
+            Order order = orderService.getOrder(testOrders.get(i).getId());
             if (Objects.equals(order.getOrderStatus(), OrderStatus.ORDERED.name())) {
                 assertThat(BigDecimal.TEN ).isEqualByComparingTo(user.getPoint());
             } else {

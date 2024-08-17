@@ -4,7 +4,6 @@ import com.ecommerce.DatabaseCleanUp;
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.application.usecase.PopularProductUseCase;
 import com.ecommerce.domain.order.service.OrderCommand;
-import com.ecommerce.domain.order.service.OrderCommandService;
 import com.ecommerce.domain.order.service.OrderInfo;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
@@ -48,7 +47,7 @@ class PopularProductUseCaseTest {
     private ProductService productService;
 
     @Autowired
-    private OrderCommandService orderCommandService;
+    private OrderService orderService;
 
     @Autowired
     private PaymentUseCase paymentUseCase;
@@ -94,7 +93,7 @@ class PopularProductUseCaseTest {
                 orderItems.put((long)random.nextInt(productCount) + 1, random.nextInt(10)+1);
             }
             OrderCommand.Create command = new OrderCommand.Create(user.getId(), orderItems);
-            OrderInfo.Summary order1 = paymentUseCase.orderCommandService.createOrder(command, paymentUseCase);
+            OrderInfo.Summary order1 = paymentUseCase.orderService.createOrder(command, paymentUseCase);
             long orderId = order1.orderId();
             OrderCommand.Payment payment = new OrderCommand.Payment(orderId);
             futures.add(CompletableFuture.runAsync(() -> paymentUseCase.payOrder(payment)));

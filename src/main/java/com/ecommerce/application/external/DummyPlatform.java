@@ -11,7 +11,7 @@ public class DummyPlatform {
     @Transactional
     public boolean send(PayAfterEvent order){
         if(order.eventId() != null){
-            log.info("주문이 완료되었습니다. 주문번호: {}", order.getId());
+            log.info("주문이 완료되었습니다. 주문번호: {}", order.orderId());
             return true;
         }
         return false;

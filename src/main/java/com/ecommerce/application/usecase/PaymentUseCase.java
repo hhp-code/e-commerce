@@ -6,8 +6,7 @@ import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderInfo;
-import com.ecommerce.domain.order.service.OrderCommandService;
-import com.ecommerce.domain.order.service.OrderQueryService;
+import com.ecommerce.domain.order.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -22,15 +21,15 @@ public class PaymentUseCase {
     private static final Duration ORDER_LOCK_TIMEOUT = Duration.ofSeconds(5);
 
 
-    public final OrderCommandService orderCommandService;
+    public final OrderService orderService;
     private final QuantumLockManager quantumLockManager;
-    private final OrderQueryService orderQueryService;
+    private final OrderService orderService;
     private final PaymentEventPublisher eventPublisher;
 
-    public PaymentUseCase(OrderCommandService orderCommandService, QuantumLockManager quantumLockManager, OrderQueryService orderQueryService, PaymentEventPublisher eventPublisher) {
-        this.orderCommandService = orderCommandService;
+    public PaymentUseCase(OrderService orderService, QuantumLockManager quantumLockManager, OrderService orderQueryService, PaymentEventPublisher eventPublisher) {
+        this.orderService = orderService;
         this.quantumLockManager = quantumLockManager;
-        this.orderQueryService = orderQueryService;
+        this.orderService = orderQueryService;
         this.eventPublisher = eventPublisher;
     }
 
@@ -40,9 +39,9 @@ public class PaymentUseCase {
                     ORDER_LOCK_PREFIX + command.orderId(),
                     ORDER_LOCK_TIMEOUT,
                     () -> {
-                        Order queryOrder = orderQueryService.getOrder(command.orderId());
+                        Order queryOrder = orderService.getOrder(command.orderId());
                         Order execute = command.execute(queryOrder);
-                        Order commandOrder = orderCommandService.saveOrder(execute);
+                        Order commandOrder = orderService.saveOrder(execute);
                         eventPublisher.publish(new PayAfterEvent(commandOrder.getId()));
                         return OrderInfo.Detail.from(commandOrder);
                     });
@@ -56,9 +55,9 @@ public class PaymentUseCase {
             return quantumLockManager.executeWithLock(
                     ORDER_LOCK_PREFIX + command.orderId(), ORDER_LOCK_TIMEOUT,
                     () -> {
-                        Order queryOrder = orderQueryService.getOrder(command.orderId());
+                        Order queryOrder = orderService.getOrder(command.orderId());
                         Order execute = command.execute(queryOrder);
-                        Order commandOrder = orderCommandService.saveOrder(execute);
+                        Order commandOrder = orderService.saveOrder(execute);
                         return OrderInfo.Detail.from(commandOrder);
                     });
         } catch (TimeoutException e) {
