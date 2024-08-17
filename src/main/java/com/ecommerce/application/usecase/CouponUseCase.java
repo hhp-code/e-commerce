@@ -5,9 +5,8 @@ import com.ecommerce.domain.coupon.service.CouponCommand;
 import com.ecommerce.domain.coupon.service.CouponService;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.order.Order;
-import com.ecommerce.domain.order.service.OrderCommandService;
 import com.ecommerce.domain.order.service.OrderQuery;
-import com.ecommerce.domain.order.service.OrderQueryService;
+import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserCouponService;
 import com.ecommerce.domain.user.service.UserService;
@@ -22,16 +21,14 @@ public class CouponUseCase {
     private final UserService userService;
     private final UserCouponService userCouponService;
     private final QuantumLockManager quantumLockManager;
-    private final OrderQueryService orderQueryService;
-    private final OrderCommandService orderCommandService;
+    private final OrderService orderQueryService;
 
-    public CouponUseCase(CouponService couponService, UserService userService, UserCouponService userCouponService, QuantumLockManager quantumLockManager, OrderQueryService orderQueryService, OrderCommandService orderCommandService) {
+    public CouponUseCase(CouponService couponService, UserService userService, UserCouponService userCouponService, QuantumLockManager quantumLockManager, OrderService orderQueryService) {
         this.couponService = couponService;
         this.userService = userService;
         this.userCouponService = userCouponService;
         this.quantumLockManager = quantumLockManager;
         this.orderQueryService = orderQueryService;
-        this.orderCommandService = orderCommandService;
     }
 
     public User useCoupon(Long userId, Long couponId) {
@@ -40,7 +37,7 @@ public class CouponUseCase {
         OrderQuery.GetOrder getOrderQuery = new OrderQuery.GetOrder(userId);
         Order order = orderQueryService.getOrder(getOrderQuery.orderId());
         order.applyCoupon(userCoupon);
-        orderCommandService.saveOrder(order);
+        orderQueryService.saveOrder(order);
         return userCouponService.updateUserCoupon(user,userCoupon);
     }
 

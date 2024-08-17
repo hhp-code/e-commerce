@@ -1,9 +1,9 @@
 package com.ecommerce.cache;
 
+import com.ecommerce.application.OrderFacade;
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.service.OrderCommand;
-import com.ecommerce.domain.order.service.OrderCommandService;
-import com.ecommerce.domain.order.service.OrderQueryService;
+import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
@@ -23,8 +23,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @SpringBootTest
 @AutoConfigureTestDatabase
 public class OrderCacheTest {
-    @Autowired
-    private OrderCommandService orderCommandService;
 
     @Autowired
     private CacheManager cacheManager;
@@ -37,7 +35,9 @@ public class OrderCacheTest {
     @Autowired
     private PaymentUseCase paymentUseCase;
     @Autowired
-    private OrderQueryService orderQueryService;
+    private OrderService orderQueryService;
+    @Autowired
+    private OrderFacade orderFacade;
 
     @BeforeEach
     void setUp() {
@@ -46,7 +46,7 @@ public class OrderCacheTest {
         Long productId = 1L;
         Map<Long, Integer> items = Map.of(productId, 1);
         OrderCommand.Create createOrderCommand = new OrderCommand.Create(1L, items);
-        paymentUseCase.orderCommandService.createOrder(createOrderCommand, paymentUseCase);
+        orderFacade.createOrder(createOrderCommand);
     }
 
     @Test

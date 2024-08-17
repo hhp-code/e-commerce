@@ -14,6 +14,9 @@ public class OrderDto {
 
     public record OrderCreateRequest(long customerId, Map<Long,Integer> items) {
         public void validate() {
+            if(items.isEmpty()){
+                throw new OrderException.ControllerException("주문할 상품이 없습니다.");
+            }
             if (items.size() > 10) {
                 throw new OrderException.ControllerException("주문 수량은 최대 10개까지 가능합니다.");
             }

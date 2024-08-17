@@ -1,14 +1,14 @@
 package com.ecommerce.api.controller.domain.order;
 
+import com.ecommerce.application.OrderFacade;
 import com.ecommerce.domain.order.service.OrderInfo;
-import com.ecommerce.domain.order.service.OrderQueryService;
+import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.interfaces.controller.domain.order.OrderController;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderMapper;
 import com.ecommerce.application.usecase.CartUseCase;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
-import com.ecommerce.domain.order.service.OrderCommandService;
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.user.User;
@@ -51,7 +51,7 @@ class OrderControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private OrderCommandService orderCommandService;
+    private OrderFacade orderFacade;
 
     @MockBean
     private PaymentUseCase paymentUseCase;
@@ -67,7 +67,7 @@ class OrderControllerTest {
     private final Map<Long, Integer> create = Map.of(PRODUCT_ID, 1);
     private final OrderCommand.Create request = new OrderCommand.Create(VALID_USER_ID, create);
     private final Order order = new Order( new User(VALID_USER_ID, "test", PRODUCT_PRICE), items);
-    private OrderQueryService orderQueryService;
+    private OrderService orderQueryService;
 
     @BeforeEach
     void setup() {
@@ -80,7 +80,7 @@ class OrderControllerTest {
     void createOrder_Success() throws Exception {
 
         OrderInfo.Summary orderInfo = OrderInfo.Summary.from(order);
-        when(paymentUseCase.orderCommandService.createOrder(any(OrderCommand.Create.class), paymentUseCase)).thenReturn(orderInfo);
+        when(orderFacade.createOrder(any(OrderCommand.Create.class))).thenReturn(orderInfo);
 
 
         mockMvc.perform(post(API_ORDERS)

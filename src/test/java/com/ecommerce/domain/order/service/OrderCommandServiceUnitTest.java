@@ -1,5 +1,6 @@
 package com.ecommerce.domain.order.service;
 
+import com.ecommerce.application.OrderFacade;
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.service.repository.OrderCommandRepository;
 import com.ecommerce.domain.order.service.repository.OrderQueryRepository;
@@ -34,12 +35,12 @@ class OrderCommandServiceUnitTest {
     @Mock
     private OrderQueryRepository orderQueryRepository;
 
-    @InjectMocks
-    private OrderCommandService orderCommandService;
-
     PaymentUseCase paymentUseCase;
     @InjectMocks
-    private OrderQueryService orderQueryService;
+    private OrderService orderQueryService;
+
+    @InjectMocks
+    private OrderFacade orderFacade;
 
 
     @Test
@@ -85,7 +86,7 @@ class OrderCommandServiceUnitTest {
     void createOrder_Failure_ShouldThrowException() {
         OrderCommand.Create createCommand = new OrderCommand.Create(VALID_USER_ID.intValue(), Map.of());
 
-        assertThrows(RuntimeException.class, () -> paymentUseCase.orderCommandService.createOrder(createCommand, paymentUseCase));
+        assertThrows(RuntimeException.class, () -> orderFacade.createOrder(createCommand));
     }
 
     private Order createMockOrder() {

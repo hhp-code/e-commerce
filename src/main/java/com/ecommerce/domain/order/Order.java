@@ -3,8 +3,6 @@ package com.ecommerce.domain.order;
 import com.ecommerce.interfaces.exception.domain.OrderException;
 import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.coupon.DiscountType;
-import com.ecommerce.domain.order.service.OrderCommandService;
-import com.ecommerce.application.external.DummyPlatform;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
@@ -150,7 +148,14 @@ public class Order {
     }
 
     public String getOrderStatus() {
-        return orderStatus.name();
+        String name = orderStatus.name();
+        if(name.equals("ORDERED")) {
+            return "주문완료";
+        } else if(name.equals("CANCELLED")) {
+            return "주문취소";
+        } else {
+            return "주문준비중";
+        }
     }
 
     public BigDecimal getTotalAmount() {
@@ -189,15 +194,6 @@ public class Order {
     public Order deductPoint() {
         this.user.deductPoint( getTotalAmount());
         return this;
-    }
-
-    public Order send(DummyPlatform dummyPlatform) {
-        dummyPlatform.send(this);
-        return this;
-    }
-
-    public Order saveAndGet(OrderCommandService orderCommandService) {
-        return orderCommandService.saveOrder(this);
     }
 
     public Order chargeStock() {

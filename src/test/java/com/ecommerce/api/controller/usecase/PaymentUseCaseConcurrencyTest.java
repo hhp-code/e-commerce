@@ -1,19 +1,21 @@
 package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.application.OrderFacade;
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.application.UserFacade;
 import com.ecommerce.config.QuantumLockManager;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.OrderStatus;
+import com.ecommerce.domain.order.event.PayAfterEvent;
 import com.ecommerce.domain.order.service.OrderCommand;
-import com.ecommerce.domain.order.service.OrderCommandService;
-import com.ecommerce.domain.order.service.OrderQueryService;
+import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.application.external.DummyPlatform;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
+import com.ecommerce.infra.event.PaymentEventPublisher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,7 +50,9 @@ class PaymentUseCaseConcurrencyTest {
     @Autowired
     private UserFacade userFacade;
     @Autowired
-    private OrderQueryService orderQueryService;
+    private OrderService orderQueryService;
+    @Autowired
+    private OrderFacade orderFacade;
 
     @AfterEach
     void tearDown() {
@@ -58,8 +62,6 @@ class PaymentUseCaseConcurrencyTest {
     @Autowired
     private UserService userService;
     @Autowired
-    private OrderCommandService orderCommandService;
-    @Autowired
     private ProductService productService;
     @Mock
     private DummyPlatform dummyPlatform;
@@ -67,6 +69,9 @@ class PaymentUseCaseConcurrencyTest {
     private PaymentUseCase paymentUseCase;
     @Autowired
     private QuantumLockManager quantumLockManager;
+
+    @Autowired
+    private PaymentEventPublisher paymentEventPublisher;
 
     private Product testProduct;
     private List<User> testUsers;
@@ -82,16 +87,15 @@ class PaymentUseCaseConcurrencyTest {
             User user = userService.saveUser(new User("testUser" + i, BigDecimal.valueOf(20)));
             testUsers.add(user);
             Map<Product, Integer> orderItem = Map.of(testProduct, 1);
-            testOrders.add(orderCommandService.saveOrder(new Order(user, orderItem)));
+            testOrders.add(orderQueryService.saveOrder(new Order(user, orderItem)));
         }
 
-        when(dummyPlatform.send(any(Order.class))).thenReturn(true);
+        when(dummyPlatform.send(any(PayAfterEvent.class))).thenReturn(true);
 
-        paymentUseCase = new PaymentUseCase(orderCommandService,
-                quantumLockManager, orderQueryService);
+        paymentUseCase = new PaymentUseCase(quantumLockManager, orderQueryService, paymentEventPublisher);
         for(Order order : testOrders) {
             OrderCommand.Create orderCreate = new OrderCommand.Create(order.getId(), Map.of(testProduct.getId(), 1));
-            paymentUseCase.orderCommandService.createOrder(orderCreate, paymentUseCase);
+            orderFacade.createOrder(orderCreate);
         }
     }
 

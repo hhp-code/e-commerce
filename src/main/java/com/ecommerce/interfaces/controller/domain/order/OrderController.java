@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "order", description = "주문 관련 API")
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/orders")
 public class OrderController {
     private final OrderFacade orderFacade;
     private final CartUseCase cartUseCase;
@@ -27,7 +27,7 @@ public class OrderController {
         this.paymentUseCase = paymentUseCase;
     }
 
-    @PostMapping("/orders")
+    @PostMapping
     @Operation(
             summary = "주문 생성",
             description = "새로운 주문을 생성합니다.",
@@ -42,7 +42,7 @@ public class OrderController {
         return OrderMapper.toOrderSummaryResponse(orderFacade.createOrder(OrderMapper.toOrder(request)));
     }
 
-    @GetMapping("/orders/{orderId}")
+    @GetMapping("/{orderId}")
     @Operation(
             summary = "주문 조회",
             description = "주문 ID로 특정 주문을 조회합니다.",
@@ -65,7 +65,7 @@ public class OrderController {
         );
     }
 
-    @PatchMapping("/orders/{orderId}/items")
+    @PatchMapping("/{orderId}/items")
     @Operation(
             summary = "주문 상품 추가",
             description = "기존 주문에 새로운 상품을 추가합니다.",
@@ -83,7 +83,7 @@ public class OrderController {
         request.validate();
         return OrderMapper.toOrderDetailResponse(cartUseCase.addItemToOrder(OrderMapper.toOrderAddItem(orderId, request)));
     }
-    @DeleteMapping("/orders/{orderId}/items")
+    @DeleteMapping("/{orderId}/items")
     @Operation(
             summary = "주문 상품 추가",
             description = "기존 주문에 새로운 상품을 추가합니다.",
@@ -104,7 +104,7 @@ public class OrderController {
         );
     }
 
-    @GetMapping("/orders")
+    @PostMapping("/list")
     @Operation(
             summary = "주문 목록 조회",
             description = "주문 목록을 조회합니다.",
@@ -114,12 +114,12 @@ public class OrderController {
                     @ApiResponse(responseCode = "400", description = "잘못된 요청")
             }
     )
-    public OrderDto.OrderListResponse listOrders(@RequestBody OrderDto.OrderListRequest request){
+    public OrderDto.OrderListResponse listOrders(@RequestBody OrderDto.OrderListRequest request) {
         request.validate();
         return OrderMapper.toOrderListResponse(orderFacade.getOrders(OrderMapper.toGetUserOrders(request)));
     }
 
-    @PostMapping("/orders/payments")
+    @PostMapping("/payments")
     @Operation(
             summary = "주문 결제",
             description = "주문을 결제합니다.",
@@ -134,7 +134,7 @@ public class OrderController {
         request.validate();
         return OrderMapper.toOrderDetailResponse(paymentUseCase.payOrder(OrderMapper.toOrderPay(request)));
     }
-    @PatchMapping("/orders/cancel")
+    @PatchMapping("/cancel")
     @Operation(
             summary = "주문 취소",
             description = "주문을 취소합니다.",

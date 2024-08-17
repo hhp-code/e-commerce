@@ -1,7 +1,7 @@
 package com.ecommerce.application.usecase;
 
 import com.ecommerce.domain.order.Order;
-import com.ecommerce.domain.order.service.OrderQueryService;
+import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.Product;
 import org.springframework.stereotype.Component;
 
@@ -11,9 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class PopularProductUseCase {
-    private final OrderQueryService orderQueryService;
+    private final OrderService orderQueryService;
 
-    public PopularProductUseCase(OrderQueryService orderQueryService) {
+    public PopularProductUseCase(OrderService orderQueryService) {
         this.orderQueryService = orderQueryService;
     }
 

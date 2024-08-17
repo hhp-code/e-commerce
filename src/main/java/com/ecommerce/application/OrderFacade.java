@@ -11,14 +11,12 @@ import java.util.List;
 
 @Component
 public class OrderFacade {
-    private final OrderQueryService orderQueryService;
-    private final OrderCommandService orderCommandService;
+    private final OrderService orderQueryService;
     private final UserService userService;
     private final ProductService productService;
 
-    public OrderFacade(OrderQueryService orderQueryService, OrderCommandService orderCommandService, UserService userService, ProductService productService) {
+    public OrderFacade(OrderService orderQueryService,  UserService userService, ProductService productService) {
         this.orderQueryService = orderQueryService;
-        this.orderCommandService = orderCommandService;
         this.userService = userService;
         this.productService = productService;
     }
@@ -36,7 +34,7 @@ public class OrderFacade {
     }
     public OrderInfo.Summary createOrder(OrderCommand.Create command) {
         Order execute = command.execute(userService, productService);
-        Order order = orderCommandService.saveOrder(execute);
+        Order order = orderQueryService.saveOrder(execute);
         return OrderInfo.Summary.from(order);
     }
 }

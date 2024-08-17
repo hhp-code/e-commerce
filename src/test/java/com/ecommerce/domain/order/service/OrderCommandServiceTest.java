@@ -1,12 +1,14 @@
 package com.ecommerce.domain.order.service;
 
 import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.application.OrderFacade;
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +31,7 @@ class OrderCommandServiceTest {
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
     @Autowired
-    private OrderQueryService orderQueryService;
+    private OrderService orderQueryService;
 
     @AfterEach
     void tearDown() {
@@ -39,8 +41,6 @@ class OrderCommandServiceTest {
     private static final Long ORDER_ID = 1L;
 
 
-    @Autowired
-    private OrderCommandService orderCommandService;
 
     @Autowired
     private UserService userService;
@@ -52,6 +52,8 @@ class OrderCommandServiceTest {
     private Product testProduct;
     @Autowired
     private PaymentUseCase paymentUseCase;
+    @Autowired
+    private OrderFacade orderFacade;
 
     @BeforeEach
     void setup() {
@@ -61,7 +63,7 @@ class OrderCommandServiceTest {
         testProduct = productService.saveAndGet(product);
         Map<Product,Integer> orderItem = Map.of(testProduct, 1);
         Order order = new Order(testUser, orderItem);
-        testOrder = orderCommandService.saveOrder(order);
+        testOrder = orderQueryService.saveOrder(order);
     }
 
     @Test
@@ -91,7 +93,7 @@ class OrderCommandServiceTest {
     void createOrder_ShouldCreateNewOrder_WhenValidCommandProvided() {
         OrderCommand.Create createCommand = new OrderCommand.Create(testUser.getId(), Map.of(testProduct.getId(), 1));
 
-        OrderInfo.Summary result = paymentUseCase.orderCommandService.createOrder(createCommand, paymentUseCase);
+        OrderInfo.Summary result = orderFacade.createOrder(createCommand);
 
         assertNotNull(result);
         assertEquals("PREPARED", result.status());
