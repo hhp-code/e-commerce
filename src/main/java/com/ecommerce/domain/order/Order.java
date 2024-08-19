@@ -1,8 +1,6 @@
 package com.ecommerce.domain.order;
 
 import com.ecommerce.interfaces.exception.domain.OrderException;
-import com.ecommerce.domain.coupon.Coupon;
-import com.ecommerce.domain.coupon.DiscountType;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
@@ -11,7 +9,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,10 +45,6 @@ public class Order {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "coupon_id")
-    private Coupon coupon;
-
 
     @Getter
     @ElementCollection
@@ -79,28 +72,16 @@ public class Order {
         calculatePrices();
     }
 
-    public void applyCoupon(Coupon coupon) {
-        if (coupon != null && coupon.isValid() && coupon.getQuantity() >= 0) {
-            this.coupon = coupon;
-            calculateDiscount();
-            coupon.use();
 
-        } else {
-            throw new IllegalArgumentException("Invalid coupon");
-        }
-    }
 
     private void calculateDiscount() {
-        if (this.coupon != null) {
-            this.salePrice = this.coupon.getDiscountAmount();
+
             this.sellingPrice = this.sellingPrice.subtract(this.salePrice);
-        }
+
     }
 
     void calculatePrices() {
         this.regularPrice = calculateRegularPrice();
-        this.sellingPrice = calculateSellingPrice();
-        this.salePrice = regularPrice.subtract(sellingPrice);
     }
 
     private BigDecimal calculateRegularPrice() {
@@ -112,25 +93,6 @@ public class Order {
     private BigDecimal calculateItemPrice(Product product, Integer price) {
         return product.getPrice().multiply(BigDecimal.valueOf(price));
 
-    }
-
-    private BigDecimal calculateSellingPrice() {
-        if (coupon == null) {
-            return regularPrice;
-        }
-
-        BigDecimal discountAmount = calculateDiscountAmount();
-        return regularPrice.subtract(discountAmount).max(BigDecimal.ZERO);
-    }
-
-    private BigDecimal calculateDiscountAmount() {
-        if (coupon.getDiscountType() == DiscountType.PERCENTAGE) {
-            return regularPrice.multiply(coupon.getDiscountAmount())
-                    .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
-        } else if (coupon.getDiscountType() == DiscountType.FIXED_AMOUNT) {
-            return coupon.getDiscountAmount();
-        }
-        return BigDecimal.ZERO;
     }
 
 
@@ -165,17 +127,9 @@ public class Order {
         return sellingPrice;
     }
 
-    public boolean isFinished() {
-        return orderStatus == OrderStatus.ORDERED;
-    }
-
     public Order cancel() {
         this.orderStatus = OrderStatus.CANCELLED;
         return this;
-    }
-
-    public boolean isCanceled() {
-        return orderStatus == OrderStatus.CANCELLED;
     }
 
     public void deleteOrderItem(Product product) {

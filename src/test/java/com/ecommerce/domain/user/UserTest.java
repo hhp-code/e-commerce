@@ -1,7 +1,6 @@
 package com.ecommerce.domain.user;
 
 import com.ecommerce.interfaces.exception.domain.UserException;
-import com.ecommerce.domain.coupon.Coupon;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -44,15 +43,7 @@ class UserTest {
         assertEquals(BigDecimal.valueOf(50), user.getPoint());
     }
 
-    @Test
-    @DisplayName("쿠폰 추가 테스트")
-    void testAddCoupon() {
-        User user = new User("testUser", BigDecimal.ZERO);
-        Coupon coupon = new Coupon();
-        user.addCoupon(coupon);
 
-        assertTrue(user.getCoupons().contains(coupon));
-    }
     @Test
     @DisplayName("잔액 음수 테스트 실패")
     void testChargePointWithNegativeAmount() {

@@ -24,12 +24,12 @@ public class LoggingFilter implements Filter {
 
         ContentCachingRequestWrapper requestWrapper = new ContentCachingRequestWrapper(httpRequest);
         ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(httpResponse);
-        logRequest(requestWrapper, requestId);
+//        logRequest(requestWrapper, requestId);
 
         try {
             filterChain.doFilter(requestWrapper, responseWrapper);
         } finally {
-            logResponse(responseWrapper, requestId, System.currentTimeMillis() - startTime);
+//            logResponse(responseWrapper, requestId, System.currentTimeMillis() - startTime);
             responseWrapper.copyBodyToResponse();
         }
     }

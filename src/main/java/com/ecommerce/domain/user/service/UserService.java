@@ -1,6 +1,5 @@
 package com.ecommerce.domain.user.service;
 
-import com.ecommerce.domain.coupon.Coupon;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.repository.UserRepository;
 import com.ecommerce.interfaces.exception.domain.UserException;
@@ -21,12 +20,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    @Transactional(readOnly = true)
-    public List<Coupon> getUserCoupons(Long userId) {
-        User user = userRepository.getById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + userId));
-        return user.getCoupons();
-    }
+
     @Transactional
     @Cacheable(value = "users", key = "#userId", unless = "#result == null")
     public User getUser(Long userId) {

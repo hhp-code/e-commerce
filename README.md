@@ -6,9 +6,8 @@ K6를 사용한 부하 테스트 및 성능 분석 계획을 다음과 같이 �
 ## K6를 활용한 부하 테스트 계획
 
 1. **테스트 대상 선정**
-    - 주문 생성 API
-    - 상품 조회 API
-    - 결제 처리 API
+    - 주문 결제 api
+    - 인기 상품조회 api
 
 2. **테스트 목적**
     - 시스템의 최대 처리 용량 파악
@@ -21,32 +20,13 @@ K6를 사용한 부하 테스트 및 성능 분석 계획을 다음과 같이 �
     - 최대 부하: 가상 사용자 1000명
 
 ## K6 테스트 스크립트 작성 및 실행
+`
 
-1. **K6 스크립트 작성**
-   ```javascript
-   import http from 'k6/http';
-   import { sleep } from 'k6';
-
-   export const options = {
-     vus: 100,
-     duration: '5m',
-   };
-
-   export default function () {
-     http.get('http://test.loadimpact.com');
-     sleep(1);
-   }
-   ```
-
-2. **다양한 부하 시나리오 실행**
+1. **다양한 부하 시나리오 실행**
     - 단계적 부하 증가 (Ramping VUs)
     - 스파이크 테스트
     - 지속 부하 테스트
 
-3. **Docker 환경에서 실행**
-   ```
-   docker run --rm -i grafana/k6 run - <script.js
-   ```
 
 ## 성능 지표 분석 및 병목 탐색
 

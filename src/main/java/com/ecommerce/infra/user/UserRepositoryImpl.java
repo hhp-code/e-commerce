@@ -1,7 +1,5 @@
 package com.ecommerce.infra.user;
 
-import com.ecommerce.domain.coupon.Coupon;
-import com.ecommerce.domain.coupon.QCoupon;
 import com.ecommerce.domain.user.QUser;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.repository.UserRepository;
@@ -18,7 +16,6 @@ public class UserRepositoryImpl implements UserRepository {
     private final UserJPARepository userJPARepository;
     private final JPAQueryFactory queryFactory;
     private final QUser user = QUser.user;
-    private final QCoupon coupon = QCoupon.coupon;
 
 
     public UserRepositoryImpl(UserJPARepository userJPARepository, JPAQueryFactory queryFactory) {
@@ -37,15 +34,6 @@ public class UserRepositoryImpl implements UserRepository {
         return Optional.of(userJPARepository.save(user));
     }
 
-    @Override
-    public Optional<Coupon> getCouponByUser(long userId, long couponId) {
-        return Optional.ofNullable(queryFactory
-                .select(coupon)
-                .from(user)
-                .join(user.coupons, coupon)
-                .where(user.id.eq(userId).and(coupon.id.eq(couponId)))
-                .fetchOne());
-    }
 
 
 
