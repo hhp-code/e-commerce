@@ -15,7 +15,7 @@ public class OrderMapper {
 
 
     public static OrderCommand.Create toOrder(OrderDto.OrderCreateRequest request) {
-        return new OrderCommand.Create(request.customerId(),request.items());
+        return new OrderCommand.Create(request.userId(),request.items());
     }
 
 

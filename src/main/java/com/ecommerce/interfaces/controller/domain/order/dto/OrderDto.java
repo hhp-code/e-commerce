@@ -12,7 +12,7 @@ import java.util.Map;
 @UtilityClass
 public class OrderDto {
 
-    public record OrderCreateRequest(long customerId, Map<Long,Integer> items) {
+    public record OrderCreateRequest(long userId, Map<Long,Integer> items) {
         public void validate() {
             if(items.isEmpty()){
                 throw new OrderException.ControllerException("주문할 상품이 없습니다.");

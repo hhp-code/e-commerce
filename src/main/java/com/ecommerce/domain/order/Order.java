@@ -4,7 +4,6 @@ import com.ecommerce.interfaces.exception.domain.OrderException;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
-import com.ecommerce.domain.user.service.UserService;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -73,15 +72,14 @@ public class Order {
     }
 
 
-
-    private void calculateDiscount() {
-
-            this.sellingPrice = this.sellingPrice.subtract(this.salePrice);
-
-    }
-
     void calculatePrices() {
         this.regularPrice = calculateRegularPrice();
+        this.salePrice = calculateSalePrice();
+        this.sellingPrice = this.regularPrice.subtract(this.salePrice);
+    }
+
+    private BigDecimal calculateSalePrice() {
+        return this.regularPrice.multiply(new BigDecimal("0.1"));
     }
 
     private BigDecimal calculateRegularPrice() {
@@ -101,6 +99,7 @@ public class Order {
             this.orderItems = new HashMap<>();
         }
         this.orderItems.put(product, quantity);
+        calculatePrices();
     }
 
 
@@ -172,26 +171,21 @@ public class Order {
             throw new OrderException.ServiceException("상품의 재고가 부족합니다.");
         }
         this.addOrderItem(product, quantity);
+        calculatePrices();
         return this;
     }
 
     public Order deleteItem(ProductService productService, long orderId) {
         Product product = productService.getProduct(orderId);
         this.deleteOrderItem(product);
+        calculatePrices();
         return this;
     }
 
-    public Order putUser(UserService userService, long userId) {
-        this.user = userService.getUser(userId);
-        return this;
-    }
-
-    public Order addItems(ProductService productService, Map<Long, Integer> items) {
-        items.forEach((productId, quantity) -> {
-            Product product = productService.getProduct(productId);
-            validateOrderItem(product, quantity);
-            this.addOrderItem(product, quantity);
-        });
+    public Order addItems( Map<Product, Integer> items) {
+        items.forEach(this::validateOrderItem);
+        this.orderItems.putAll(items);
+        calculatePrices();
         return this;
     }
     private void validateOrderItem(Product product, int quantity) {

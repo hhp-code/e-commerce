@@ -2,12 +2,16 @@ package com.ecommerce.application;
 
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.*;
+import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
+import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class OrderFacade {
@@ -33,7 +37,14 @@ public class OrderFacade {
         return orderDetails;
     }
     public OrderInfo.Summary createOrder(OrderCommand.Create command) {
-        Order execute = command.execute(userService, productService);
+        User user = userService.getUser(command.userId());
+        Map<Long, Integer> items = command.items();
+        Map<Product, Integer> productMap = new HashMap<>();
+        items.forEach((productId, quantity) -> {
+            Product product = productService.getProduct(productId);
+            productMap.put(product, quantity);
+        });
+        Order execute = command.execute(user, productMap);
         Order order = orderQueryService.saveOrder(execute);
         return OrderInfo.Summary.from(order);
     }
