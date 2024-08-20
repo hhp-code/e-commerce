@@ -78,7 +78,7 @@ public class OrderControllerConcurrencyTest {
             Map<Product, Integer> items = Map.of(testProduct, 1);
             Order order = new Order(user, items);
             orderService.saveOrder(order);
-            orderPayRequest.add(new OrderDto.OrderPayRequest(user.getId()));
+            orderPayRequest.add(new OrderDto.OrderPayRequest(1L,user.getId()));
         }
 
 

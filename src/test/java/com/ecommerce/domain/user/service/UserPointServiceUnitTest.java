@@ -63,7 +63,7 @@ class UserPointServiceUnitTest {
 
     @Test
     @DisplayName("잔액 감소 - 성공 케이스")
-    void deductPointSuccess() throws TimeoutException {
+    void deductPointSuccess() throws TimeoutException, InterruptedException {
         BigDecimal decreaseAmount = BigDecimal.valueOf(500);
 
         when(quantumLockManager.executeWithLock(anyString(), any(), any())).thenReturn(new User(1L,"testUser", BigDecimal.valueOf(500)));

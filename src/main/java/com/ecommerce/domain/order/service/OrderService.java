@@ -9,6 +9,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -22,28 +23,34 @@ public class OrderService {
         this.orderQueryRepository = orderQueryRepository;
         this.orderCommandRepository = orderCommandRepository;
     }
+
     @Transactional(readOnly = true)
     public List<Order> getOrders(OrderQuery.GetUserOrders query) {
         List<Order> orders = orderQueryRepository.getOrders(query.userId());
         orders.size();
         return orders;
     }
+
     @Transactional(readOnly = true)
     @Cacheable(value = "orders", key = "#orderId", unless = "#result == null")
     public Order getOrder(Long orderId) {
         return orderQueryRepository.getById(orderId)
                 .orElseThrow(() -> new OrderException.ServiceException("주문이 존재하지 않습니다."));
     }
+
     @Transactional
     @Cacheable(value = "finishedOrders", key = "#durationDays", unless = "#result.isEmpty()")
     public List<Order> getFinishedOrderWithDays(int durationDays) {
         return orderQueryRepository.getFinishedOrderWithDays(durationDays);
     }
-    @Transactional
-    @Caching(
-            put = {@CachePut(value = "orders", key = "#result.id")},
-            evict = {@CacheEvict(value = "finishedOrders", allEntries = true)}
-    )
+
+    //    @Transactional
+//    @Caching(
+//            put = {@CachePut(value = "orders", key = "#result.id")},
+//            evict = {@CacheEvict(value = "finishedOrders", allEntries = true)}
+//    )
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @CacheEvict(value = {"orders", "finishedOrders"}, allEntries = true)
     public Order saveOrder(Order order) {
         return orderCommandRepository.saveAndGet(order)
                 .orElseThrow(() -> new OrderException.ServiceException("주문 저장에 실패하였습니다."));

@@ -4,16 +4,52 @@ import { check, sleep } from 'k6';
 const BASE_URL = 'http://localhost:8080/api';
 
 export const options = {
-    // stages: [
-    //     { duration: '30s', target: 10 },
-    //     { duration: '1m', target: 50 },
-    //     { duration: '2m', target: 50 },
-    //     { duration: '30s', target: 0 },
-    // ],
-    iterations: 1,
-    vus: 1,
+    scenarios: {
+        load_test: {
+            executor: 'ramping-vus',
+            startVUs: 0,
+            stages: [
+                { duration: '1m', target: 50 },
+                { duration: '3m', target: 50 },
+                { duration: '1m', target: 0 },
+            ],
+            gracefulRampDown: '30s',
+            startTime: '0s',
+        },
+        endurance_test: {
+            executor: 'constant-vus',
+            vus: 30,
+            duration: '30m',
+            startTime: '5m30s',
+        },
+        stress_test: {
+            executor: 'ramping-vus',
+            startVUs: 0,
+            stages: [
+                { duration: '2m', target: 100 },
+                { duration: '5m', target: 100 },
+                { duration: '2m', target: 200 },
+                { duration: '5m', target: 200 },
+                { duration: '2m', target: 0 },
+            ],
+            gracefulRampDown: '30s',
+            startTime: '35m30s',
+        },
+        spike_test: {
+            executor: 'ramping-arrival-rate',
+            startRate: 50,
+            timeUnit: '1s',
+            preAllocatedVUs: 50,
+            maxVUs: 500,
+            stages: [
+                { duration: '1m', target: 50 },
+                { duration: '30s', target: 500 },
+                { duration: '1m', target: 50 },
+            ],
+            startTime: '51m30s',
+        },
+    },
 };
-
 export default function () {
     const createOrderPayload = JSON.stringify({
         userId: 1,
@@ -32,6 +68,7 @@ export default function () {
     }
 
     const orderId = JSON.parse(createOrderResponse.body).id;
+    const userId = JSON.parse(createOrderResponse.body).userId;
 
 
 
@@ -41,6 +78,7 @@ export default function () {
         '주문 조회 성공': (r) => r.status === 200,
     });
     const payOrderPayload = JSON.stringify({
+        userId : userId,
         orderId: orderId,
     });
 
@@ -66,7 +104,5 @@ export default function () {
     check(res, { '주문 목록 조회 성공': (r) => r.status === 200 });
     sleep(1);
 
-    //인기상품 조회
-    res = http.get(`${BASE_URL}/products/popular`);
-    check(res, { '인기상품 조회 성공': (r) => r.status === 200 });
+
 }

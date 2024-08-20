@@ -24,7 +24,7 @@ public class OrderCommand {
                     .addItem(productService, productId, quantity);
         }
     }
-    public record Payment( long orderId) {
+    public record Payment(long userId, long orderId) {
         public Order execute(Order order) {
             return order
                     .deductStock()

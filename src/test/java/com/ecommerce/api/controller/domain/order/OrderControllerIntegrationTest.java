@@ -136,7 +136,7 @@ class OrderControllerIntegrationTest {
         mockMvc.perform(post("/api/orders")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(orderCreateRequest)));
-        OrderDto.OrderPayRequest orderPayRequest = new OrderDto.OrderPayRequest( 1L);
+        OrderDto.OrderPayRequest orderPayRequest = new OrderDto.OrderPayRequest( 1L,1L);
         mockMvc.perform(post("/api/orders/payments")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(orderPayRequest)))
@@ -147,7 +147,7 @@ class OrderControllerIntegrationTest {
     @Test
     @DisplayName("결제 요청 - 주문 없음")
     void payOrderWithNonExistentOrder() throws Exception {
-        OrderDto.OrderPayRequest orderPayRequest = new OrderDto.OrderPayRequest(999L);
+        OrderDto.OrderPayRequest orderPayRequest = new OrderDto.OrderPayRequest(1L,999L);
         mockMvc.perform(post("/api/orders/payments")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(orderPayRequest)))
@@ -166,7 +166,7 @@ class OrderControllerIntegrationTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(orderCreateRequest)));
 
-        OrderDto.OrderPayRequest orderPayRequest = new OrderDto.OrderPayRequest(-1L);
+        OrderDto.OrderPayRequest orderPayRequest = new OrderDto.OrderPayRequest(1L,-1L);
         mockMvc.perform(post("/api/orders/payments")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(orderPayRequest)))

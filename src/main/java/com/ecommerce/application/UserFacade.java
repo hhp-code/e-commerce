@@ -33,6 +33,8 @@ public class UserFacade {
         }
         catch (TimeoutException e) {
             throw new UserException("포인트 충전 중 락 획득 시간 초과");
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -44,7 +46,7 @@ public class UserFacade {
                     () -> userService.getUser(userId)
                             .deductPoint(amount)
                             .saveAndGet(userService));
-        } catch (TimeoutException e) {
+        } catch (TimeoutException | InterruptedException e) {
             throw new UserException.ServiceException("포인트 감소 중 락 획득 시간 초과");
         }
     }

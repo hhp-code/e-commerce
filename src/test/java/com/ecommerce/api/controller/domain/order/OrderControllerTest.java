@@ -116,7 +116,7 @@ class OrderControllerTest {
     @Test
     @DisplayName("결제 요청 - 결제 성공")
     void payOrder_Success() throws Exception {
-        OrderDto.OrderPayRequest request = new OrderDto.OrderPayRequest(ORDER_ID);
+        OrderDto.OrderPayRequest request = new OrderDto.OrderPayRequest(1L,ORDER_ID);
         Order order = createSampleOrder();
         OrderInfo.Detail orderInfo = OrderInfo.Detail.from(order);
         when(paymentUseCase.payOrder(OrderMapper.toOrderPay(request))).thenReturn(orderInfo);

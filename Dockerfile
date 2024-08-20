@@ -1,7 +1,7 @@
 # 빌드 스테이지
 FROM gradle:8.5-jdk21 AS build
 WORKDIR /app
-COPY . .
+COPY .. .
 ARG JAR_FILE=build/libs/*.jar
 COPY ${JAR_FILE} app.jar
 

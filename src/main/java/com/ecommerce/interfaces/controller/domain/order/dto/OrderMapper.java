@@ -33,7 +33,7 @@ public class OrderMapper {
     }
 
     public static OrderCommand.Payment toOrderPay(OrderDto.OrderPayRequest request) {
-        return new OrderCommand.Payment(request.orderId());
+        return new OrderCommand.Payment(request.userId(),request.orderId());
     }
     public static OrderCommand.Cancel toOrderCancel(OrderDto.OrderCancelRequest request) {
         return new OrderCommand.Cancel(request.userId());

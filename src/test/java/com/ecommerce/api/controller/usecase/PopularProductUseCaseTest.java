@@ -96,7 +96,7 @@ class PopularProductUseCaseTest {
             OrderCommand.Create command = new OrderCommand.Create(user.getId(), orderItems);
             OrderInfo.Summary order1 = orderFacade.createOrder(command);
             long orderId = order1.orderId();
-            OrderCommand.Payment payment = new OrderCommand.Payment(orderId);
+            OrderCommand.Payment payment = new OrderCommand.Payment(user.getId(), orderId);
             futures.add(CompletableFuture.runAsync(() -> paymentUseCase.payOrder(payment)));
 //            paymentUseCase.payOrder(payment);
         }
