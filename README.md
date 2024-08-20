@@ -1,93 +1,88 @@
-### K6 및 부하테스트
+## K6 부하 테스트 개요
 
-## K6를 활용한 부하 테스트 계획
-1. ** 스펙 **
-   - cpu : 2
-   - memory : 4G
-   - 도커로 띄운 어플리케이션에 대한 부하테스트
+### 테스트 환경
+- **CPU**: 4G
+- **메모리**: 8G
 
-2. **테스트 대상 선정**
-    - 주문 결제 api 
-    - 인기 상품조회 api
+### 테스트 대상
+- 주문 결제 API
+- 주문 생성 API
+- 주문 조회 API
 
-3. **테스트 목적**
-    - 시스템의 최대 처리 용량 파악
-    - 응답 시간 및 처리량 측정
-    - 병목 지점 식별
-    - 200TPS 부하에 대한 안전성 보장
+### 테스트 목적
+- 시스템의 최대 처리 용량 파악
+- 응답 시간 및 처리량 측정
+- 병목 지점 식별
+- 200TPS 부하에 대한 안전성 보장
 
-4. **시나리오 작성**
-  - 부하 테스트
-  - 내구성 테스트
-  - 스트레스 테스트
-  - 최고 부하 테스트
+### 테스트 시나리오
+1. 부하 테스트
+2. 내구성 테스트
+3. 스트레스 테스트
+4. 최고 부하 테스트 (스파이크 테스트)
 
-## K6 테스트 스크립트 작성 및 실행
-`
+## 테스트 실행 및 문제 해결 과정
 
+1. 초기 실행 시 데드락 발생
+   - 원인: 'User' 도메인 변경에 동시성 문제
+   - 해결: 락 적용 후 재시도
 
+2. 하이버네이트 관련 예외 발생
+   - IllegalStateException 및 NullPointerException 발생
+   - 원인: 하이버네이트의 스레드 안전성 문제
 
+3. 데드락 해결을 위한 설계 변경
+   - 주문->유저 참조 방식 변경
+   - 유저번호, 주문번호를 통한 변경 방식 도입
 
-## 성능 지표 분석 및 병목 탐색
-1회 이터레이션 성공후 시나리오별 설정후 병렬 실행
-데드락 발생 'User' 도메인 변경에 동시성이 생김
-데드락 발생으로 인해 락 적용 후 재시도
-IllegalStateException: Illegal pop() with non-matching JdbcValuesSourceProcessingState
-NullPointerException: Cannot invoke "org.hibernate.engine.spi.SharedSessionContractImplement
-문제 분석.. 하이버네이트의 스레드는 스레드세이프 하지 않다.
-주문 결제 스레드에서 저장하는것에있어 유저도메인의 변경이 일어나는데 이때 데드락이 발생한다.
-데드락 해결을 위해서 1가지 변경을 했습니다.
-주문-> 유저 참조를 통해 변경을 하는것이 아니라 유저번호, 주문번호 및 유저번호를 통해 변경을 하도록 변경하겠습니다.
-이로인해 데드락은 해결했지만, 2CPU 4G의 환경에서 50TPS를 처리하는데에는 문제가 있었습니다.
-일단 도커에서 스펙업을 해서 4CPU 8G로 변경하겠습니다.
-메트릭을 봐도 TPS의 문제보다는 서버가 죽는게 문제였습니다.
+4. 서버 스펙 업그레이드
+   - 2CPU 4G에서 4CPU 8G로 변경
 
+5. 도커 컴포즈 도입
+   - 단일 도커파일 사용에서 도커 컴포즈로 전환
 
-1. **K6 결과 분석**
-    - 응답 시간 (Response Time)
-    - 요청 처리량 (Requests per Second)
-    - 오류율 (Error Rate)
+## 테스트 결과 분석
 
-2. **추가 모니터링 도구 연동**
-    - Grafana K6 대시보드 활용
-    - Prometheus와 연동하여 시스템 메트릭 수집
+### 응답 시간
+- 평균: 10.4ms
+- 중앙값: 7.48ms
+- 최소: 990μs
+- 최대: 757.78ms
+- 90번째 백분위수: 20.42ms
+- 95번째 백분위수: 26.15ms
 
-3. **병목 지점 식별 및 개선**
-    - 데이터베이스 쿼리 최적화
-    - 캐시 도입 검토
-    - 비동기 처리 적용 가능성 탐색
+### 요청 처리량
+- 총 처리 요청: 458,616
+- 초당 요청 처리량: 141.457939/s
 
-## 장애 대응 문서 작성
+### 오류율
+- http_req_failed: 0.00%
 
-1. **K6 테스트 중 발견된 장애 시나리오**
-    - 특정 부하에서의 응답 시간 급증
-    - 오류율 증가 지점
-    - 시스템 리소스 포화 상황
-
-2. **대응 절차**
-    - 모니터링 알림 설정
-    - 부하 분산 전략 (로드 밸런싱)
-    - 자동 스케일링 설정
-
-## 최종 발표 자료 작성
-
-1. **K6 테스트 결과 요약**
-    - 주요 성능 지표 그래프 (K6 대시보드 활용)
-    - 병목 지점 및 개선 사항 제시
-
-2. **시스템 아키텍처 개선안**
-    - K6 테스트 결과를 바탕으로 한 확장성 개선 제안
-
-3. **향후 계획**
-    - 지속적인 성능 테스트 자동화 방안
-    - K6와 CI/CD 파이프라인 통합 계획
+### 추가 정보
+- 최대 가상 사용자 수: 550명
+- 테스트 실행 시간: 54분 2.1초
+- 총 반복 횟수: 114,654회
 
 
-2024-08-20 09:16:56 org.springframework.dao.CannotAcquireLockException: could not execute statement [Deadlock found when trying to get lock; try restarting transaction] [/* update for com.ecommerce.domain.user.User */update users set deleted_at=?,is_deleted=?,point=?,username=? where id=?]; SQL [/* update for com.ecommerce.domain.user.User */update users set deleted_at=?,is_deleted=?,point=?,username=? where id=?]
-2024-08-20 09:16:56     at org.springframework.orm.jpa.vendor.HibernateJpaDialect.convertHibernateAccessException(HibernateJpaDialect.java:283) ~[spring-orm-6.1.10.jar!/:6.1.10]
-2024-08-20 09:16:56     at org.springframework.orm.jpa.vendor.HibernateJpaDialect.translateExceptionIfPossible(HibernateJpaDialect.java:244) ~[spring-orm-6.1.10.jar!/:6.1.10]
-2024-08-20 09:16:56     at org.springframework.orm.jpa.JpaTransactionManager.doCommit(JpaTransactionManager.java:566) ~[spring-orm-6.1.10.jar!/:6.1.10]
-2024-08-20 09:16:56     at org.springframework.transaction.support.AbstractPlatformTransactionManager.processCommit(AbstractPlatformTransactionManager.java:795) ~[spring-tx-6.1.10.jar!/:6.1.10]
-2024-08-20 09:16:56     at org.springframework.transaction.support.AbstractPlatformTransactionManager.commit(AbstractPlatformTransactionManager.java:758) ~[spring-tx-6.1.10.jar!/:6.1.10]
-2024-08-20 09:16:56     at org.springframework.transaction.interceptor.TransactionAspectSupport.commitTransactionAfterReturning(TransactionAspectSupport.java:676) ~[spring-tx-6.1.10.jar!/:6.1.10]
-2024-08-20 09:16:56     at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:426) ~[spring-tx-6.1.10.jar!/:6.1.10]
+## 테스트 결과 분석
+
+1. **성능 목표 달성**:
+   - 목표했던 200 TPS에 근접한 141 TPS를 달성했습니다.
+   - 시스템이 안정적으로 높은 부하를 처리할 수 있음을 확인했습니다.
+
+2. **시스템 안정성**:
+   - 오류율 0%로 매우 안정적인 성능을 보여주었습니다.
+   - 평균 응답 시간 10.4ms로 빠른 응답 속도를 유지했습니다.
+
+3. **확장성**:
+   - 최대 550명의 동시 사용자를 처리할 수 있었습니다.
+   - 이는 실제 운영 환경에서 상당한 규모의 트래픽을 감당할 수 있음을 의미합니다.
+
+4. **예상 일일 사용자 수**:
+   - 약 30만~35만 명의 일일 활성 사용자(DAU)를 안정적으로 지원할 수 있을 것으로 추정됩니다.
+   - 이는 사용자당 평균 30개의 요청을 한다고 가정했을 때의 보수적인 추정치입니다.
+
+
+
+
+
