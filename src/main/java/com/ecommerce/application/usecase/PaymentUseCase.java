@@ -48,7 +48,6 @@ public class PaymentUseCase {
                         orderItems.forEach(Product::deductStock);
                         User user = userService.getUser(command.userId());
                         user.deductPoint(queryOrder.getTotalAmount());
-//                        Order execute = command.execute(queryOrder);
                         Order commandOrder = orderQueryService.saveOrder(queryOrder);
                         eventPublisher.publish(new PayAfterEvent(commandOrder.getId()));
                         return OrderInfo.Detail.from(commandOrder);
