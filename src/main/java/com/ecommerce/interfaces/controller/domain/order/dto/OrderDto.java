@@ -1,7 +1,7 @@
 package com.ecommerce.interfaces.controller.domain.order.dto;
 
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
-import com.ecommerce.domain.product.ProductWrite;
+import com.ecommerce.domain.product.Product;
 import com.ecommerce.interfaces.exception.domain.OrderException;
 import lombok.experimental.UtilityClass;
 
@@ -76,6 +76,6 @@ public class OrderDto {
             }
         }
     }
-    public record PopularListResponse(List<ProductWrite> products) {
+    public record PopularListResponse(List<Product> products) {
     }
 }

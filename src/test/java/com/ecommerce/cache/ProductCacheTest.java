@@ -1,6 +1,6 @@
 package com.ecommerce.cache;
 
-import com.ecommerce.domain.product.ProductWrite;
+import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,16 +27,16 @@ public class ProductCacheTest {
     @BeforeEach
     @Transactional
     public void setUp() {
-        productService.saveAndGet(new ProductWrite("상품1", BigDecimal.valueOf(1000),10));
+        productService.saveAndGet(new Product("상품1", BigDecimal.valueOf(1000),10));
     }
 
     @Test
     public void testProductCaching() {
         Long productId = 1L;
 
-        ProductWrite product = productService.getProduct(productId);
+        Product product = productService.getProduct(productId);
 
-        ProductWrite cachedProduct = productService.getProduct(productId);
+        Product cachedProduct = productService.getProduct(productId);
 
         assertThat(cachedProduct).isEqualTo(product);
 

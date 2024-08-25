@@ -7,7 +7,7 @@ import com.ecommerce.domain.coupon.service.CouponService;
 import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.domain.order.OrderWrite;
 import com.ecommerce.domain.order.query.OrderQuery;
-import com.ecommerce.domain.user.UserWrite;
+import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserCouponService;
 import com.ecommerce.domain.user.service.UserService;
 import org.springframework.stereotype.Component;
@@ -31,8 +31,8 @@ public class CouponUseCase {
         this.orderService = orderService;
     }
 
-    public UserWrite useCoupon(Long userId, Long couponId) {
-        UserWrite user = userService.getUser(userId);
+    public User useCoupon(Long userId, Long couponId) {
+        User user = userService.getUser(userId);
         CouponWrite userCoupon = userCouponService.getUserCoupon(userId, couponId);
         OrderQuery.GetOrder getOrderQuery = new OrderQuery.GetOrder(userId);
         OrderWrite orderEntity = orderService.getOrder(getOrderQuery.orderId());
@@ -43,13 +43,13 @@ public class CouponUseCase {
     }
 
     @Transactional
-    public UserWrite issueCouponToUser(CouponCommand.Issue issue) {
+    public User issueCouponToUser(CouponCommand.Issue issue) {
         String lockKey = "coupon:" + issue.couponId();
         Duration timeout = Duration.ofSeconds(5);
         try{
             return quantumLockManager.executeWithLock(lockKey, timeout, () ->
             {
-                UserWrite user = userService.getUser(issue.userId());
+                User user = userService.getUser(issue.userId());
                 CouponWrite coupon = couponService.deductCoupon(issue.couponId());
                 user.addCoupon(coupon);
                 user.getCoupons().size();

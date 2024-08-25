@@ -6,20 +6,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDomainMapper {
-    public static UserWrite toWriteModel(UserEntity user) {
-        return new UserWrite(user.getUsername(), user.getInitialBalance());
+    public static User toWriteModel(UserEntity user) {
+        return new User(user.getUsername(), user.getInitialBalance());
 
     }
 
-    public static UserEntity toEntity(UserWrite user) {
+    public static UserEntity toEntity(User user) {
         return new UserEntity(user.getUsername(), user.getInitialBalance());
     }
 
-    public static List<UserWrite> toWriteModels(List<UserEntity> all) {
-        List<UserWrite> userWrites = new ArrayList<>();
+    public static List<User> toWriteModels(List<UserEntity> all) {
+        List<User> users = new ArrayList<>();
         for (UserEntity userEntity : all) {
-            userWrites.add(toWriteModel(userEntity));
+            users.add(toWriteModel(userEntity));
         }
-        return userWrites;
+        return users;
     }
 }

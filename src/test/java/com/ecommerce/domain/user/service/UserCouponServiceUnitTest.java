@@ -1,7 +1,7 @@
 package com.ecommerce.domain.user.service;
 
 import com.ecommerce.domain.coupon.CouponWrite;
-import com.ecommerce.domain.user.UserWrite;
+import com.ecommerce.domain.user.User;
 import com.ecommerce.interfaces.exception.domain.UserException;
 import com.ecommerce.domain.user.service.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -42,7 +42,7 @@ class UserCouponServiceUnitTest {
     @DisplayName("사용자의 쿠폰 업데이트 실패 - 사용자 조회실패")
     void getUpdateCouponsFail(){
         // Given
-        UserWrite user = new UserWrite( "testUser", BigDecimal.ZERO);
+        User user = new User( "testUser", BigDecimal.ZERO);
         CouponWrite coupon = new CouponWrite();
 
         // When & Then
@@ -52,7 +52,7 @@ class UserCouponServiceUnitTest {
     @DisplayName("사용자의 쿠폰 업데이트 실패 - 업데이트 실패")
     void getUpdateCouponsFail2(){
         // Given
-        UserWrite user = new UserWrite( "testUser", BigDecimal.ZERO);
+        User user = new User( "testUser", BigDecimal.ZERO);
         CouponWrite coupon = new CouponWrite();
 
         // When & Then

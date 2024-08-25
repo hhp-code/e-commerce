@@ -4,20 +4,20 @@ import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.domain.order.OrderWrite;
 import com.ecommerce.domain.order.event.*;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
-import com.ecommerce.domain.product.ProductWrite;
+import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.event.StockDeductEvent;
 import com.ecommerce.domain.product.event.StockChargeEvent;
 import com.ecommerce.domain.product.service.ProductService;
-import com.ecommerce.domain.user.UserWrite;
+import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.event.PointDeductEvent;
 import com.ecommerce.domain.user.event.PointChargeEvent;
 import com.ecommerce.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-//TODO : 상태머신을 활용한 부분보상로직 구현
 @Slf4j
 @Component
 public class EventHandler {
@@ -25,20 +25,21 @@ public class EventHandler {
     private final OrderService orderService;
     private final ProductService productService;
     private final UserService userService;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public EventHandler(ObjectMapper objectMapper, OrderService orderService, ProductService productService, UserService userService) {
+    public EventHandler(ObjectMapper objectMapper, OrderService orderService, ProductService productService, UserService userService, KafkaTemplate<String, String> kafkaTemplate) {
         this.objectMapper = objectMapper;
         this.orderService = orderService;
         this.productService = productService;
         this.userService = userService;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @KafkaListener(topics = "order-create", groupId = "ecommerce-group")
     public void handleOrderCreateEvent(String eventJson) {
         try {
             OrderCreateEvent event = objectMapper.readValue(eventJson, OrderCreateEvent.class);
-            log.info("received order create event: {}", event);
-            UserWrite user = userService.getUser(event.userId());
+            User user = userService.getUser(event.userId());
             OrderWrite orderWrite = new OrderWrite(user).addItems(event.orderItems());
             orderService.saveOrder(orderWrite);
         } catch (Exception e) {
@@ -50,7 +51,7 @@ public class EventHandler {
     public void handleStockDeductEvent(String eventJson) {
         try {
             StockDeductEvent event = objectMapper.readValue(eventJson, StockDeductEvent.class);
-            ProductWrite product = productService.getProduct(event.productId()).deductStock(event.quantityChange());
+            Product product = productService.getProduct(event.productId()).deductStock(event.quantityChange());
             productService.saveAndGet(product);
         } catch (Exception e) {
             // 예외 처리
@@ -60,7 +61,7 @@ public class EventHandler {
     public void handleOrderAddItemEvent(String eventJson) {
         try {
             OrderItemAddEvent event = objectMapper.readValue(eventJson, OrderItemAddEvent.class);
-            ProductWrite product = productService.getProduct(event.productId());
+            Product product = productService.getProduct(event.productId());
             int quantity = event.quantity();
             OrderItemWrite item = new OrderItemWrite(product, quantity);
             OrderWrite orderWrite = orderService.getOrder(event.orderId()).addItem(item);
@@ -87,8 +88,8 @@ public class EventHandler {
     public void handlePointDeductEvent(String eventJson) {
         try {
             PointDeductEvent event = objectMapper.readValue(eventJson, PointDeductEvent.class);
-            UserWrite userWrite = userService.getUser(event.userId()).deductPoint(event.pointChange());
-            userService.saveUser(userWrite);
+            User user = userService.getUser(event.userId()).deductPoint(event.pointChange());
+            userService.saveUser(user);
         } catch (Exception e) {
             //TODO: 예외 처리
         }
@@ -109,7 +110,7 @@ public class EventHandler {
     public void handleStockRestoreEvent(String eventJson) {
         try {
             StockChargeEvent event = objectMapper.readValue(eventJson, StockChargeEvent.class);
-            ProductWrite product = productService.getProduct(event.productId()).chargeStock(event.quantityChange());
+            Product product = productService.getProduct(event.productId()).chargeStock(event.quantityChange());
             productService.saveAndGet(product);
         } catch (Exception e) {
             //TODO: 예외 처리
@@ -120,8 +121,8 @@ public class EventHandler {
     public void handlePointRestoreEvent(String eventJson) {
         try {
             PointChargeEvent event = objectMapper.readValue(eventJson, PointChargeEvent.class);
-            UserWrite userWrite = userService.getUser(event.userId()).chargePoint(event.pointChange());
-            userService.saveUser(userWrite);
+            User user = userService.getUser(event.userId()).chargePoint(event.pointChange());
+            userService.saveUser(user);
         } catch (Exception e) {
             //TODO: 예외 처리
         }
@@ -136,5 +137,13 @@ public class EventHandler {
         } catch (Exception e) {
             //TODO: 예외 처리
         }
+    }
+    @KafkaListener(topics = "order-query", groupId = "ecommerce-group")
+    public void handleOrderQueryEvent(String eventJson) throws Exception {
+        OrderQueryEvent event = objectMapper.readValue(eventJson, OrderQueryEvent.class);
+        OrderWrite orderInfo = orderService.getOrder(event.orderId());
+
+        OrderQueryResultEvent resultEvent = new OrderQueryResultEvent(event.orderId(), orderInfo);
+        kafkaTemplate.send(event.getEventType(), objectMapper.writeValueAsString(resultEvent));
     }
 }

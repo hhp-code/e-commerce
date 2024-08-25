@@ -1,17 +1,12 @@
 package com.ecommerce.application;
 
 import com.ecommerce.domain.event.DomainEvent;
-import com.ecommerce.domain.order.OrderService;
-import com.ecommerce.domain.order.OrderWrite;
 import com.ecommerce.domain.order.command.OrderCommand;
 import com.ecommerce.domain.order.event.*;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 import com.ecommerce.domain.outbox.OutboxMessage;
 import com.ecommerce.domain.outbox.OutboxRepository;
-import com.ecommerce.domain.product.event.StockDeductEvent;
-import com.ecommerce.domain.product.event.StockChargeEvent;
 import com.ecommerce.domain.user.command.UserCommand;
-import com.ecommerce.domain.user.event.PointDeductEvent;
 import com.ecommerce.domain.user.event.PointChargeEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,20 +15,17 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 @Slf4j
 @Component
 public class CommandHandler {
     private final ObjectMapper objectMapper;
-    private final OrderService orderService;
     private final OutboxRepository outboxRepository;
 
 
-    public CommandHandler(ObjectMapper objectMapper, OrderService orderService, OutboxRepository outboxRepository) {
+    public CommandHandler(ObjectMapper objectMapper, OutboxRepository outboxRepository) {
         this.objectMapper = objectMapper;
-        this.orderService = orderService;
         this.outboxRepository = outboxRepository;
     }
 
@@ -88,26 +80,16 @@ public class CommandHandler {
     }
 
     private List<DomainEvent> handlePayment(OrderCommand.Payment command) {
-        OrderWrite order = orderService.getOrder(command.orderId());
-        List<OrderItemWrite> items = order.getItems();
-        List<DomainEvent> events = new ArrayList<>();
-        for(OrderItemWrite item : items) {
-            events.add(new StockDeductEvent(item.product().getId(), item.quantity()));
-        }
-        events.add(new PointDeductEvent(order.getUserId(), order.getTotalAmount()));
-        events.add(new OrderPayAfterEvent(order.getId()));
-        return events;
+        return List.of(
+                new OrderPayEvent(command.orderId())
+        );
+
     }
 
     private List<DomainEvent> handleCancelOrder(OrderCommand.Cancel command) {
-        OrderWrite order = orderService.getOrder(command.orderId());
-        List<DomainEvent> events = new ArrayList<>();
-        for(OrderItemWrite item : order.getItems()) {
-            events.add(new StockChargeEvent(item.product().getId(), item.quantity()));
-        }
-        events.add(new PointChargeEvent(order.getUserId(), order.getTotalAmount()));
-        events.add(new OrderCancelEvent(order.getId()));
-        return events;
+        return List.of(
+                new OrderCancelEvent(command.orderId())
+        );
     }
 
     private void publishEvents(List<DomainEvent> events) {

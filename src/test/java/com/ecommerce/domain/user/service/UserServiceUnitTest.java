@@ -1,7 +1,6 @@
 package com.ecommerce.domain.user.service;
 
 import com.ecommerce.domain.coupon.CouponWrite;
-import com.ecommerce.domain.user.UserWrite;
 import com.ecommerce.domain.user.service.repository.UserRepository;
 import com.ecommerce.infra.user.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;

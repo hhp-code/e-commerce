@@ -8,19 +8,19 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @Getter
-public class ProductWrite {
+public class Product {
     private Long productId;
     private String name;
     private BigDecimal price;
     private Integer stock;
 
-    public ProductWrite( String name,BigDecimal price,  Integer stock) {
+    public Product(String name, BigDecimal price, Integer stock) {
         this.price = price;
         this.name = name;
         this.stock = stock;
     }
 
-    public ProductWrite deductStock(int quantity) {
+    public Product deductStock(int quantity) {
         if(stock < quantity) {
             log.error("Stock is not enough. Stock: {}, Quantity: {}", stock, quantity);
             throw new IllegalArgumentException("Stock is not enough");
@@ -30,7 +30,7 @@ public class ProductWrite {
         return this;
     }
 
-    public ProductWrite chargeStock(int quantity) {
+    public Product chargeStock(int quantity) {
         if(quantity <= 0) {
             log.error("Invalid quantity: {}", quantity);
             throw new IllegalArgumentException("Invalid quantity");

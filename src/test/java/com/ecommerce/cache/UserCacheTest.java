@@ -1,9 +1,9 @@
 package com.ecommerce.cache;
 
 import com.ecommerce.config.DatabaseCleanUp;
-import com.ecommerce.domain.product.ProductWrite;
+import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
-import com.ecommerce.domain.user.UserWrite;
+import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,9 +42,9 @@ public class UserCacheTest {
 
     @BeforeEach
     void setUp() {
-        UserWrite user = new UserWrite( "TestUser", BigDecimal.valueOf(1000));
+        User user = new User( "TestUser", BigDecimal.valueOf(1000));
         userService.saveUser(user);
-        ProductWrite product = new ProductWrite( "TestProduct", BigDecimal.valueOf(1000), 10);
+        Product product = new Product( "TestProduct", BigDecimal.valueOf(1000), 10);
         productService.saveAndGet(product);
     }
 
@@ -55,8 +55,8 @@ public class UserCacheTest {
         Long userId = 1L;
 
         //when
-        UserWrite user = userService.getUser(userId);
-        UserWrite cachedUser = userService.getUser(userId);
+        User user = userService.getUser(userId);
+        User cachedUser = userService.getUser(userId);
 
         //then
         assertThat(cachedUser).isEqualTo(user);

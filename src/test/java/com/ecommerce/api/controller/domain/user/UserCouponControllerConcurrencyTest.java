@@ -3,7 +3,7 @@ package com.ecommerce.api.controller.domain.user;
 import com.ecommerce.domain.coupon.CouponWrite;
 import com.ecommerce.domain.coupon.DiscountType;
 import com.ecommerce.domain.coupon.service.CouponService;
-import com.ecommerce.domain.user.UserWrite;
+import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -55,7 +55,7 @@ class UserCouponControllerConcurrencyTest {
         testCoupon2= couponService.saveAndGet(new CouponWrite(2L,"WINTER2024", BigDecimal.valueOf(5000), DiscountType.PERCENTAGE, 500
                 , LocalDateTime.now(),LocalDateTime.now().plusDays(7),true));
         for(int i=0; i<1000; i++){
-            userService.saveUser(new UserWrite("TestUser"+i, BigDecimal.ZERO));
+            userService.saveUser(new User("TestUser"+i, BigDecimal.ZERO));
         }
 
     }

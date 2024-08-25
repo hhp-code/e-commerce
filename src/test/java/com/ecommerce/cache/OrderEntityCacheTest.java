@@ -4,9 +4,9 @@ import com.ecommerce.application.OrderFacade;
 import com.ecommerce.domain.order.command.OrderCommand;
 import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
-import com.ecommerce.domain.product.ProductWrite;
+import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
-import com.ecommerce.domain.user.UserWrite;
+import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,10 +41,10 @@ public class OrderEntityCacheTest {
 
     @BeforeEach
     void setUp() {
-        userService.saveUser(new UserWrite("TestUser", BigDecimal.valueOf(1000)));
-        productService.saveAndGet(new ProductWrite("TestProduct", BigDecimal.valueOf(1000), 10));
+        userService.saveUser(new User("TestUser", BigDecimal.valueOf(1000)));
+        productService.saveAndGet(new Product("TestProduct", BigDecimal.valueOf(1000), 10));
         Long productId = 1L;
-        ProductWrite product = productService.getProduct(productId);
+        Product product = productService.getProduct(productId);
         List<OrderItemWrite> orderItems = List.of(new OrderItemWrite(product, 1));
         OrderCommand.Create createOrderCommand = new OrderCommand.Create(1L, orderItems);
     }

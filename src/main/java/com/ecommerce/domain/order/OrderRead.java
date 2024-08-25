@@ -1,6 +1,7 @@
 package com.ecommerce.domain.order;
 
 import com.ecommerce.domain.order.orderitem.OrderItemRead;
+import com.ecommerce.domain.order.state.OrderStatus;
 import lombok.Getter;
 
 import java.math.BigDecimal;

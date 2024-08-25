@@ -3,9 +3,9 @@ package com.ecommerce.domain.order;
 import com.ecommerce.domain.order.orderitem.OrderItemRead;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 import com.ecommerce.domain.product.ProductDomainMapper;
-import com.ecommerce.domain.product.ProductWrite;
+import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.user.UserDomainMapper;
-import com.ecommerce.domain.user.UserWrite;
+import com.ecommerce.domain.user.User;
 import com.ecommerce.infra.order.entity.OrderEntity;
 import com.ecommerce.infra.order.entity.OrderItemEntity;
 import com.ecommerce.infra.product.entity.ProductEntity;
@@ -38,7 +38,7 @@ public class OrderDomainMapper {
     }
 
     public static OrderEntity toEntity(OrderWrite writeModel) {
-        UserWrite user = writeModel.getUser();
+        User user = writeModel.getUser();
         UserEntity entity = UserDomainMapper.toEntity(user);
         return new OrderEntity(
                 entity,
@@ -49,7 +49,7 @@ public class OrderDomainMapper {
     }
 
     public static OrderItemEntity toEntity(OrderItemWrite writeModel) {
-        ProductWrite product = writeModel.product();
+        Product product = writeModel.product();
         ProductEntity entity = ProductDomainMapper.toEntity(product);
 
         return new OrderItemEntity(
@@ -66,7 +66,7 @@ public class OrderDomainMapper {
 
     public static OrderWrite toWriteModel(OrderEntity orderEntity) {
         UserEntity user = orderEntity.getUser();
-        UserWrite userWrite = UserDomainMapper.toWriteModel(user);
+        User userWrite = UserDomainMapper.toWriteModel(user);
         return new OrderWrite(
                 userWrite,
                 toItemWriteModel(orderEntity.getOrderItemEntities())
@@ -77,7 +77,7 @@ public class OrderDomainMapper {
         List<OrderItemWrite> orderItemWrites = new ArrayList<>();
         for(OrderItemEntity item: items){
             ProductEntity product = item.getProduct();
-            ProductWrite writeModel = ProductDomainMapper.toWriteModel(product);
+            Product writeModel = ProductDomainMapper.toWriteModel(product);
             orderItemWrites.add(new OrderItemWrite(writeModel, item.getQuantity()));
         }
         return orderItemWrites;

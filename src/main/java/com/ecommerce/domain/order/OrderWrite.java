@@ -2,8 +2,9 @@ package com.ecommerce.domain.order;
 
 import com.ecommerce.domain.coupon.CouponWrite;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
-import com.ecommerce.domain.product.ProductWrite;
-import com.ecommerce.domain.user.UserWrite;
+import com.ecommerce.domain.order.state.OrderStatus;
+import com.ecommerce.domain.product.Product;
+import com.ecommerce.domain.user.User;
 import com.ecommerce.interfaces.exception.domain.OrderException;
 import com.ecommerce.domain.coupon.DiscountType;
 import lombok.Getter;
@@ -31,7 +32,7 @@ public class OrderWrite {
 
 
     @Getter
-    private UserWrite user;
+    private User user;
 
     private CouponWrite coupon;
 
@@ -42,20 +43,20 @@ public class OrderWrite {
 
     public OrderWrite() {
     }
-    public OrderWrite(UserWrite user) {
+    public OrderWrite(User user) {
         this.orderDate = LocalDateTime.now();
         this.user = user;
         this.orderItems = new ArrayList<>();
         this.isDeleted = false;
-        this.orderStatus = OrderStatus.PREPARED;
+        this.orderStatus = OrderStatus.CREATED;
     }
 
-    public OrderWrite(UserWrite user, List<OrderItemWrite> orderItems) {
+    public OrderWrite(User user, List<OrderItemWrite> orderItems) {
         this.orderDate = LocalDateTime.now();
         this.user = user;
         this.orderItems = new ArrayList<>(orderItems);
         this.isDeleted = false;
-        this.orderStatus = OrderStatus.PREPARED;
+        this.orderStatus = OrderStatus.CREATED;
         calculatePrices();
     }
 
@@ -89,7 +90,7 @@ public class OrderWrite {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private BigDecimal calculateItemPrice(ProductWrite product, Integer price) {
+    private BigDecimal calculateItemPrice(Product product, Integer price) {
         return product.getPrice().multiply(BigDecimal.valueOf(price));
 
     }
@@ -123,7 +124,7 @@ public class OrderWrite {
 
 
     public OrderWrite finish() {
-        this.orderStatus = OrderStatus.ORDERED;
+        this.orderStatus = OrderStatus.STOCK_DEDUCTED;
         return this;
     }
 
@@ -139,7 +140,7 @@ public class OrderWrite {
     }
 
     public OrderWrite cancel() {
-        this.orderStatus = OrderStatus.CANCELLED;
+        this.orderStatus = OrderStatus.COMPLETED;
         return this;
     }
 
@@ -149,7 +150,7 @@ public class OrderWrite {
 
 
     public OrderWrite addItem(OrderItemWrite orderItemWrite) {
-        ProductWrite product = orderItemWrite.product();
+        Product product = orderItemWrite.product();
         validateOrderItem(product, orderItemWrite.quantity());
         this.addOrderItem(orderItemWrite);
         return this;
@@ -167,14 +168,14 @@ public class OrderWrite {
 
     public OrderWrite addItems(List<OrderItemWrite> orderItemWrites) {
         for(OrderItemWrite orderItemWrite : orderItemWrites){
-            ProductWrite product = orderItemWrite.product();
+            Product product = orderItemWrite.product();
             validateOrderItem(product, orderItemWrite.quantity());
             this.addOrderItem(orderItemWrite);
         }
         return this;
     }
 
-    private void validateOrderItem(ProductWrite product, int quantity) {
+    private void validateOrderItem(Product product, int quantity) {
         if (quantity <= 0) {
             throw new OrderException("주문 수량은 0보다 커야 합니다.");
         }
@@ -191,6 +192,14 @@ public class OrderWrite {
 
     public long getUserId() {
         return user.getId();
+    }
+
+    public OrderStatus getStatus() {
+        return orderStatus;
+    }
+
+    public void setStatus(OrderStatus nextStatus) {
+        this.orderStatus = nextStatus;
     }
 }
 

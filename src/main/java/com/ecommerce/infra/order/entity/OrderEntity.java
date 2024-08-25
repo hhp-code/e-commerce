@@ -1,7 +1,7 @@
 package com.ecommerce.infra.order.entity;
 
 import com.ecommerce.domain.coupon.DiscountType;
-import com.ecommerce.domain.order.OrderStatus;
+import com.ecommerce.domain.order.state.OrderStatus;
 import com.ecommerce.infra.coupon.entity.CouponEntity;
 import com.ecommerce.infra.product.entity.ProductEntity;
 import com.ecommerce.infra.user.entity.UserEntity;
@@ -64,7 +64,7 @@ public class OrderEntity {
         this.user = user;
         this.orderItemEntities = new ArrayList<>();
         this.isDeleted = false;
-        this.orderStatus = OrderStatus.PREPARED;
+        this.orderStatus = OrderStatus.CREATED;
     }
 
     public OrderEntity(UserEntity user, List<OrderItemEntity> orderItemEntities) {
@@ -72,7 +72,7 @@ public class OrderEntity {
         this.user = user;
         this.orderItemEntities = new ArrayList<>(orderItemEntities);
         this.isDeleted = false;
-        this.orderStatus = OrderStatus.PREPARED;
+        this.orderStatus = OrderStatus.CREATED;
         calculatePrices();
     }
 

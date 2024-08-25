@@ -5,8 +5,8 @@ import com.ecommerce.application.OrderFacade;
 import com.ecommerce.domain.order.*;
 import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 import com.ecommerce.domain.order.query.OrderQuery;
-import com.ecommerce.domain.product.ProductWrite;
-import com.ecommerce.domain.user.UserWrite;
+import com.ecommerce.domain.product.Product;
+import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.service.UserService;
 import org.junit.jupiter.api.AfterEach;
@@ -51,13 +51,13 @@ class OrderEntityCommandServiceTest {
     private ProductService productService;
 
     private OrderWrite testOrderWrite;
-    private UserWrite testUser;
-    private ProductWrite testProduct;
+    private User testUser;
+    private Product testProduct;
 
     @BeforeEach
     void setup() {
-        UserWrite user = new UserWrite("testUser", BigDecimal.valueOf(1000));
-        ProductWrite product = new ProductWrite( "test", BigDecimal.TWO, 1000);
+        User user = new User("testUser", BigDecimal.valueOf(1000));
+        Product product = new Product( "test", BigDecimal.TWO, 1000);
         testUser = userService.saveUser(user);
         testProduct = productService.saveAndGet(product);
         OrderItemWrite orderItem = new OrderItemWrite(testProduct, 1);

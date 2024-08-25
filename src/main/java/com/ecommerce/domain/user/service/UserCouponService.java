@@ -3,7 +3,7 @@ package com.ecommerce.domain.user.service;
 import com.ecommerce.domain.coupon.CouponDomainMapper;
 import com.ecommerce.domain.coupon.CouponWrite;
 import com.ecommerce.domain.user.UserDomainMapper;
-import com.ecommerce.domain.user.UserWrite;
+import com.ecommerce.domain.user.User;
 import com.ecommerce.infra.coupon.entity.CouponEntity;
 import com.ecommerce.infra.user.entity.UserEntity;
 import com.ecommerce.interfaces.exception.domain.UserException;
@@ -29,7 +29,7 @@ public class UserCouponService {
     }
 
     @Transactional
-    public UserWrite updateUserCoupon(UserWrite user , CouponWrite userCoupon) {
+    public User updateUserCoupon(User user , CouponWrite userCoupon) {
         user.addCoupon(userCoupon);
         UserEntity entity = UserDomainMapper.toEntity(user);
         UserEntity userEntity = userRepository.save(entity).orElseThrow(

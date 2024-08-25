@@ -3,7 +3,7 @@ package com.ecommerce.domain.user.service;
 import com.ecommerce.config.DatabaseCleanUp;
 import com.ecommerce.domain.coupon.CouponWrite;
 import com.ecommerce.domain.coupon.DiscountType;
-import com.ecommerce.domain.user.UserWrite;
+import com.ecommerce.domain.user.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,12 +36,12 @@ class UserServiceTest {
     private UserService userService;
 
     private List<CouponWrite> testCoupons;
-    private UserWrite user;
+    private User user;
 
     @BeforeEach
     void setup(){
-        UserWrite testUser = new UserWrite( "testUser", BigDecimal.ZERO);
-        UserWrite initialUser = userService.saveUser(testUser);
+        User testUser = new User( "testUser", BigDecimal.ZERO);
+        User initialUser = userService.saveUser(testUser);
         testCoupons = Arrays.asList(
                 new CouponWrite("testCoupon1", BigDecimal.valueOf(1000), DiscountType.FIXED_AMOUNT,10),
                 new CouponWrite("testCoupon2", BigDecimal.valueOf(2000), DiscountType.FIXED_AMOUNT,10));
