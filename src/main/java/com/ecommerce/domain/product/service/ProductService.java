@@ -24,6 +24,7 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
+    @Transactional
     @Cacheable(value = "products", key = "#productId", unless = "#result == null")
     public Product getProduct(Long productId) {
         return productRepository.getProduct(productId).orElseThrow(

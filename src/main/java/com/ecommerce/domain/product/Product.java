@@ -26,7 +26,7 @@ public class Product {
     private Integer stock;
     @Getter
     private LocalDateTime lastUpdated;
-    private boolean isDeleted;
+    private final boolean isDeleted;
     private LocalDateTime deletedAt;
 
 

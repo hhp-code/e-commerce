@@ -1,12 +1,9 @@
 package com.ecommerce.infra.user;
 
-import com.ecommerce.domain.user.QUser;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.repository.UserRepository;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,27 +11,21 @@ import java.util.Optional;
 public class UserRepositoryImpl implements UserRepository {
 
     private final UserJPARepository userJPARepository;
-    private final JPAQueryFactory queryFactory;
-    private final QUser user = QUser.user;
 
 
-    public UserRepositoryImpl(UserJPARepository userJPARepository, JPAQueryFactory queryFactory) {
+    public UserRepositoryImpl(UserJPARepository userJPARepository) {
         this.userJPARepository = userJPARepository;
-        this.queryFactory = queryFactory;
     }
 
     @Override
     public Optional<User> getById(Long id) {
-        User user1 = queryFactory.select(user).from(user).where(user.id.eq(id)).fetchOne();
-        return Optional.ofNullable(user1);
+        return userJPARepository.findById(id);
     }
 
     @Override
     public Optional<User> save(User user) {
         return Optional.of(userJPARepository.save(user));
     }
-
-
 
 
     @Override
@@ -53,13 +44,5 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
 
-    @Override
-    public Optional<BigDecimal> getAmountByUserId(Long userId) {
-        return Optional.ofNullable(queryFactory
-                .select(user.point)
-                .from(user)
-                .where(user.id.eq(userId))
-                .fetchOne());
-    }
 
 }

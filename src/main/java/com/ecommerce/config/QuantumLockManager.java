@@ -1,75 +1,106 @@
 package com.ecommerce.config;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.LockSupport;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 import java.time.Duration;
 import java.util.UUID;
+
 @Slf4j
 @Component
 public class QuantumLockManager {
 
     private final ConcurrentHashMap<String, QuantumLock> locks = new ConcurrentHashMap<>();
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1000000);
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(
+            Runtime.getRuntime().availableProcessors(),
+            new ThreadFactory() {
+                private final AtomicInteger threadNumber = new AtomicInteger(1);
+                public Thread newThread(Runnable r) {
+                    Thread t = new Thread(r, "quantum-lock-pool-" + threadNumber.getAndIncrement());
+                    t.setDaemon(true);
+                    return t;
+                }
+            }
+    );
 
-    public <T> T executeWithLock(String resourceId, Duration timeout, Supplier<T> action) throws TimeoutException {
+    public <T> T executeWithLock(String resourceId, Duration timeout, Supplier<T> action) throws TimeoutException, InterruptedException {
         QuantumLock lock = locks.computeIfAbsent(resourceId, k -> new QuantumLock());
         String lockerId = UUID.randomUUID().toString();
 
+        if (!lock.acquire(lockerId, timeout)) {
+            throw new TimeoutException("시간동안 락 획득에 실패했습니다.");
+        }
+
         try {
-            if (lock.acquire(lockerId, timeout)) {
-                return action.get();
-            } else {
-                throw new TimeoutException("시간동안 락 획득에 실패했습니다.");
-            }
+            return action.get();
         } finally {
             lock.release(lockerId);
         }
     }
 
     private class QuantumLock {
-        private final AtomicReference<String> owner = new AtomicReference<>();
-        private final ConcurrentLinkedQueue<String> waitQueue = new ConcurrentLinkedQueue<>();
-        private final AtomicInteger waitCount = new AtomicInteger(0);
+        private final ReentrantLock lock = new ReentrantLock(true);
+        private final AtomicBoolean isLocked = new AtomicBoolean(false);
+        private volatile String currentOwner = null;
 
-        public boolean acquire(String lockerId, Duration timeout) {
-            waitQueue.offer(lockerId);
-            waitCount.incrementAndGet();
-
-            try {
-                return CompletableFuture.supplyAsync(() -> {
-                    while (true) {
-                        if (owner.compareAndSet(null, lockerId)) {
-                            waitQueue.remove(lockerId);
+        public boolean acquire(String lockerId, Duration timeout) throws InterruptedException {
+            long endTime = System.currentTimeMillis() + timeout.toMillis();
+            while (System.currentTimeMillis() < endTime) {
+                if (lock.tryLock(100, TimeUnit.MILLISECONDS)) {
+                    try {
+                        if (!isLocked.get()) {
+                            isLocked.set(true);
+                            currentOwner = lockerId;
                             return true;
                         }
-                        if (!waitQueue.peek().equals(lockerId)) {
-                            LockSupport.parkNanos(ThreadLocalRandom.current().nextLong(1000, 1000000));
-                        }
+                    } finally {
+                        lock.unlock();
                     }
-                }).get(timeout.toMillis(), TimeUnit.MILLISECONDS);
-            } catch (Exception e) {
-                waitQueue.remove(lockerId);
-                return false;
-            } finally {
-                waitCount.decrementAndGet();
+                }
             }
+            return false;
         }
 
         public void release(String lockerId) {
-            owner.compareAndSet(lockerId, null);
-            if (waitCount.get() > 0) {
-                scheduler.schedule(this::notifyWaiters, 0, TimeUnit.NANOSECONDS);
+            lock.lock();
+            try {
+                if (lockerId.equals(currentOwner)) {
+                    isLocked.set(false);
+                    currentOwner = null;
+                }
+            } finally {
+                lock.unlock();
             }
         }
+    }
 
-        private void notifyWaiters() {
-            LockSupport.unpark(Thread.currentThread());
+    // 리소스 정리를 위한 메서드
+    public void cleanup() {
+        locks.entrySet().removeIf(entry -> !entry.getValue().isLocked.get());
+    }
+
+    // 주기적으로 cleanup 메서드를 호출하는 스케줄러 설정
+    @PostConstruct
+    public void scheduleCleanup() {
+        scheduler.scheduleAtFixedRate(this::cleanup, 1, 1, TimeUnit.HOURS);
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        scheduler.shutdown();
+        try {
+            if (!scheduler.awaitTermination(60, TimeUnit.SECONDS)) {
+                scheduler.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            scheduler.shutdownNow();
         }
     }
 }

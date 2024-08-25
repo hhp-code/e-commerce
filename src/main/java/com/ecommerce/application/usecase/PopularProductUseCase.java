@@ -11,15 +11,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class PopularProductUseCase {
-    private final OrderService orderQueryService;
+    private final OrderService orderService;
 
-    public PopularProductUseCase(OrderService orderQueryService) {
-        this.orderQueryService = orderQueryService;
+    public PopularProductUseCase(OrderService orderService) {
+        this.orderService = orderService;
     }
 
     public List<Product> getPopularProducts() {
         int durationDays = 3;
-        List<Order> finishedOrderWithDays = orderQueryService.getFinishedOrderWithDays(durationDays);
+        List<Order> finishedOrderWithDays = orderService.getFinishedOrderWithDays(durationDays);
         Map<Product, Long> sellingMap = new ConcurrentHashMap<>();
         for(Order order: finishedOrderWithDays){
             order.getOrderItems().forEach((product, quantity) -> {

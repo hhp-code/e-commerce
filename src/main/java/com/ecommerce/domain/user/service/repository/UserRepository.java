@@ -2,7 +2,6 @@ package com.ecommerce.domain.user.service.repository;
 
 import com.ecommerce.domain.user.User;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,7 +11,6 @@ public interface UserRepository {
     Optional<User> save(User testUser);
 
 
-    Optional<BigDecimal> getAmountByUserId(Long userId);
 
     void saveAll(List<User> users);
 

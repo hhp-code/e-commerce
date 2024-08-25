@@ -1,7 +1,9 @@
 package com.ecommerce.domain.order.service;
 
 import com.ecommerce.domain.order.Order;
+import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
+import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
 import lombok.experimental.UtilityClass;
 
@@ -10,10 +12,9 @@ import java.util.Map;
 @UtilityClass
 public class OrderCommand {
     public record Create(long userId, Map<Long, Integer> items) {
-        public Order execute(UserService userService, ProductService productService) {
-            return new Order()
-                    .putUser(userService, userId)
-                    .addItems(productService, items);
+        public Order execute(User user, Map<Product, Integer> items) {
+            return new Order(user)
+                    .addItems(items);
         }
     }
 
@@ -23,7 +24,7 @@ public class OrderCommand {
                     .addItem(productService, productId, quantity);
         }
     }
-    public record Payment( long orderId) {
+    public record Payment(long userId, long orderId) {
         public Order execute(Order order) {
             return order
                     .deductStock()

@@ -92,7 +92,7 @@ class PaymentUseCaseConcurrencyTest {
 
         when(dummyPlatform.send(any(PayAfterEvent.class))).thenReturn(true);
 
-        paymentUseCase = new PaymentUseCase(quantumLockManager, orderQueryService, paymentEventPublisher);
+        paymentUseCase = new PaymentUseCase(quantumLockManager, orderQueryService, paymentEventPublisher,userService);
         for(Order order : testOrders) {
             OrderCommand.Create orderCreate = new OrderCommand.Create(order.getId(), Map.of(testProduct.getId(), 1));
             orderFacade.createOrder(orderCreate);
@@ -115,7 +115,7 @@ class PaymentUseCaseConcurrencyTest {
                     readyLatch.countDown(); // 스레드가 준비되었음을 알림
                     startLatch.await(); // 모든 스레드가 시작 신호를 기다림
 
-                    OrderCommand.Payment orderPay = new OrderCommand.Payment(testOrders.get(index).getId());
+                    OrderCommand.Payment orderPay = new OrderCommand.Payment(testUsers.get(index).getId(),testOrders.get(index).getId());
                     paymentUseCase.payOrder(orderPay);
                     productService.getProduct(testProduct.getId());
                     successfulPayments.incrementAndGet();
