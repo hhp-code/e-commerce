@@ -1,6 +1,5 @@
 package com.ecommerce.domain.product;
 
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -8,69 +7,48 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Slf4j
-@Entity
-@Table(name = "products", indexes = {
-        @Index(name = "idx_name", columnList = "name"),
-})
+@Getter
 public class Product {
-    @Getter
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Getter
+    private Long productId;
     private String name;
-    @Getter
     private BigDecimal price;
-    @Getter
     private Integer stock;
-    @Getter
-    private LocalDateTime lastUpdated;
-    private final boolean isDeleted;
-    private LocalDateTime deletedAt;
-
-
-    public Product() {
-        this.lastUpdated = LocalDateTime.now();
-        this.isDeleted = false;
-    }
 
     public Product(String name, BigDecimal price, Integer stock) {
-        this();
-        this.name = name;
         this.price = price;
+        this.name = name;
         this.stock = stock;
-        this.lastUpdated = LocalDateTime.now();
     }
-    public Product(long id, String name, BigDecimal price, Integer stock) {
-        this();
-        this.id = id;
-        this.name = name;
-        this.price = price;
-        this.stock = stock;
-        this.lastUpdated = LocalDateTime.now();
+
+    public Product deductStock(int quantity) {
+        if(stock < quantity) {
+            log.error("Stock is not enough. Stock: {}, Quantity: {}", stock, quantity);
+            throw new IllegalArgumentException("Stock is not enough");
+        }
+        stock -= quantity;
+        log.info("Stock deducted. New stock: {}", stock);
+        return this;
+    }
+
+    public Product chargeStock(int quantity) {
+        if(quantity <= 0) {
+            log.error("Invalid quantity: {}", quantity);
+            throw new IllegalArgumentException("Invalid quantity");
+        }
+        stock += quantity;
+        log.info("Stock charged. New stock: {}", stock);
+        return this;
+    }
+
+    public Long getId() {
+        return productId;
+    }
+
+    public LocalDateTime getLastUpdated() {
+        return LocalDateTime.now();
     }
 
     public boolean isDeleted() {
-        return isDeleted;
+        return false;
     }
-
-
-    public boolean deductStock(int quantity) {
-        if(stock < quantity) {
-            return false;
-        }
-        stock -= quantity;
-        this.lastUpdated = LocalDateTime.now();
-        return true;
-    }
-    public boolean chargeStock(int quantity) {
-        if(quantity<=0 || stock < quantity) {
-            return false;
-        }
-        stock += quantity;
-        this.lastUpdated = LocalDateTime.now();
-        return true;
-    }
-
 }

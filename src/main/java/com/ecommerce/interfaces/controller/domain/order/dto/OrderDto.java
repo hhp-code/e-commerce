@@ -1,7 +1,8 @@
 package com.ecommerce.interfaces.controller.domain.order.dto;
 
-import com.ecommerce.interfaces.exception.domain.OrderException;
+import com.ecommerce.domain.order.orderitem.OrderItemWrite;
 import com.ecommerce.domain.product.Product;
+import com.ecommerce.interfaces.exception.domain.OrderException;
 import lombok.experimental.UtilityClass;
 
 import java.math.BigDecimal;
@@ -12,11 +13,8 @@ import java.util.Map;
 @UtilityClass
 public class OrderDto {
 
-    public record OrderCreateRequest(long userId, Map<Long,Integer> items) {
+    public record OrderCreateRequest(long customerId, List<OrderItemWrite> items) {
         public void validate() {
-            if(items.isEmpty()){
-                throw new OrderException.ControllerException("주문할 상품이 없습니다.");
-            }
             if (items.size() > 10) {
                 throw new OrderException.ControllerException("주문 수량은 최대 10개까지 가능합니다.");
             }
@@ -64,7 +62,7 @@ public class OrderDto {
         }
     }
 
-    public record OrderPayRequest (long userId, long orderId) {
+    public record OrderPayRequest (long orderId) {
         public void validate() {
             if (orderId <= 0) {
                 throw new OrderException.ControllerException("주문을 찾을 수 없습니다.");

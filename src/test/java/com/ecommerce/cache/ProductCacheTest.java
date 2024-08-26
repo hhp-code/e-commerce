@@ -34,9 +34,9 @@ public class ProductCacheTest {
     public void testProductCaching() {
         Long productId = 1L;
 
-        com.ecommerce.domain.product.Product product = productService.getProduct(productId);
+        Product product = productService.getProduct(productId);
 
-        com.ecommerce.domain.product.Product cachedProduct = productService.getProduct(productId);
+        Product cachedProduct = productService.getProduct(productId);
 
         assertThat(cachedProduct).isEqualTo(product);
 

@@ -1,87 +1,69 @@
 package com.ecommerce.domain.user;
 
+import com.ecommerce.domain.coupon.CouponWrite;
 import com.ecommerce.interfaces.exception.domain.UserException;
-import com.ecommerce.domain.order.Order;
-import com.ecommerce.domain.user.service.UserService;
-import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-@Entity
-@Table(name = "users", indexes = {
-        @Index(name = "idx_username", columnList = "username"),
-})
+@Getter
 public class User {
-    @Getter
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
+    private final String username;
+    private BigDecimal initialBalance;
+    private final boolean isDeleted;
 
-    @Getter
-    private String username;
-
-    @Getter
-    private BigDecimal point;
-
-    private boolean isDeleted;
-    private LocalDateTime deletedAt;
-
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Order> orders = new ArrayList<>();
-
-
-    public User() {
-
-    }
+    private List<CouponWrite> coupons = new ArrayList<>();
 
     public User(String username, BigDecimal initialBalance) {
         this.username = username;
-        this.point = initialBalance;
+        this.initialBalance = initialBalance;
         this.isDeleted = false;
-        this.orders = new ArrayList<>();
     }
-    public User(long userId, String username, BigDecimal initialBalance) {
-        this.id = userId;
-        this.username = username;
-        this.point = initialBalance;
+
+    public User(String test, Object initialBalance, List<CouponWrite> testCoupon) {
+        this.username = test;
+        this.initialBalance = (BigDecimal) initialBalance;
+        this.coupons = testCoupon;
         this.isDeleted = false;
-        this.orders = new ArrayList<>();
+    }
+
+    public User(long l, String test, BigDecimal zero, List<CouponWrite> testCoupon) {
+        this.id = l;
+        this.username = test;
+        this.initialBalance = zero;
+        this.coupons = testCoupon;
+        this.isDeleted = false;
     }
 
 
-
-
-    public void addOrder(Order order) {
-        orders.add(order);
-    }
 
     public User chargePoint(BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new UserException("충전 금액은 0보다 커야 합니다.");
         }
-        this.point = this.point.add(amount);
+        this.initialBalance = this.initialBalance.add(amount);
         return this;
     }
 
     public User deductPoint(BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new UserException("차감 금액은 0보다 커야 합니다.") {
-            };
+            throw new UserException("차감 금액은 0보다 커야 합니다.");
         }
-        if (this.point.compareTo(amount) < 0) {
+        if (this.initialBalance.compareTo(amount) < 0) {
             throw new UserException("잔액이 부족합니다.");
         }
-        this.point = this.point.subtract(amount);
+        this.initialBalance = this.initialBalance.subtract(amount);
         return this;
     }
 
-
-    public User saveAndGet(UserService userService) {
-        return userService.save(this);
+    public void addCoupon(CouponWrite coupon) {
+        coupons.add(coupon);
     }
+
+    public BigDecimal getPoint() {
+        return initialBalance;
+    }
+
 }

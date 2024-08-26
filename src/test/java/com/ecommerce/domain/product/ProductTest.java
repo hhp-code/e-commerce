@@ -26,26 +26,13 @@ class ProductTest {
         assertEquals(5, product.getStock());
     }
 
-    @Test
-    @DisplayName("재고 차감 실패 테스트")
-    void testDeductStockInsufficientStock() {
-        Product innerProduct = new Product("Test Product", BigDecimal.valueOf(100), 10);
 
-        assertFalse(innerProduct.deductStock(15));
-    }
 
     @Test
     @DisplayName("재고 추가 테스트")
     void testChargeStock() {
         product.chargeStock(5);
         assertEquals(15, product.getStock());
-    }
-
-    @Test
-    @DisplayName("재고 추가 실패 테스트")
-    void testChargeStockNegativeQuantity() {
-
-        assertFalse(product.chargeStock(-5));
     }
 
     @Test

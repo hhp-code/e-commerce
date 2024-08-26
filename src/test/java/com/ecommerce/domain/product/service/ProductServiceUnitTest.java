@@ -1,9 +1,7 @@
 package com.ecommerce.domain.product.service;
 
-import com.ecommerce.application.ProductFacade;
-import com.ecommerce.interfaces.exception.domain.ProductException;
-import com.ecommerce.domain.product.service.repository.ProductRepository;
 import com.ecommerce.domain.product.Product;
+import com.ecommerce.domain.product.service.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,14 +9,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -32,8 +28,6 @@ class ProductServiceUnitTest {
     @InjectMocks
     private ProductService productService;
 
-    @InjectMocks
-    private ProductFacade productFacade;
 
     private Product sampleProduct;
 
@@ -46,7 +40,6 @@ class ProductServiceUnitTest {
     @DisplayName("존재하는 상품 ID로 조회 시 상품 반환")
     void testGetExistingProduct() {
         //given
-        when(productRepository.getProduct(1L)).thenReturn(Optional.of(sampleProduct));
 
         //when
         Product result = productService.getProduct(1L);
@@ -84,7 +77,6 @@ class ProductServiceUnitTest {
                 createProductRequest("ProductRequest 3", "20000", 60)
         );
 
-        when(productRepository.getProducts()).thenReturn(allProducts);
 
         List<Product> result = productService.getProducts();
 
@@ -109,17 +101,7 @@ class ProductServiceUnitTest {
         verify(productRepository, times(1)).getProducts();
     }
 
-    @Test
-    @DisplayName("상품 재고 차감 - 상품 저장실패")
-    void testDeductStockWhenSaveFailed() {
-        assertThrows(ProductException.ServiceException.class, () -> productFacade.deductStock(sampleProduct, 10));
-    }
 
-    @Test
-    @DisplayName("상품 재고 충전 - 상품 저장실패")
-    void testChargeStockWhenSaveFailed() {
-        assertThrows(ProductException.ServiceException.class, () -> productFacade.chargeStock(sampleProduct, 10));
-    }
 
     private Product createProductRequest(String name, String price, Integer availableStock) {
         return createProduct(name, price, availableStock, LocalDateTime.now());

@@ -1,6 +1,6 @@
 package com.ecommerce.cache;
 
-import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.config.DatabaseCleanUp;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
@@ -42,9 +42,9 @@ public class UserCacheTest {
 
     @BeforeEach
     void setUp() {
-        User user = new User(1L, "TestUser", BigDecimal.valueOf(1000));
+        User user = new User( "TestUser", BigDecimal.valueOf(1000));
         userService.saveUser(user);
-        Product product = new Product(1L, "TestProduct", BigDecimal.valueOf(1000), 10);
+        Product product = new Product( "TestProduct", BigDecimal.valueOf(1000), 10);
         productService.saveAndGet(product);
     }
 

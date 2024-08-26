@@ -1,7 +1,6 @@
 package com.ecommerce.domain.product.service;
 
-import com.ecommerce.DatabaseCleanUp;
-import com.ecommerce.domain.product.service.repository.ProductRepository;
+import com.ecommerce.config.DatabaseCleanUp;
 import com.ecommerce.domain.product.Product;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,15 +32,12 @@ class ProductServiceTest {
     @Autowired
     private ProductService productService;
 
-    @Autowired
-    private ProductRepository productRepository;
-
     private Product sampleProduct;
 
     @BeforeEach
     void setUp() {
         sampleProduct = new Product("Sample ProductRequest", new BigDecimal("100.00"), 50);
-        productRepository.save(sampleProduct);
+        productService.saveAndGet(sampleProduct);
     }
 
     @Test

@@ -1,11 +1,9 @@
 package com.ecommerce.api.controller.usecase;
 
-import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.config.DatabaseCleanUp;
 import com.ecommerce.application.OrderFacade;
-import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.application.usecase.PopularProductUseCase;
-import com.ecommerce.domain.order.service.OrderCommand;
-import com.ecommerce.domain.order.service.OrderInfo;
+import com.ecommerce.domain.order.OrderService;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.domain.user.User;
@@ -48,10 +46,11 @@ class PopularProductUseCaseTest {
     private ProductService productService;
 
     @Autowired
-    private OrderFacade orderFacade;
+    private OrderService orderCommandService;
+
 
     @Autowired
-    private PaymentUseCase paymentUseCase;
+    private OrderFacade orderFacade;
 
 
     @BeforeEach
@@ -71,7 +70,9 @@ class PopularProductUseCaseTest {
         for (int i = 0; i < count; i++) {
             users.add(new User("user" + i, BigDecimal.valueOf(100000000)));
         }
-        userService.saveAll(users);
+        for(User user : users){
+            userService.saveUser(user);
+        }
         System.out.println("createUsers end");
     }
 
@@ -80,7 +81,9 @@ class PopularProductUseCaseTest {
         for (int i = 0; i < count; i++) {
             products.add(new Product("product" + i, BigDecimal.valueOf(10 + i), 1000000000));
         }
-        productService.saveAll(products);
+        for(Product write : products){
+            productService.saveAndGet(write);
+        }
     }
 
     private void createOrders(int orderCount, int userCount, int productCount) {
@@ -93,11 +96,12 @@ class PopularProductUseCaseTest {
             for (int j = 0; j < random.nextInt(productCount)+1; j++) {
                 orderItems.put((long)random.nextInt(productCount) + 1, random.nextInt(10)+1);
             }
-            OrderCommand.Create command = new OrderCommand.Create(user.getId(), orderItems);
-            OrderInfo.Summary order1 = orderFacade.createOrder(command);
-            long orderId = order1.orderId();
-            OrderCommand.Payment payment = new OrderCommand.Payment(user.getId(), orderId);
-            futures.add(CompletableFuture.runAsync(() -> paymentUseCase.payOrder(payment)));
+//            OrderItemWrite orderItemWrite = new OrderItemWrite();
+//            OrderCommand.Create command = new OrderCommand.Create(user.getId(), orderItems);
+//            OrderInfo.Summary order1 = orderFacade.createOrder(command);
+//            long orderId = order1.orderId();
+//            OrderCommand.Payment payment = new OrderCommand.Payment(orderId);
+//            futures.add(CompletableFuture.runAsync(() -> paymentUseCase.payOrder(payment)));
 //            paymentUseCase.payOrder(payment);
         }
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();

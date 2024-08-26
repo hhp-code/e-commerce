@@ -1,9 +1,9 @@
 package com.ecommerce.interfaces.controller.domain.order.dto;
 
 
-import com.ecommerce.domain.order.service.OrderCommand;
-import com.ecommerce.domain.order.service.OrderInfo;
-import com.ecommerce.domain.order.service.OrderQuery;
+import com.ecommerce.domain.order.command.OrderCommand;
+import com.ecommerce.domain.order.OrderInfo;
+import com.ecommerce.domain.order.query.OrderQuery;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -1,7 +1,7 @@
 package com.ecommerce.interfaces.controller.domain.product.dto;
 
-import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
 import com.ecommerce.domain.product.Product;
+import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
 
 import java.util.List;
 

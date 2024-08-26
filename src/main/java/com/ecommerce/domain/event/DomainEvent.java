@@ -11,4 +11,7 @@ public interface DomainEvent {
     default String getEventName() {
         return this.getClass().getSimpleName();
     }
+
+
+    String getAggregateId();
 }

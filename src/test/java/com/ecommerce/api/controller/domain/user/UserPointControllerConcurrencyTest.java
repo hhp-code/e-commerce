@@ -1,6 +1,5 @@
 package com.ecommerce.api.controller.domain.user;
 
-import com.ecommerce.application.UserFacade;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,8 +38,6 @@ class UserPointControllerConcurrencyTest {
     private UserService userService;
 
 
-    @Autowired
-    private UserFacade userPointService;
 
     private User testUser;
 

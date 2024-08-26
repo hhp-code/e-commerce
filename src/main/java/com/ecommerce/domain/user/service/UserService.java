@@ -1,7 +1,10 @@
 package com.ecommerce.domain.user.service;
 
+import com.ecommerce.domain.coupon.CouponWrite;
+import com.ecommerce.domain.user.UserDomainMapper;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.repository.UserRepository;
+import com.ecommerce.infra.user.entity.UserEntity;
 import com.ecommerce.interfaces.exception.domain.UserException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.cache.annotation.CacheEvict;
@@ -20,45 +23,50 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-
+    @Transactional(readOnly = true)
+    public List<CouponWrite> getUserCoupons(Long userId) {
+        UserEntity user = userRepository.getById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + userId));
+        User writeModel = UserDomainMapper.toWriteModel(user);
+        return writeModel.getCoupons();
+    }
     @Transactional
     @Cacheable(value = "users", key = "#userId", unless = "#result == null")
     public User getUser(Long userId) {
-        return userRepository.getById(userId)
+        UserEntity user = userRepository.getById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + userId));
+        return UserDomainMapper.toWriteModel(user);
     }
-
-
 
 
     @Transactional
     @CachePut(value = "users", key = "#result.id")
     public User saveUser(User user) {
-        return userRepository.save(user).orElseThrow(
+        UserEntity entity = UserDomainMapper.toEntity(user);
+        UserEntity userEntity = userRepository.save(entity).orElseThrow(
                 () -> new RuntimeException("사용자 정보를 찾을 수 없습니다.")
         );
+        return UserDomainMapper.toWriteModel(userEntity);
     }
+
     @CacheEvict(value = {"users", "userCoupons"}, allEntries = true)
-    public void saveAll(List<User> users) {
+    public void saveAll(List<UserEntity> users) {
         userRepository.saveAll(users);
     }
 
 
 
     public List<User> getAllUsers() {
-        return userRepository.getAll();
+        List<UserEntity> all = userRepository.getAll();
+        return UserDomainMapper.toWriteModels(all);
     }
 
-    public User save(User user) {
-        return userRepository.save(user).orElseThrow(
-                () -> new UserException("사용자 정보를 찾을 수 없습니다.")
-        );
-    }
 
     @Transactional
     public User getPoint(Long id) {
-        return userRepository.getUser(id).orElseThrow(
+        UserEntity userEntity = userRepository.getUser(id).orElseThrow(
                 () -> new UserException("사용자 정보를 찾을 수 없습니다.")
         );
+        return UserDomainMapper.toWriteModel(userEntity);
     }
 }

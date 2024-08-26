@@ -1,12 +1,10 @@
 package com.ecommerce.infra.product;
 
-import com.ecommerce.domain.order.OrderStatus;
-import com.ecommerce.domain.order.QOrder;
-import com.ecommerce.domain.product.QProduct;
 import com.ecommerce.domain.product.service.repository.ProductRepository;
-import com.ecommerce.domain.product.Product;
-import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.NumberExpression;
+import com.ecommerce.infra.order.entity.QOrderEntity;
+import com.ecommerce.infra.order.entity.QOrderItemEntity;
+import com.ecommerce.infra.product.entity.ProductEntity;
+import com.ecommerce.infra.product.entity.QProductEntity;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +19,10 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     private final ProductJPARepository productJPARepository;
     private final JPAQueryFactory queryFactory;
-    private final QProduct product = QProduct.product;
+    private final QOrderEntity order = QOrderEntity.orderEntity;
+    private final QOrderItemEntity orderItem = QOrderItemEntity.orderItemEntity;
+    private final QProductEntity product = QProductEntity.productEntity;
+
 
     public ProductRepositoryImpl(ProductJPARepository productJPARepository, EntityManager entityManager) {
         this.productJPARepository = productJPARepository;
@@ -29,32 +30,30 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public List<Product> getPopularProducts() {
+    public List<ProductEntity> getPopularProducts() {
         LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
-        QOrder order = QOrder.order;
-        QProduct product = QProduct.product;
-
-        NumberExpression<Integer> quantitySum = new CaseBuilder()
-                .when(order.orderItems.containsKey(product))
-                .then(order.orderItems.get(product).castToNum(Integer.class))
-                .otherwise(0)
-                .sum();
-
-        return queryFactory
-                .select(product)
-                .from(order)
-                .join(product)
-                .on(order.orderItems.containsKey(product))
-                .where(order.orderDate.after(threeDaysAgo)
-                        .and(order.orderStatus.eq(OrderStatus.ORDERED)))
-                .groupBy(product)
-                .orderBy(quantitySum.desc())
-                .limit(5)
-                .fetch();
+//
+//        NumberExpression<Integer> quantitySum = new CaseBuilder()
+//                .when(order.orderItems.containsKey(product))
+//                .then(order.orderItems.get(product).quantity.sum())
+//                .otherwise(0);
+//
+//        return queryFactory
+//                .select(product)
+//                .from(order)
+//                .join(product)
+//                .on(order.orderItems.containsKey(product))
+//                .where(order.orderDate.after(threeDaysAgo)
+//                        .and(order.orderStatus.eq(OrderStatus.ORDERED)))
+//                .groupBy(product)
+//                .orderBy(quantitySum.desc())
+//                .limit(5)
+//                .fetch();
+        return null;
     }
 
     @Override
-    public List<Product> getProducts() {
+    public List<ProductEntity> getProducts() {
         return queryFactory
                 .selectFrom(product)
                 .orderBy(product.id.asc())
@@ -62,7 +61,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public Optional<Product> getProduct(Long productId) {
+    public Optional<ProductEntity> getProduct(Long productId) {
         return Optional.ofNullable(queryFactory
                 .selectFrom(product)
                 .where(product.id.eq(productId))
@@ -70,7 +69,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public Optional<Product> save(Product product) {
+    public Optional<ProductEntity> save(ProductEntity product) {
         return Optional.of(productJPARepository.save(product));
     }
 
@@ -83,18 +82,18 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public void saveAll(List<Product> products) {
+    public void saveAll(List<ProductEntity> products) {
         productJPARepository.saveAll(products);
     }
 
     @Override
-    public List<Product> getAll() {
+    public List<ProductEntity> getAll() {
         return productJPARepository.findAll();
 
     }
 
     @Override
-    public Optional<Product> saveProduct(Product testProduct) {
+    public Optional<ProductEntity> saveProduct(ProductEntity testProduct) {
         return Optional.of(productJPARepository.save(testProduct));
     }
 
