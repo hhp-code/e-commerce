@@ -4,10 +4,9 @@ import com.ecommerce.application.ProductFacade;
 import com.ecommerce.application.UserFacade;
 import com.ecommerce.domain.order.event.PayAfterEvent;
 import com.ecommerce.domain.product.Product;
-import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.UserService;
 import com.ecommerce.infra.event.PaymentEventPublisher;
-import com.ecommerce.config.QuantumLockManager;
+import com.ecommerce.config.RedisLockManager;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderInfo;
@@ -17,35 +16,32 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
 
 @Slf4j
 @Component
 public class PaymentUseCase {
 
     private static final String ORDER_LOCK_PREFIX = "order:";
-    private static final Duration ORDER_LOCK_TIMEOUT = Duration.ofSeconds(5);
+    private static final Duration ORDER_LOCK_TIMEOUT = Duration.ofSeconds(10);
 
 
-    private final QuantumLockManager quantumLockManager;
+    private final RedisLockManager redisLockManager;
     private final OrderService orderQueryService;
     private final PaymentEventPublisher eventPublisher;
-    private final UserService userService;
     private final ProductFacade productFacade;
     private final UserFacade userFacade;
 
-    public PaymentUseCase(QuantumLockManager quantumLockManager, OrderService orderQueryService, PaymentEventPublisher eventPublisher, UserService userService, com.ecommerce.application.ProductFacade productFacade, UserFacade userFacade) {
-        this.quantumLockManager = quantumLockManager;
+    public PaymentUseCase(RedisLockManager redisLockManager, OrderService orderQueryService, PaymentEventPublisher eventPublisher, UserService userService, com.ecommerce.application.ProductFacade productFacade, UserFacade userFacade) {
+        this.redisLockManager = redisLockManager;
         this.orderQueryService = orderQueryService;
         this.eventPublisher = eventPublisher;
-        this.userService = userService;
         this.productFacade = productFacade;
         this.userFacade = userFacade;
     }
 
     public OrderInfo.Detail payOrder(OrderCommand.Payment command) {
         try {
-            return quantumLockManager.executeWithLock(
+            return redisLockManager.executeWithLock(
                     ORDER_LOCK_PREFIX + command.orderId(),
                     ORDER_LOCK_TIMEOUT,
                     () -> {
@@ -59,8 +55,6 @@ public class PaymentUseCase {
                         eventPublisher.publish(new PayAfterEvent(commandOrder.getId()));
                         return OrderInfo.Detail.from(commandOrder);
                     });
-        } catch (TimeoutException e) {
-            throw new RuntimeException("주문 결제 중 락 획득 시간 초과");
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -68,7 +62,7 @@ public class PaymentUseCase {
 
     public OrderInfo.Detail cancelOrder(OrderCommand.Cancel command) {
         try {
-            return quantumLockManager.executeWithLock(
+            return redisLockManager.executeWithLock(
                     ORDER_LOCK_PREFIX + command.orderId(), ORDER_LOCK_TIMEOUT,
                     () -> {
                         Order queryOrder = orderQueryService.getOrder(command.orderId());
@@ -81,8 +75,6 @@ public class PaymentUseCase {
                         Order commandOrder = orderQueryService.saveOrder(execute);
                         return OrderInfo.Detail.from(commandOrder);
                     });
-        } catch (TimeoutException e) {
-            throw new RuntimeException("주문 취소 중 락 획득 시간 초과");
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

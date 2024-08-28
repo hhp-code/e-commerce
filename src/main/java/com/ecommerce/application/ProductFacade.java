@@ -1,6 +1,6 @@
 package com.ecommerce.application;
 
-import com.ecommerce.config.QuantumLockManager;
+import com.ecommerce.config.RedisLockManager;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.product.service.ProductService;
 import com.ecommerce.interfaces.exception.domain.ProductException;
@@ -12,16 +12,16 @@ import java.time.Duration;
 @Component
 public class ProductFacade {
     private final ProductService productService;
-    private final QuantumLockManager quantumLockManager;
-    public ProductFacade(ProductService productService, QuantumLockManager quantumLockManager) {
+    private final RedisLockManager redisLockManager;
+    public ProductFacade(ProductService productService, RedisLockManager redisLockManager) {
         this.productService = productService;
-        this.quantumLockManager = quantumLockManager;
+        this.redisLockManager = redisLockManager;
     }
     public Product deductStock(Product product, Integer quantity) {
         String lockKey = "product:" + product.getId();
         Duration timeout = Duration.ofSeconds(5);
         try {
-            return quantumLockManager.executeWithLock(lockKey, timeout, () -> {
+            return redisLockManager.executeWithLock(lockKey, timeout, () -> {
                 Product myProduct = productService.getProduct(product.getId());
                 myProduct.deductStock(quantity);
                 return productService.saveProduct(myProduct);
@@ -36,7 +36,7 @@ public class ProductFacade {
         String lockKey = "product:" + product.getId();
         Duration timeout = Duration.ofSeconds(5);
         try {
-            return quantumLockManager.executeWithLock(lockKey, timeout, () -> {
+            return redisLockManager.executeWithLock(lockKey, timeout, () -> {
                 product.chargeStock(quantity);
                 return productService.saveProduct(product);
             });

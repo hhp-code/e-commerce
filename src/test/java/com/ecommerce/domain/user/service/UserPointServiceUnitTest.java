@@ -2,7 +2,7 @@ package com.ecommerce.domain.user.service;
 
 import com.ecommerce.application.UserFacade;
 import com.ecommerce.interfaces.exception.domain.UserException;
-import com.ecommerce.config.QuantumLockManager;
+import com.ecommerce.config.RedisLockManager;
 import com.ecommerce.domain.user.User;
 import com.ecommerce.domain.user.service.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -26,7 +26,7 @@ class UserPointServiceUnitTest {
     private UserRepository userRepository;
 
     @Mock
-    private QuantumLockManager quantumLockManager;
+    private RedisLockManager redisLockManager;
 
     @InjectMocks
     private UserFacade userFacade;
@@ -66,7 +66,7 @@ class UserPointServiceUnitTest {
     void deductPointSuccess() throws TimeoutException, InterruptedException {
         BigDecimal decreaseAmount = BigDecimal.valueOf(500);
 
-        when(quantumLockManager.executeWithLock(anyString(), any(), any())).thenReturn(new User(1L,"testUser", BigDecimal.valueOf(500)));
+        when(redisLockManager.executeWithLock(anyString(), any(), any())).thenReturn(new User(1L,"testUser", BigDecimal.valueOf(500)));
         User user = userFacade.deductPoint(userId, decreaseAmount);
         BigDecimal deductPoint = user.getPoint();
 

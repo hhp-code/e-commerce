@@ -5,7 +5,7 @@ import com.ecommerce.application.OrderFacade;
 import com.ecommerce.application.ProductFacade;
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.application.UserFacade;
-import com.ecommerce.config.QuantumLockManager;
+import com.ecommerce.config.RedisLockManager;
 import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.OrderStatus;
 import com.ecommerce.domain.order.event.PayAfterEvent;
@@ -71,7 +71,7 @@ class PaymentUseCaseConcurrencyTest {
     @Autowired
     private PaymentUseCase paymentUseCase;
     @Autowired
-    private QuantumLockManager quantumLockManager;
+    private RedisLockManager redisLockManager;
 
     @Autowired
     private PaymentEventPublisher paymentEventPublisher;
@@ -95,7 +95,7 @@ class PaymentUseCaseConcurrencyTest {
 
         when(dummyPlatform.send(any(PayAfterEvent.class))).thenReturn(true);
 
-        paymentUseCase = new PaymentUseCase(quantumLockManager, orderQueryService, paymentEventPublisher,userService, productFacade, userFacade);
+        paymentUseCase = new PaymentUseCase(redisLockManager, orderQueryService, paymentEventPublisher,userService, productFacade, userFacade);
         for(Order order : testOrders) {
             OrderCommand.Create orderCreate = new OrderCommand.Create(order.getId(), Map.of(testProduct.getId(), 1));
             orderFacade.createOrder(orderCreate);

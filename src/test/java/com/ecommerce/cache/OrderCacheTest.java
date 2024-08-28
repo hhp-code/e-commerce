@@ -2,6 +2,7 @@ package com.ecommerce.cache;
 
 import com.ecommerce.application.OrderFacade;
 import com.ecommerce.application.usecase.PaymentUseCase;
+import com.ecommerce.domain.order.Order;
 import com.ecommerce.domain.order.service.OrderCommand;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.domain.product.Product;
@@ -73,15 +74,32 @@ public class OrderCacheTest {
 
         // 첫 번째 조회 (캐시되지 않은 상태)
         Instant start = Instant.now();
-        orderQueryService.getOrder(orderId);
+        for(int i = 0; i < 1000; i++) {
+            orderQueryService.getOrder(orderId);
+        }
         Instant end = Instant.now();
         long uncachedDuration = Duration.between(start, end).toMillis();
 
         // 두 번째 조회 (캐시된 상태)
         start = Instant.now();
-        orderQueryService.getOrder(orderId);
+        for(int i = 0; i < 1000; i++) {
+            orderQueryService.getOrder(orderId);
+        }
         end = Instant.now();
         long cachedDuration = Duration.between(start, end).toMillis();
+
+        // 세 번째 조회 (캐시 변경 상태, 조회 9번과 변경 1번)
+        start = Instant.now();
+        for(int i = 0; i < 100; i++) {
+            Order order = orderQueryService.getOrder(orderId);
+            for(int j = 0; j < 9; j++) {
+                order = orderQueryService.getOrder(orderId);
+            }
+            order.addItem(productService, 1L, 1);
+            orderQueryService.saveOrder(order);
+        }
+        end = Instant.now();
+        long evictedDuration = Duration.between(start, end).toMillis();
 
         // 성능 향상 검증
         assertThat(cachedDuration).isLessThan(uncachedDuration);
@@ -92,7 +110,9 @@ public class OrderCacheTest {
 
         System.out.println("Uncached query time: " + uncachedDuration + "ms");
         System.out.println("Cached query time: " + cachedDuration + "ms");
+        System.out.println("Evicted query time: " + evictedDuration + "ms");
         System.out.println("Performance improvement: " + (improvementRatio * 100) + "%");
+
     }
 
 }
