@@ -14,8 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -32,8 +38,6 @@ public class OrderCacheTest {
 
     @Autowired
     private ProductService productService;
-    @Autowired
-    private PaymentUseCase paymentUseCase;
     @Autowired
     private OrderService orderQueryService;
     @Autowired
@@ -60,6 +64,35 @@ public class OrderCacheTest {
 
         //then
         assertThat(cacheManager.getCache("orders").get(userId)).isNotNull();
+    }
+
+    @Test
+    @DirtiesContext
+    public void testOrderCachingPerformance() {
+        Long orderId = 1L;
+
+        // 첫 번째 조회 (캐시되지 않은 상태)
+        Instant start = Instant.now();
+        orderQueryService.getOrder(orderId);
+        Instant end = Instant.now();
+        long uncachedDuration = Duration.between(start, end).toMillis();
+
+        // 두 번째 조회 (캐시된 상태)
+        start = Instant.now();
+        orderQueryService.getOrder(orderId);
+        end = Instant.now();
+        long cachedDuration = Duration.between(start, end).toMillis();
+
+        // 성능 향상 검증
+        assertThat(cachedDuration).isLessThan(uncachedDuration);
+
+        // 구체적인 성능 향상 비율 계산 (예: 50% 이상 빨라졌는지)
+        double improvementRatio = (uncachedDuration - cachedDuration) / (double) uncachedDuration;
+        assertThat(improvementRatio).isGreaterThan(0.5); // 50% 이상 성능 향상 기대
+
+        System.out.println("Uncached query time: " + uncachedDuration + "ms");
+        System.out.println("Cached query time: " + cachedDuration + "ms");
+        System.out.println("Performance improvement: " + (improvementRatio * 100) + "%");
     }
 
 }

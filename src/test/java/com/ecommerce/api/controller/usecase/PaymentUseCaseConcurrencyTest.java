@@ -2,6 +2,7 @@ package com.ecommerce.api.controller.usecase;
 
 import com.ecommerce.DatabaseCleanUp;
 import com.ecommerce.application.OrderFacade;
+import com.ecommerce.application.ProductFacade;
 import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.application.UserFacade;
 import com.ecommerce.config.QuantumLockManager;
@@ -53,6 +54,8 @@ class PaymentUseCaseConcurrencyTest {
     private OrderService orderQueryService;
     @Autowired
     private OrderFacade orderFacade;
+    @Autowired
+    private ProductFacade productFacade;
 
     @AfterEach
     void tearDown() {
@@ -92,7 +95,7 @@ class PaymentUseCaseConcurrencyTest {
 
         when(dummyPlatform.send(any(PayAfterEvent.class))).thenReturn(true);
 
-        paymentUseCase = new PaymentUseCase(quantumLockManager, orderQueryService, paymentEventPublisher,userService);
+        paymentUseCase = new PaymentUseCase(quantumLockManager, orderQueryService, paymentEventPublisher,userService, productFacade, userFacade);
         for(Order order : testOrders) {
             OrderCommand.Create orderCreate = new OrderCommand.Create(order.getId(), Map.of(testProduct.getId(), 1));
             orderFacade.createOrder(orderCreate);

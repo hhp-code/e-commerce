@@ -28,8 +28,11 @@ public class UserFacade {
         Duration timeout = Duration.ofSeconds(5);
         try {
             return quantumLockManager.executeWithLock(lockKey, timeout,
-                    () -> userService.getUser(userId)
-                            .chargePoint(amount).saveAndGet(userService));
+                    () -> {
+                        User user = userService.getUser(userId)
+                                .chargePoint(amount);
+                        return userService.saveUser(user);
+                    });
         }
         catch (TimeoutException e) {
             throw new UserException("포인트 충전 중 락 획득 시간 초과");
@@ -43,9 +46,11 @@ public class UserFacade {
         Duration timeout = Duration.ofSeconds(5);
         try {
             return quantumLockManager.executeWithLock(lockKey, timeout,
-                    () -> userService.getUser(userId)
-                            .deductPoint(amount)
-                            .saveAndGet(userService));
+                    () -> {
+                        User user = userService.getUser(userId)
+                                .deductPoint(amount);
+                        return userService.saveUser(user);
+                    });
         } catch (TimeoutException | InterruptedException e) {
             throw new UserException.ServiceException("포인트 감소 중 락 획득 시간 초과");
         }

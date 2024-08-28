@@ -19,9 +19,6 @@ configurations {
     }
 }
 
-test {
-    enabled = false
-}
 
 repositories {
     mavenCentral()

@@ -1,6 +1,7 @@
 package com.ecommerce.api.controller.domain.order;
 
 import com.ecommerce.DatabaseCleanUp;
+import com.ecommerce.application.usecase.PaymentUseCase;
 import com.ecommerce.domain.order.service.OrderService;
 import com.ecommerce.interfaces.controller.domain.order.dto.OrderDto;
 import com.ecommerce.domain.order.Order;
@@ -35,7 +36,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("cleanser")
-@Transactional
 @AutoConfigureMockMvc
 public class OrderControllerConcurrencyTest {
     @Autowired
@@ -60,6 +60,9 @@ public class OrderControllerConcurrencyTest {
     private OrderService orderService;
 
     @Autowired
+    private PaymentUseCase paymentUseCase;
+
+    @Autowired
     private ProductService productService;
 
     private Product testProduct;
@@ -70,7 +73,7 @@ public class OrderControllerConcurrencyTest {
     void setUp() {
         testProduct = productService.saveAndGet(new Product("testProduct", BigDecimal.valueOf(1), 100));
         for (int i = 0; i < 1000; i++) {
-            userService.saveUser(new User("TestUser" + i, BigDecimal.valueOf(10)));
+            userService.saveUser(new User("TestUser" + i, BigDecimal.valueOf(100000000)));
         }
 
         List<User> testUsers = userService.getAllUsers();

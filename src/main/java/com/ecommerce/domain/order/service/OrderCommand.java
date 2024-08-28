@@ -32,7 +32,7 @@ public class OrderCommand {
                     .finish();
         }
     }
-    public record Cancel(long orderId) {
+    public record Cancel(long userId, long orderId) {
         public Order execute(Order order) {
             return order
                     .chargeStock()

@@ -32,11 +32,11 @@ public class ProductFacade {
     }
 
 
-    public void chargeStock(Product product, Integer quantity) {
+    public Product chargeStock(Product product, Integer quantity) {
         String lockKey = "product:" + product.getId();
         Duration timeout = Duration.ofSeconds(5);
         try {
-            quantumLockManager.executeWithLock(lockKey, timeout, () -> {
+            return quantumLockManager.executeWithLock(lockKey, timeout, () -> {
                 product.chargeStock(quantity);
                 return productService.saveProduct(product);
             });

@@ -1,5 +1,7 @@
 package com.ecommerce.application.usecase;
 
+import com.ecommerce.application.ProductFacade;
+import com.ecommerce.application.UserFacade;
 import com.ecommerce.domain.order.event.PayAfterEvent;
 import com.ecommerce.domain.product.Product;
 import com.ecommerce.domain.user.User;
@@ -29,12 +31,16 @@ public class PaymentUseCase {
     private final OrderService orderQueryService;
     private final PaymentEventPublisher eventPublisher;
     private final UserService userService;
+    private final ProductFacade productFacade;
+    private final UserFacade userFacade;
 
-    public PaymentUseCase(QuantumLockManager quantumLockManager, OrderService orderQueryService, PaymentEventPublisher eventPublisher, UserService userService) {
+    public PaymentUseCase(QuantumLockManager quantumLockManager, OrderService orderQueryService, PaymentEventPublisher eventPublisher, UserService userService, com.ecommerce.application.ProductFacade productFacade, UserFacade userFacade) {
         this.quantumLockManager = quantumLockManager;
         this.orderQueryService = orderQueryService;
         this.eventPublisher = eventPublisher;
         this.userService = userService;
+        this.productFacade = productFacade;
+        this.userFacade = userFacade;
     }
 
     public OrderInfo.Detail payOrder(OrderCommand.Payment command) {
@@ -45,9 +51,10 @@ public class PaymentUseCase {
                     () -> {
                         Order queryOrder = orderQueryService.getOrder(command.orderId());
                         Map<Product, Integer> orderItems = queryOrder.getOrderItems();
-                        orderItems.forEach(Product::deductStock);
-                        User user = userService.getUser(command.userId());
-                        user.deductPoint(queryOrder.getTotalAmount());
+                        for(Product product : orderItems.keySet()) {
+                            productFacade.deductStock(product, orderItems.get(product));
+                        }
+                        userFacade.deductPoint(command.userId(), queryOrder.getTotalAmount());
                         Order commandOrder = orderQueryService.saveOrder(queryOrder);
                         eventPublisher.publish(new PayAfterEvent(commandOrder.getId()));
                         return OrderInfo.Detail.from(commandOrder);
@@ -65,6 +72,11 @@ public class PaymentUseCase {
                     ORDER_LOCK_PREFIX + command.orderId(), ORDER_LOCK_TIMEOUT,
                     () -> {
                         Order queryOrder = orderQueryService.getOrder(command.orderId());
+                        Map<Product, Integer> orderItems = queryOrder.getOrderItems();
+                        for(Product product : orderItems.keySet()) {
+                            productFacade.chargeStock(product, orderItems.get(product));
+                        }
+                        userFacade.chargePoint(command.userId(), queryOrder.getTotalAmount());
                         Order execute = command.execute(queryOrder);
                         Order commandOrder = orderQueryService.saveOrder(execute);
                         return OrderInfo.Detail.from(commandOrder);

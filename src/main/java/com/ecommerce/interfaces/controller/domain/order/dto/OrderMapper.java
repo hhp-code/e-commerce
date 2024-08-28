@@ -36,7 +36,7 @@ public class OrderMapper {
         return new OrderCommand.Payment(request.userId(),request.orderId());
     }
     public static OrderCommand.Cancel toOrderCancel(OrderDto.OrderCancelRequest request) {
-        return new OrderCommand.Cancel(request.userId());
+        return new OrderCommand.Cancel(request.userId(),request.orderId());
     }
 
     public static OrderCommand.Delete toOrderDeleteItem(Long orderId, OrderDto.OrderDeleteItemRequest request) {
