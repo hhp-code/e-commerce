@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 @Component
 public class UserFacade {
@@ -15,6 +17,8 @@ public class UserFacade {
     private final RedisLockManager redisLockManager;
     private final UserService userService;
 
+    private final Duration lockTimeout = Duration.ofSeconds(5);
+    private final Duration actionTimeout = Duration.ofSeconds(5);
 
     public UserFacade(RedisLockManager redisLockManager, UserService userService) {
         this.redisLockManager = redisLockManager;
@@ -24,24 +28,22 @@ public class UserFacade {
 
     public User chargePoint(Long userId, BigDecimal amount) {
         String lockKey = "user:" + userId;
-        Duration timeout = Duration.ofSeconds(5);
         try {
-            return redisLockManager.executeWithLock(lockKey, timeout,
+            return redisLockManager.executeWithLock(lockKey, lockTimeout,actionTimeout,
                     () -> {
                         User user = userService.getUser(userId)
                                 .chargePoint(amount);
                         return userService.saveUser(user);
                     });
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new RuntimeException(e);
         }
     }
 
     public User deductPoint(Long userId, BigDecimal amount) {
         String lockKey = "user:" + userId;
-        Duration timeout = Duration.ofSeconds(5);
         try {
-            return redisLockManager.executeWithLock(lockKey, timeout,
+            return redisLockManager.executeWithLock(lockKey, lockTimeout, actionTimeout,
                     () -> {
                         User user = userService.getUser(userId)
                                 .deductPoint(amount);
@@ -49,6 +51,8 @@ public class UserFacade {
                     });
         } catch (InterruptedException e) {
             throw new UserException.ServiceException("포인트 감소 중 락 획득 시간 초과");
+        } catch (ExecutionException | TimeoutException e) {
+            throw new RuntimeException(e);
         }
     }
 

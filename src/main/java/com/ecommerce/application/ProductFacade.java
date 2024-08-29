@@ -13,15 +13,17 @@ import java.time.Duration;
 public class ProductFacade {
     private final ProductService productService;
     private final RedisLockManager redisLockManager;
+
+    private final Duration lockTimeout = Duration.ofSeconds(5);
+    private final Duration actionTimeout = Duration.ofSeconds(5);
     public ProductFacade(ProductService productService, RedisLockManager redisLockManager) {
         this.productService = productService;
         this.redisLockManager = redisLockManager;
     }
     public Product deductStock(Product product, Integer quantity) {
         String lockKey = "product:" + product.getId();
-        Duration timeout = Duration.ofSeconds(5);
         try {
-            return redisLockManager.executeWithLock(lockKey, timeout, () -> {
+            return redisLockManager.executeWithLock(lockKey, lockTimeout,actionTimeout, () -> {
                 Product myProduct = productService.getProduct(product.getId());
                 myProduct.deductStock(quantity);
                 return productService.saveProduct(myProduct);
@@ -34,9 +36,9 @@ public class ProductFacade {
 
     public Product chargeStock(Product product, Integer quantity) {
         String lockKey = "product:" + product.getId();
-        Duration timeout = Duration.ofSeconds(5);
         try {
-            return redisLockManager.executeWithLock(lockKey, timeout, () -> {
+            return redisLockManager.executeWithLock(lockKey, lockTimeout,actionTimeout,
+                    () -> {
                 product.chargeStock(quantity);
                 return productService.saveProduct(product);
             });

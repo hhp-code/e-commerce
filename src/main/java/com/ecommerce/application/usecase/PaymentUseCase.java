@@ -16,13 +16,17 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 @Slf4j
 @Component
 public class PaymentUseCase {
 
     private static final String ORDER_LOCK_PREFIX = "order:";
-    private static final Duration ORDER_LOCK_TIMEOUT = Duration.ofSeconds(10);
+
+    private final Duration lockTimeout = Duration.ofSeconds(5);
+    private final Duration actionTimeout = Duration.ofSeconds(5);
 
 
     private final RedisLockManager redisLockManager;
@@ -43,7 +47,7 @@ public class PaymentUseCase {
         try {
             return redisLockManager.executeWithLock(
                     ORDER_LOCK_PREFIX + command.orderId(),
-                    ORDER_LOCK_TIMEOUT,
+                    lockTimeout, actionTimeout,
                     () -> {
                         Order queryOrder = orderQueryService.getOrder(command.orderId());
                         Map<Product, Integer> orderItems = queryOrder.getOrderItems();
@@ -55,7 +59,7 @@ public class PaymentUseCase {
                         eventPublisher.publish(new PayAfterEvent(commandOrder.getId()));
                         return OrderInfo.Detail.from(commandOrder);
                     });
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new RuntimeException(e);
         }
     }
@@ -63,7 +67,7 @@ public class PaymentUseCase {
     public OrderInfo.Detail cancelOrder(OrderCommand.Cancel command) {
         try {
             return redisLockManager.executeWithLock(
-                    ORDER_LOCK_PREFIX + command.orderId(), ORDER_LOCK_TIMEOUT,
+                    ORDER_LOCK_PREFIX + command.orderId(), lockTimeout, actionTimeout,
                     () -> {
                         Order queryOrder = orderQueryService.getOrder(command.orderId());
                         Map<Product, Integer> orderItems = queryOrder.getOrderItems();
@@ -75,7 +79,7 @@ public class PaymentUseCase {
                         Order commandOrder = orderQueryService.saveOrder(execute);
                         return OrderInfo.Detail.from(commandOrder);
                     });
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | TimeoutException | ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
